@@ -46,7 +46,9 @@ abstract class Url {
 
             foreach ($path as $key => $value) {
                 if (is_numeric($key)) {
-                    $parts[] = $value;
+                    foreach (explode('/', $value) as $part) {
+                        $parts[] = urlencode($part);
+                    }
                 }
                 else {
                     $query[$key] = $value;
