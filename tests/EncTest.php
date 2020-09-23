@@ -189,10 +189,10 @@ class EncTest extends TestCase
         // The mysql path through the helper
         $this->assertEquals(Enc::jsdate('1988-05-07'), 'new Date(1988, 5 - 1, 7)');
         $this->assertEquals(Enc::jsdate('1988-05-07', 'mysql'), 'new Date(1988, 5 - 1, 7)');
-        $this->assertNull(Enc::jsdate([7,5,1988), 'mysql'));
+        $this->assertNull(Enc::jsdate([7,5,1988], 'mysql'));
 
         // the array path through the helper
-        $this->assertEquals(Enc::jsdate([7,5,1988), 'array'), 'new Date(1988, 5 - 1, 7)');
+        $this->assertEquals(Enc::jsdate([7,5,1988], 'array'), 'new Date(1988, 5 - 1, 7)');
         $this->assertNull(Enc::jsdate('1988-05-07', 'array'));
 
         // Something else
