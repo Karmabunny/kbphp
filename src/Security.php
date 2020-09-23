@@ -189,7 +189,7 @@ class Security
                 return null;
         }
 
-        return array($hash, $algorithm, $salt);
+        return [$hash, $algorithm, $salt];
     }
 
 

@@ -136,7 +136,7 @@ abstract class Enc
 
         // Basic replacements
         $value = str_replace('&', 'and', $value);
-        $value = str_replace(array(' ', '-', '/', '\\'), '_', $value);
+        $value = str_replace([' ', '-', '/', '\\'], '_', $value);
 
         // Cleanup
         $value = preg_replace('/__/', '_', $value);

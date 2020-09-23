@@ -41,7 +41,7 @@ class EncTest extends TestCase
 
         // Non-string inputs
         $this->assertEquals(Enc::cleanfunky(null), '');
-        $this->assertEquals(Enc::cleanfunky(array()), '');
+        $this->assertEquals(Enc::cleanfunky([]), '');
         $this->assertEquals(Enc::cleanfunky(new stdClass), '');
         $this->assertEquals(Enc::cleanfunky(123), '123');
         $this->assertEquals(Enc::cleanfunky(123.45), '123.45');
@@ -58,7 +58,7 @@ class EncTest extends TestCase
         $this->assertEquals(Enc::html('ê'), 'ê');
         $this->assertEquals(Enc::html("\0"), '');
         $this->assertEquals(Enc::html("\x1A"), '');
-        $this->assertEquals(Enc::html(array()), '');
+        $this->assertEquals(Enc::html([]), '');
 
         $this->assertEquals('&amp;amp;', Enc::html('&amp;'));
         $this->assertEquals('&amp;quot;', Enc::html('&quot;'));
@@ -76,7 +76,7 @@ class EncTest extends TestCase
         $this->assertEquals(Enc::htmlNoDup('ê'), 'ê');
         $this->assertEquals(Enc::htmlNoDup("\0"), '');
         $this->assertEquals(Enc::htmlNoDup("\x1A"), '');
-        $this->assertEquals(Enc::htmlNoDup(array()), '');
+        $this->assertEquals(Enc::htmlNoDup([]), '');
 
         $this->assertEquals('&amp;', Enc::htmlNoDup('&amp;'));
         $this->assertEquals('&quot;', Enc::htmlNoDup('&quot;'));
@@ -95,7 +95,7 @@ class EncTest extends TestCase
         $this->assertEquals(Enc::xml('ê'), 'ê');
         $this->assertEquals(Enc::xml("\0"), '');
         $this->assertEquals(Enc::xml("\x1A"), '');
-        $this->assertEquals(Enc::xml(array()), '');
+        $this->assertEquals(Enc::xml([]), '');
     }
 
     public function textUrl()
@@ -107,7 +107,7 @@ class EncTest extends TestCase
         $this->assertEquals(Enc::url('ê'), '%C3%AA');
         $this->assertEquals(Enc::url("\0"), '');
         $this->assertEquals(Enc::url("\x1A"), '');
-        $this->assertEquals(Enc::url(array()), '');
+        $this->assertEquals(Enc::url([]), '');
     }
 
     public function testId()
@@ -127,7 +127,7 @@ class EncTest extends TestCase
         $this->assertEquals(Enc::id('no_symbols~!@#$%^&*()<>.,?/\'":;|\\]}[{`_no_symbols'), 'no_symbols_no_symbols');
         $this->assertEquals(Enc::id("\0"), '');
         $this->assertEquals(Enc::id("\x1A"), '');
-        $this->assertEquals(Enc::id(array()), '');
+        $this->assertEquals(Enc::id([]), '');
     }
 
     public function testJs()
@@ -141,7 +141,7 @@ class EncTest extends TestCase
         $this->assertEquals(Enc::js("\n"), '\n');
         $this->assertEquals(Enc::js("\0"), '');
         $this->assertEquals(Enc::js("\x1A"), '');
-        $this->assertEquals(Enc::js(array()), '');
+        $this->assertEquals(Enc::js([]), '');
     }
 
     public function testHttpfield()
@@ -155,7 +155,7 @@ class EncTest extends TestCase
         $this->assertEquals(Enc::httpfield('ê'), '');
         $this->assertEquals(Enc::httpfield("\0"), '');
         $this->assertEquals(Enc::httpfield("\x1A"), '');
-        $this->assertEquals(Enc::httpfield(array()), '');
+        $this->assertEquals(Enc::httpfield([]), '');
     }
 
     public function testUrlname()
@@ -167,7 +167,7 @@ class EncTest extends TestCase
         $this->assertEquals(Enc::urlname('ê'), '');
         $this->assertEquals(Enc::urlname("\0"), '');
         $this->assertEquals(Enc::urlname("\x1A"), '');
-        $this->assertEquals(Enc::urlname(array()), '');
+        $this->assertEquals(Enc::urlname([]), '');
 
         // Space character tests
         $this->assertEquals(Enc::urlname('hey ya', '_'), 'hey_ya');
@@ -189,10 +189,10 @@ class EncTest extends TestCase
         // The mysql path through the helper
         $this->assertEquals(Enc::jsdate('1988-05-07'), 'new Date(1988, 5 - 1, 7)');
         $this->assertEquals(Enc::jsdate('1988-05-07', 'mysql'), 'new Date(1988, 5 - 1, 7)');
-        $this->assertNull(Enc::jsdate(array(7,5,1988), 'mysql'));
+        $this->assertNull(Enc::jsdate([7,5,1988), 'mysql'));
 
         // the array path through the helper
-        $this->assertEquals(Enc::jsdate(array(7,5,1988), 'array'), 'new Date(1988, 5 - 1, 7)');
+        $this->assertEquals(Enc::jsdate([7,5,1988), 'array'), 'new Date(1988, 5 - 1, 7)');
         $this->assertNull(Enc::jsdate('1988-05-07', 'array'));
 
         // Something else
@@ -200,12 +200,12 @@ class EncTest extends TestCase
 
         // 2-digit years
         $this->assertEquals(Enc::jsdate('88-05-07', 'mysql'), 'new Date(1988, 5 - 1, 7)');
-        $this->assertEquals(Enc::jsdate(array(7,5,88), 'array'), 'new Date(1988, 5 - 1, 7)');
+        $this->assertEquals(Enc::jsdate([7,5,88], 'array'), 'new Date(1988, 5 - 1, 7)');
         $this->assertEquals(Enc::jsdate('20-05-07', 'mysql'), 'new Date(2020, 5 - 1, 7)');
-        $this->assertEquals(Enc::jsdate(array(7,5,20), 'array'), 'new Date(2020, 5 - 1, 7)');
+        $this->assertEquals(Enc::jsdate([7,5,20], 'array'), 'new Date(2020, 5 - 1, 7)');
         $this->assertEquals(Enc::jsdate('49-05-07', 'mysql'), 'new Date(2049, 5 - 1, 7)');
-        $this->assertEquals(Enc::jsdate(array(7,5,49), 'array'), 'new Date(2049, 5 - 1, 7)');
+        $this->assertEquals(Enc::jsdate([7,5,49], 'array'), 'new Date(2049, 5 - 1, 7)');
         $this->assertEquals(Enc::jsdate('50-05-07', 'mysql'), 'new Date(1950, 5 - 1, 7)');
-        $this->assertEquals(Enc::jsdate(array(7,5,50), 'array'), 'new Date(1950, 5 - 1, 7)');
+        $this->assertEquals(Enc::jsdate([7,5,50], 'array'), 'new Date(1950, 5 - 1, 7)');
     }
 }
