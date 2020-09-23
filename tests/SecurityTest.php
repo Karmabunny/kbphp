@@ -150,4 +150,58 @@ class SecurityTest extends TestCase
             $this->assertLessThan(10, $perc);
         }
     }
+
+
+    public function dataAlgorithms()
+    {
+        return [
+            [Security::PASSWORD_SHA_SALT],
+            [Security::PASSWORD_SHA_SALT_5000],
+            [Security::PASSWORD_BCRYPT12],
+        ];
+    }
+
+
+    /**
+    * Does hash creation match hash checking?
+    * @dataProvider dataAlgorithms
+    **/
+    public function testHashMatchCheck($alg)
+    {
+        if (! Security::checkAlgorithm($alg)) return;
+
+        list ($a, $b, $c) = Security::hashPassword('Match', $alg);
+        $result = Security::doPasswordCheck($a, $b, $c, 'Match');
+        $this->assertTrue($result);
+        $this->assertTrue($alg == $b);
+
+        list ($a, $b, $c) = Security::hashPassword('Match', $alg);
+        $result = Security::doPasswordCheck($a, $b, $c, 'Do not match');
+        $this->assertFalse($result);
+        $this->assertTrue($alg == $b);
+    }
+
+
+    /**
+    * Does two creations create different hashes? (hashes with salts)
+    * @dataProvider dataAlgorithms
+    **/
+    public function testHashWithSalts($alg)
+    {
+        if (! Security::checkAlgorithm($alg)) return;
+        list ($a1, $b1, $c1) = Security::hashPassword('Match', $alg);
+        list ($a2, $b2, $c2) = Security::hashPassword('Match', $alg);
+        $this->assertTrue($b1 == $b2);
+        $this->assertTrue($alg == $b1);
+        $this->assertTrue($a1 != $a2);
+        $this->assertTrue($c1 != $c2);
+    }
+
+
+    public function testCheckAlgorithm()
+    {
+        $this->assertTrue(Security::checkAlgorithm(Security::PASSWORD_SHA_SALT));
+        $this->assertTrue(Security::checkAlgorithm(Security::PASSWORD_SHA_SALT_5000));
+        $this->assertFalse(Security::checkAlgorithm(1234));
+    }
 }

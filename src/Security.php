@@ -6,6 +6,7 @@
 
 namespace karmabunny\kb;
 
+use Exception;
 use InvalidArgumentException;
 
 
@@ -14,6 +15,17 @@ use InvalidArgumentException;
  */
 class Security
 {
+
+    /**
+    * Password algorithms
+    **/
+    const PASSWORD_SHA_SALT = 2;
+    const PASSWORD_BCRYPT12 = 3;
+    const PASSWORD_SHA_SALT_5000 = 5;
+
+    // Read-only algorithms, for data migration
+    const PASSWORD_SHA = 1;
+    const PASSWORD_PLAIN = 4;
 
     /**
      * Returns a binary string of random bytes
@@ -89,4 +101,133 @@ class Security
         }
     }
 
+
+    /**
+     * Check a password hash against an entered password
+     *
+     * @param string $known_hash The known hash to check against, typically from the database
+     * @param int $algorithm Password algorithm, {@see self}
+     * @param string $salt
+     * @param string $user_string Password which was entered by the user, to check against the stored hash
+     * @return bool True if the password matches, false if it doesn't
+     */
+    public static function doPasswordCheck($known_hash, $algorithm, $salt, $user_string)
+    {
+        switch ($algorithm) {
+            case self::PASSWORD_SHA:
+                $expected = sha1($user_string);
+                return Security::compareStrings($known_hash, $expected);
+
+            case self::PASSWORD_SHA_SALT:
+                $expected = sha1(sha1($salt . $user_string . $salt));
+                return Security::compareStrings($known_hash, $expected);
+
+            case self::PASSWORD_SHA_SALT_5000:
+                $expected = $salt . $user_string . $salt;
+                for ($i = 1; $i <= 5000; $i++) {
+                    $expected = sha1($expected);
+                }
+                return Security::compareStrings($known_hash, $expected);
+
+            case self::PASSWORD_BCRYPT12:
+                // The entire known password is used as a salt when generating the expected hash
+                $expected = crypt($user_string, $known_hash);
+                return Security::compareStrings($known_hash, $expected);
+        }
+
+        return false;
+    }
+
+
+    /**
+     * Return a hashed password, password algorithm, and salt, for inserting into the database
+     *
+     * @param string $password Plaintext password
+     * @param int $algorithmPassword algorithm. If not specified, the default is used.
+     * @return array 0 => hash, 1 => algorithm, 2 => salt
+     */
+    public static function hashPassword($password, $algorithm = null)
+    {
+        if ($algorithm == null) {
+            $algorithm = self::defaultAlgorithm();
+        }
+
+        switch ($algorithm) {
+            case self::PASSWORD_PLAIN:
+            case self::PASSWORD_SHA:
+                throw new InvalidArgumentException('Read-only password algorithm specified');
+                break;
+
+            case self::PASSWORD_SHA_SALT:
+                $salt = Security::randStr(10);
+                $hash = sha1(sha1($salt . $password . $salt));
+                break;
+
+            case self::PASSWORD_SHA_SALT_5000:
+                $salt = Security::randStr(10);
+                $hash = $salt . $password . $salt;
+                for ($i = 1; $i <= 5000; $i++) {
+                    $hash = sha1($hash);
+                }
+                break;
+
+            case self::PASSWORD_BCRYPT12:
+                $salt = '$2y$12$';
+                $salt .= Security::randStr(22, './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
+
+                $hash = crypt($password, $salt);
+                if (strlen($hash) <= 12) {
+                    throw new Exception('Bcrypt hashing failed');
+                }
+
+                // Unit tests check whether this field is set, but it's not used
+                // so it's just set to a dummy value
+                $salt = self::randStr(4);
+                break;
+
+            default:
+                return null;
+        }
+
+        return array($hash, $algorithm, $salt);
+    }
+
+
+    /**
+     * Checks if a given password algorithm is available
+     *
+     * @param int $algorithm Password algorithm
+     * @return bool True if the specified algorithm is available, False otherwise
+     */
+    public static function checkAlgorithm($algorithm)
+    {
+        switch ($algorithm) {
+            case self::PASSWORD_SHA:
+            case self::PASSWORD_SHA_SALT:
+            case self::PASSWORD_PLAIN:
+            case self::PASSWORD_SHA_SALT_5000:
+                return true;
+
+            case self::PASSWORD_BCRYPT12:
+                return (CRYPT_BLOWFISH == 1);
+        }
+
+        return false;
+    }
+
+
+    /**
+     * Return the algorithm for new accounts.
+     * Existing accounts will be re-crypted into this algorithm upon next login.
+     *
+     * @return int Password algorithm
+     **/
+    public static function defaultAlgorithm()
+    {
+        if (self::checkAlgorithm(self::PASSWORD_BCRYPT12)) {
+            return self::PASSWORD_BCRYPT12;
+        } else {
+            return self::PASSWORD_SHA_SALT_5000;
+        }
+    }
 }
