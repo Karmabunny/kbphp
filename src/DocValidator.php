@@ -27,7 +27,7 @@ use ReflectionProperty;
  *
  * @package karmabunny\kb
  */
-class DocValidator {
+class DocValidator implements Validator {
 
     /** @var object */
     protected $target;
@@ -59,7 +59,7 @@ class DocValidator {
      * @return bool True if valid. False if there were errors.
      * @throws Exception
      */
-    public function validate()
+    public function validate(): bool
     {
         $class = new ReflectionClass($this->target);
         $properties = $class->getProperties(ReflectionProperty::IS_PUBLIC ^ ReflectionProperty::IS_STATIC);

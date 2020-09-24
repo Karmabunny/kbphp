@@ -22,10 +22,11 @@ class ValidationException extends \Exception {
 
 
     /**
+     * Construct an appropriate validation message.
      *
-     * @param array $errors Keyed string => string[]
+     * @param array $errors Keyed string => string[].
      */
-    public function __construct(array $errors)
+    public function __construct($errors)
     {
         $this->errors = $errors;
 
@@ -45,5 +46,32 @@ class ValidationException extends \Exception {
 
             $this->message = 'Validation failed for ' . implode(', ', $names);
         }
+    }
+
+
+    /**
+     * Merge errors properly.
+     *
+     * Whereas array_merge() will clobber messages within duplicate keys.
+     *
+     * @param array ...$arrays
+     * @return array
+     */
+    public static function mergeErrors(...$arrays): array
+    {
+        $all = [];
+
+        foreach ($arrays as $errors) {
+            foreach ($errors as $name => $messages) {
+                if (isset($all[$name])) {
+                    array_push($all[$name], ...$messages);
+                }
+                else {
+                    $all[$name] = $messages;
+                }
+            }
+        }
+
+        return $all;
     }
 }

@@ -15,7 +15,7 @@ namespace karmabunny\kb;
  * Uses '@var' doc comments to infer the required and intended types.
  *
  * {@see RulesValidatorTrait}
- * This uses the rules() method to declare validator function.
+ * Uses the rules() method to declare validator function.
  * Default validity methods are provided by {@see Validity}.
  *
  * Combining validators should also be possible using the respective Validator
@@ -27,7 +27,7 @@ namespace karmabunny\kb;
  *     $docs = new DocsValidator($this);
  *     $rules = new RulesValidator($this);
  *     if (!$docs->validate() or !$rules->validate()) {
- *         $errors = array_merge($docs->getErrors(), $rules->getFieldErrors());
+ *         $errors = ValidationException::mergeErrors($docs->getErrors(), $rules->getErrors());
  *         throw new ValidationException($errors);
  *     }
  * }

@@ -77,7 +77,7 @@ use InvalidArgumentException;
  *        Url::redirect('course/edit');
  *    }
  */
-class RulesValidator
+class RulesValidator implements Validator
 {
     protected $labels;
     protected $data;
@@ -212,7 +212,7 @@ class RulesValidator
      * @return bool True if valid. False if there were errors.
      * @throws Exception
      */
-    public function validate()
+    public function validate(): bool
     {
         // The target must have a rules() method.
         if (!is_object($this->data) or !is_callable([$this->data, 'rules'])) {
@@ -488,6 +488,19 @@ class RulesValidator
 
 
     /**
+     * Get validation errors (field errors).
+     *
+     * This is to appease the interface gods.
+     *
+     * @return array
+     */
+    public function getErrors(): array
+    {
+        return $this->field_errors;
+    }
+
+
+    /**
      * Add a general error message, e.g. for errors affecting many fields
      *
      * @param string $message The message text
@@ -512,7 +525,7 @@ class RulesValidator
     /**
      * @return bool True if there were any validation errors, false if there wasn't
      */
-    public function hasErrors()
+    public function hasErrors(): bool
     {
         if (count($this->field_errors)) return true;
         if (count($this->general_errors)) return true;

@@ -58,6 +58,14 @@ trait RulesValidatorTrait {
      */
     public abstract function rules(): array;
 
+    public abstract function offsetExists($offset);
+
+    public abstract function offsetGet($offset);
+
+    public abstract function offsetSet($offset, $value);
+
+    public abstract function offsetUnset($offset);
+
 
     /**
      *
@@ -68,7 +76,7 @@ trait RulesValidatorTrait {
     public function validate() {
         $valid = new RulesValidator($this);
         if (!$valid->validate()) {
-            throw new ValidationException($valid->getFieldErrors());
+            throw new ValidationException($valid->getErrors());
         }
     }
 
@@ -83,12 +91,4 @@ trait RulesValidatorTrait {
         $valid = new RulesValidator($this);
         return $valid->validate();
     }
-
-    public abstract function offsetExists($offset);
-
-    public abstract function offsetGet($offset);
-
-    public abstract function offsetSet($offset, $value);
-
-    public abstract function offsetUnset($offset);
 }
