@@ -14,9 +14,11 @@ use ReflectionProperty;
  *
  * Annoyingly, class types _must_ include the full namespace in the doc comment.
  *
+ * @todo Maybe add a namespaces() function to return a list of searchable places?
+ *
  * @package karmabunny/kb
  */
-trait ValidatorTrait {
+trait DocValidatorTrait {
 
     public function validate()
     {
@@ -24,7 +26,6 @@ trait ValidatorTrait {
         $properties = $class->getProperties(ReflectionProperty::IS_PUBLIC ^ ReflectionProperty::IS_STATIC);
 
         $errors = [];
-        $required = [];
 
         foreach ($properties as $property) {
             $comment = $property->getDocComment();
@@ -68,8 +69,7 @@ trait ValidatorTrait {
 
             // Special message for 'required' properties.
             if ($actual === 'null' && !in_array('null', $types)) {
-                $errors[$name] = "Property '{$name}' is required.";
-                $required[] = $name;
+                $errors[$name] = ['required' => 'Property is required.'];
                 continue;
             }
 
@@ -95,37 +95,34 @@ trait ValidatorTrait {
                 }
             }
 
-            $errors[$name] = "Property value '{$name}' is {$actual} instead of {$var}.";
-        }
-
-        if (count($errors) == 1) {
-            reset($errors);
-            $message = current($errors);
-
-            $error = new ValidationException($message);
-            $error->properties = array_keys($errors);
-            $error->errors = $errors;
-            $error->required = $required;
-
-            throw $error;
+            $errors[$name] = ["Property is {$actual} instead of {$var}."];
         }
 
         if (!empty($errors)) {
-            $properties = array_map(function($name) {
-                return "'{$name}'";
-            }, array_keys($errors));
-
-            $message = 'Validation failed for ';
-            $message .= implode(', ', $properties);
-            $message .= '.';
-
-            $error = new ValidationException($message);
-            $error->properties = array_keys($errors);
-            $error->errors = $errors;
-            $error->required = $required;
-
-            throw $error;
+            throw new ValidationException($errors);
         }
+    }
+
+    /**
+     *
+     * @param string $name
+     * @return string|false
+     */
+    private static function classExists(string &$name)
+    {
+        if (class_exists($name)) return $name;
+
+        if (is_callable(['self', 'namespaces'])) {
+            $namespaces = self::namespaces();
+
+            foreach ($namespaces as $ns) {
+                if (!class_exists($ns . $name)) continue;
+                $name = $ns . $name;
+                return $name;
+            }
+        }
+
+        return false;
     }
 }
 

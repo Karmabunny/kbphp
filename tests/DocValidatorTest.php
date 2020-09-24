@@ -5,7 +5,7 @@
  */
 
 use karmabunny\kb\Collection;
-use karmabunny\kb\ValidatorTrait;
+use karmabunny\kb\DocValidatorTrait;
 use karmabunny\kb\Validates;
 use karmabunny\kb\ValidationException;
 use PHPUnit\Framework\TestCase;
@@ -13,11 +13,11 @@ use PHPUnit\Framework\TestCase;
 /**
  * Test the Validator helper utilities.
  */
-final class ValidatorTest extends TestCase {
+final class DocValidatorTest extends TestCase {
 
     public static function thingo()
     {
-        return new Thing([
+        return new DocThing([
             'id' => 111,
             'amount' => 222.22,
             'scalar' => 4.44,
@@ -40,7 +40,7 @@ final class ValidatorTest extends TestCase {
     public function testRequired()
     {
         try {
-            $thing = new Thing([]);
+            $thing = new DocThing([]);
             $thing->validate();
 
             $this->fail('Expected ValidationException.');
@@ -53,13 +53,14 @@ final class ValidatorTest extends TestCase {
                 'okay',
                 'another',
             ];
-            $this->assertEquals($expected, $exception->properties);
-            $this->assertEquals($expected, $exception->required);
-            $this->assertEquals($expected, array_keys($exception->errors));
 
+            $this->assertEquals($expected, array_keys($exception->errors));
             foreach ($expected as $name) {
-                $this->assertEquals("Property '{$name}' is required.", $exception->errors[$name]);
+                $this->assertEquals("Property is required.", $exception->errors[$name]['required']);
             }
+
+            // $message = 'Validation failed for ' . implode(', ', $expected);
+            // $this->assertEquals($message, $exception->getMessage());
         }
     }
 
@@ -74,12 +75,10 @@ final class ValidatorTest extends TestCase {
             $this->fail('Expected ValidationException.');
         }
         catch (ValidationException $exception) {
-            $this->assertEquals(['id'], $exception->properties);
-            $this->assertEquals([], $exception->required);
+            $this->assertEquals(['id'], array_keys($exception->errors));
 
-            $expected = "Property value 'id' is float instead of int.";
-            $this->assertEquals($expected, $exception->errors['id']);
-            $this->assertEquals($expected, $exception->getMessage());
+            $expected = "Property is float instead of int.";
+            $this->assertEquals($expected, $exception->errors['id'][0]);
         }
     }
 
@@ -99,22 +98,24 @@ final class ValidatorTest extends TestCase {
         try {
             $thing = self::thingo();
             $thing->object = new \stdClass();
+            $thing->local = new \stdClass();
             $thing->validate();
         }
         catch (ValidationException $exception) {
-            $this->assertEquals(['object'], $exception->properties);
-            $this->assertEquals([], $exception->required);
+            $this->assertEquals(['object', 'local'], array_keys($exception->errors));
 
-            $expected = "Property value 'object' is object instead of \\karmabunny\\kb\\Collection|null.";
-            $this->assertEquals($expected, $exception->errors['object']);
-            $this->assertEquals($expected, $exception->getMessage());
+            $expected = "Property is object instead of \\karmabunny\\kb\\Collection|null.";
+            $this->assertEquals($expected, $exception->errors['object'][0]);
+
+            $expected = "Property is object instead of Collection|null.";
+            $this->assertEquals($expected, $exception->errors['local'][0]);
         }
     }
 }
 
 
-class Thing extends Collection implements Validates {
-    use ValidatorTrait;
+class DocThing extends Collection implements Validates {
+    use DocValidatorTrait;
 
     /** @var int required */
     public $id;
@@ -139,4 +140,12 @@ class Thing extends Collection implements Validates {
 
     /** @var \karmabunny\kb\Collection|null */
     public $object;
+
+    /** @var Collection|null */
+    public $local;
+
+    public static function namespaces(): array
+    {
+        return ['\\karmabunny\\kb\\'];
+    }
 }
