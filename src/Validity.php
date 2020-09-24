@@ -11,17 +11,18 @@ use InvalidArgumentException;
 
 /**
  * Validation class.
+ *
  * All of its methods should give useful errors by throwing a {@see ValidityException}.
- * Used with the {@see Validator} class.
+ * Used with the {@see RulesValidator} class.
  */
-class Validity
+abstract class Validity
 {
 
     /**
      * Checks the length of a string is within an allowed range
      *
      * @example
-     *    $valid->check('name', 'Validity::length', 1, 100)
+     *    $valid->check('name', 'length', 1, 100)
      *
      * @param string $val The value
      * @param int $min Minimum length
@@ -44,7 +45,7 @@ class Validity
      * Validate email, commonly used characters only
      *
      * @example
-     *    $valid->check('email', 'Validity::email')
+     *    $valid->check('email', 'email')
      *
      * @param string email address
      * @throws ValidityException
@@ -63,7 +64,7 @@ class Validity
      * Validate password by length, type of characters
      *
      * @example
-     *    $valid->check('password', 'Validity::password')
+     *    $valid->check('password', 'password')
      *
      * @param string $val Password to validate
      * @throws ValidityException
@@ -98,7 +99,7 @@ class Validity
      * Checks if a phone number is valid.
      *
      * @example
-     *    $valid->check('mobile', 'Validity::phone', 10)
+     *    $valid->check('mobile', 'phone', 10)
      *
      * @param string $val Phone number
      * @param int $min_digits Minimum number of digits required in phone number.
@@ -140,7 +141,7 @@ class Validity
      * Checks if a value is a positive integer
      *
      * @example
-     *    $valid->check('region_id', 'Validity::positiveInt')
+     *    $valid->check('region_id', 'positiveInt')
      *
      * @param string $val Value to check
      * @throws ValidityException
@@ -166,7 +167,7 @@ class Validity
      *    ' " / ! ? @ # $ % & ( ) - : ; . ,
      *
      * @example
-     *    $valid->check('name', 'Validity::proseText')
+     *    $valid->check('name', 'proseText')
      *
      * @param string $str
      * @throws ValidityException
@@ -184,7 +185,7 @@ class Validity
      * Checks if a value is a date in MySQL format (YYYY-MM-DD)
      *
      * @example
-     *    $valid->check('date_published', 'Validity::dateMySQL')
+     *    $valid->check('date_published', 'dateMySQL')
      *
      * @param string $val Value to check
      * @throws ValidityException
@@ -214,7 +215,7 @@ class Validity
      * Checks if a value is a time in MySQL format (HH:MM:SS)
      *
      * @example
-     *    $valid->check('event_time', 'Validity::timeMySQL')
+     *    $valid->check('event_time', 'timeMySQL')
      *
      * @param string $val Value to check
      * @throws ValidityException
@@ -244,7 +245,7 @@ class Validity
      * Checks if a value is a datetime in MySQL format (YYYY-MM-DD HH:MM:SS)
      *
      * @example
-     *    $valid->check('start_date', 'Validity::datetimeMySQL')
+     *    $valid->check('start_date', 'datetimeMySQL')
      *
      * @param string $val Value to check
      * @throws ValidityException
@@ -265,7 +266,7 @@ class Validity
      * At least one value must be specified (e.g. one of email/phone/mobile)
      *
      * @example
-     *    $valid->multipleCheck(['email', 'phone'], 'Validity::oneRequired')
+     *    $valid->multipleCheck(['email', 'phone'], 'oneRequired')
      *
      * @param array $vals Values to check
      * @throws ValidityException
@@ -288,7 +289,7 @@ class Validity
      * All field values must match (e.g. password1 and password2 must match)
      *
      * @example
-     *    $valid->multipleCheck(['password1', 'password2'], 'Validity::allMatch')
+     *    $valid->multipleCheck(['password1', 'password2'], 'allMatch')
      *
      * @param array $vals Values to check
      * @throws ValidityException
@@ -307,7 +308,7 @@ class Validity
      * All field values must be unique (e.g. home phone and work phone cannot be the same)
      *
      * @example
-     *    $valid->multipleCheck(['home_phone', 'work_phone'], 'Validity::allUnique')
+     *    $valid->multipleCheck(['home_phone', 'work_phone'], 'allUnique')
      *
      * @param array $vals Values to check
      * @throws ValidityException
@@ -325,7 +326,7 @@ class Validity
      * Checks a value is one of the allowed values
      *
      * @example
-     *    $valid->check('vowel', 'Validity::inArray', ['a', 'e', 'i', 'o', 'u'])
+     *    $valid->check('vowel', 'inArray', ['a', 'e', 'i', 'o', 'u'])
      *
      * @param string $val
      * @param array $allowed
@@ -344,7 +345,7 @@ class Validity
      *
      * @example
      *    $_POST['vowels'] = ['a', 'i']
-     *    $valid->check('vowel', 'Validity::allInArray', ['a', 'e', 'i', 'o', 'u'])
+     *    $valid->check('vowel', 'allInArray', ['a', 'e', 'i', 'o', 'u'])
      *
      * @param string $val
      * @param array $allowed
@@ -362,7 +363,7 @@ class Validity
      * Checks that a value is numeric (integral or decimal)
      *
      * @example
-     *    $valid->check('cost', 'Validity::numeric')
+     *    $valid->check('cost', 'numeric')
      *
      * @param string $val
      * @throws ValidityException
@@ -379,7 +380,7 @@ class Validity
      * Checks that a value is binary; either a '1' or a '0'.
      *
      * @example
-     *    $valid->check('active', 'Validity::binary')
+     *    $valid->check('active', 'binary')
      *
      * @param string $val
      * @throws ValidityException
@@ -396,7 +397,7 @@ class Validity
      * Checks that a value is numeric (integral or decimal) and within a given inclusive range
      *
      * @example
-     *    $valid->check('cost', 'Validity::range', 0, 5000)
+     *    $valid->check('cost', 'range', 0, 5000)
      *
      * @param string $val
      * @param number $min The minimum the value may be

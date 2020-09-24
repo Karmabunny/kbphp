@@ -7,9 +7,15 @@
 namespace karmabunny\kb;
 
 /**
- * This class has logging capabilities.
+ * This class can validate.
  *
- * An implementation is provided in {@see ValidatorTrait}.
+ * There are two provided implementations if you don't want to write your own.
+ *
+ * DocValidatorTrait
+ * Uses '@var' doc comments to infer the required and intended types.
+ *
+ * RulesValidatorTrait
+ * This uses the rules() method to declare validator function.
  *
  * @package karmabunny/kb
  */
