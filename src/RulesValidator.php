@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use ArrayAccess;
+use Exception;
 use InvalidArgumentException;
 
 
@@ -201,6 +202,61 @@ class RulesValidator
         }
 
         return false;
+    }
+
+
+    /**
+     *
+     * @return bool True if valid. False if there were errors.
+     * @throws Exception
+     */
+    public function validate()
+    {
+        if (!is_object($this->data)) {
+            return false;
+        }
+
+        if (!is_callable([$this->data, 'rules'])) {
+            return false;
+        }
+
+        $rules = call_user_func([$this->data, 'rules']);
+
+        if (isset($rules['validity'])) {
+            $this->setValidity($rules['validity']);
+            unset($rules['validity']);
+        }
+
+        foreach ($rules as $key => $args) {
+            // field => [func + args].
+            if (is_int($key)) {
+                $field = array_shift($args);
+                $func = array_shift($args);
+
+                if ($func === 'required') {
+                    $this->required([$field]);
+                }
+                else {
+                    $this->check($field, $func, ...$args);
+                }
+            }
+            // Special condition for required fields.
+            else if ($key === 'required') {
+                $this->required($args);
+            }
+            // func => [fields]
+            else if (is_array($args)) {
+                foreach ($args as $field) {
+                    $this->check($field, $key);
+                }
+            }
+            // Ah what!
+            else {
+                throw new Exception('Invalid validator');
+            }
+        }
+
+        return !$this->hasErrors();
     }
 
 

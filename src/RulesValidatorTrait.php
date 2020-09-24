@@ -6,6 +6,7 @@
 
 namespace karmabunny\kb;
 
+use ArrayAccess;
 use Exception;
 
 /**
@@ -63,48 +64,22 @@ trait RulesValidatorTrait {
      * @throws Exception
      * @throws ValidationException
      */
-    public function validate()
-    {
+    public function validate() {
         $valid = new RulesValidator($this);
-
-        $fields = $this->rules();
-
-        if (isset($fields['validity'])) {
-            $valid->setValidity($fields['validity']);
-            unset($fields['validity']);
-        }
-
-        foreach ($fields as $key => $args) {
-            // field => [func + args].
-            if (is_int($key)) {
-                $field = array_shift($args);
-                $func = array_shift($args);
-
-                if ($func === 'required') {
-                    $valid->required([$field]);
-                }
-                else {
-                    $valid->check($field, $func, ...$args);
-                }
-            }
-            // Special condition for required fields.
-            else if ($key === 'required') {
-                $valid->required($args);
-            }
-            // func => [fields]
-            else if (is_array($args)) {
-                foreach ($args as $field) {
-                    $valid->check($field, $key);
-                }
-            }
-            // Ah what!
-            else {
-                throw new \Exception('Invalid validator');
-            }
-        }
-
-        if ($valid->hasErrors()) {
+        if (!$valid->validate()) {
             throw new ValidationException($valid->getFieldErrors());
         }
+    }
+
+
+    /**
+     *
+     * @return bool
+     * @throws Exception
+     */
+    public function valid(): bool
+    {
+        $valid = new RulesValidator($this);
+        return $valid->validate();
     }
 }
