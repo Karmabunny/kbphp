@@ -6,11 +6,12 @@
 
 namespace karmabunny\kb;
 
-use ArrayAccess;
 use Exception;
 
 /**
- * Use validator functions to validate collection properties.
+ * Use validator functions to validate properties.
+ *
+ * RulesValidator uses array access, so an ArrayAccess interface is also enforced.
  *
  * @see RulesValidator
  * @see Validity
@@ -20,7 +21,7 @@ use Exception;
 trait RulesValidatorTrait {
 
     /**
-     * Specify validators to run across the collection properties.
+     * Specify validators to run across the object properties.
      *
      * There are two syntaxes:
      *
@@ -82,4 +83,12 @@ trait RulesValidatorTrait {
         $valid = new RulesValidator($this);
         return $valid->validate();
     }
+
+    public abstract function offsetExists($offset);
+
+    public abstract function offsetGet($offset);
+
+    public abstract function offsetSet($offset, $value);
+
+    public abstract function offsetUnset($offset);
 }

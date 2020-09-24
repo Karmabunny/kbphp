@@ -206,29 +206,29 @@ class RulesValidator
 
 
     /**
+     * Validate properties in an object as defined in a rules() method.
      *
+     * @see RulesValidatorTrait
      * @return bool True if valid. False if there were errors.
      * @throws Exception
      */
     public function validate()
     {
-        if (!is_object($this->data)) {
-            return false;
-        }
-
-        if (!is_callable([$this->data, 'rules'])) {
+        // The target must have a rules() method.
+        if (!is_object($this->data) or !is_callable([$this->data, 'rules'])) {
             return false;
         }
 
         $rules = call_user_func([$this->data, 'rules']);
 
+        // Optionally swap out for a different validity class.
         if (isset($rules['validity'])) {
             $this->setValidity($rules['validity']);
             unset($rules['validity']);
         }
 
         foreach ($rules as $key => $args) {
-            // field => [func + args].
+            // [field, func, ...args].
             if (is_int($key)) {
                 $field = array_shift($args);
                 $func = array_shift($args);
@@ -252,7 +252,7 @@ class RulesValidator
             }
             // Ah what!
             else {
-                throw new Exception('Invalid validator');
+                throw new Exception("Invalid validator rule: {$key}");
             }
         }
 
