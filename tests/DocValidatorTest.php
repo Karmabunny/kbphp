@@ -11,7 +11,7 @@ use karmabunny\kb\ValidationException;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Test the Validator helper utilities.
+ * Test the Doc Validator.
  */
 final class DocValidatorTest extends TestCase {
 
@@ -58,9 +58,6 @@ final class DocValidatorTest extends TestCase {
             foreach ($expected as $name) {
                 $this->assertEquals("Property is required.", $exception->errors[$name]['required']);
             }
-
-            // $message = 'Validation failed for ' . implode(', ', $expected);
-            // $this->assertEquals($message, $exception->getMessage());
         }
     }
 
@@ -104,7 +101,7 @@ final class DocValidatorTest extends TestCase {
         catch (ValidationException $exception) {
             $this->assertEquals(['object', 'local'], array_keys($exception->errors));
 
-            $expected = "Property is object instead of \\karmabunny\\kb\\Collection|null.";
+            $expected = "Property is object instead of karmabunny\\kb\\Collection|null.";
             $this->assertEquals($expected, $exception->errors['object'][0]);
 
             $expected = "Property is object instead of Collection|null.";
@@ -138,7 +135,7 @@ class DocThing extends Collection implements Validates {
     /** @var string|int */
     public $another;
 
-    /** @var \karmabunny\kb\Collection|null */
+    /** @var karmabunny\kb\Collection|null */
     public $object;
 
     /** @var Collection|null */
@@ -146,6 +143,6 @@ class DocThing extends Collection implements Validates {
 
     public static function namespaces(): array
     {
-        return ['\\karmabunny\\kb\\'];
+        return ['karmabunny\\kb\\'];
     }
 }
