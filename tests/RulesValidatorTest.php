@@ -5,15 +5,18 @@
  */
 
 use karmabunny\kb\Collection;
-use karmabunny\kb\FieldValidatorTrait;
+use karmabunny\kb\RulesValidatorTrait;
 use karmabunny\kb\Validates;
 use karmabunny\kb\ValidationException;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Test the Validator helper utilities.
+ * Test the Rules Validator.
+ *
+ * @todo Test custom 'validity' helper.
+ * @todo Adjust field errors to include the error type as the key.
  */
-final class FieldValidatorTest extends TestCase {
+final class RulesValidatorTest extends TestCase {
 
     public function testRequired()
     {
@@ -77,7 +80,7 @@ final class FieldValidatorTest extends TestCase {
 
 
 class FieldThing extends Collection implements Validates {
-    use FieldValidatorTrait;
+    use RulesValidatorTrait;
 
     /** @var int required */
     public $id;
@@ -97,7 +100,7 @@ class FieldThing extends Collection implements Validates {
     /** @var string|int */
     public $okay;
 
-    public function fields(): array
+    public function rules(): array
     {
         return [
             'required' => [ 'id', 'default', 'nope', 'okay' ],

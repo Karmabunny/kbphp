@@ -11,8 +11,9 @@ use InvalidArgumentException;
 
 
 /**
- * Validation processor
- * Used with the {@see Validity} class.
+ * Rules based validation processor.
+ *
+ * Used with the {@see Validity} class. This can be changed with setValidity().
  *
  * @example
  *    // Plain example
@@ -75,7 +76,7 @@ use InvalidArgumentException;
  *        Url::redirect('course/edit');
  *    }
  */
-class Validator
+class RulesValidator
 {
     protected $labels;
     protected $data;

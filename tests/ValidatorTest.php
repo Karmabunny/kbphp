@@ -4,7 +4,7 @@
  * @copyright Copyright (c) 2020 Karmabunny
  */
 
-use karmabunny\kb\Validator;
+use karmabunny\kb\RulesValidator;
 use karmabunny\kb\Validity;
 use PHPUnit\Framework\TestCase;
 
@@ -29,7 +29,7 @@ class ValidatorTest extends TestCase
     */
     public function testCheckFailures($value, $func)
     {
-        $validator = new Validator(['field' => $value]);
+        $validator = new RulesValidator(['field' => $value]);
 
         // Awful hack to pass through varargs to the Validator::check method
         $args = func_get_args();
@@ -46,7 +46,7 @@ class ValidatorTest extends TestCase
     public function testArrayCheck()
     {
         $data = ['vals' => [1, 2, 'A', 'B', 5]];
-        $validator = new Validator($data);
+        $validator = new RulesValidator($data);
 
         $results = $validator->arrayCheck('vals', 'positiveInt');
 
@@ -73,7 +73,7 @@ class ValidatorTest extends TestCase
     public function testArrayCheckCallable()
     {
         $data = ['vals' => [1, 2, 'A', 'B', 5]];
-        $validator = new Validator($data);
+        $validator = new RulesValidator($data);
 
         $results = $validator->arrayCheck('vals', [Validity::class, 'positiveInt']);
 
