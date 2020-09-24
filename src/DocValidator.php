@@ -6,33 +6,65 @@
 
 namespace karmabunny\kb;
 
+use Exception;
 use ReflectionClass;
 use ReflectionProperty;
 
+/**
+ * Use '@var' comments to validate object properties.
+ *
+ * If using a class type:
+ * 1. include the namespace\\to\\Class
+ * 2. OR indicate where to find it with the namespaces() function
+ *
+ * E.g.
+ *   /** @var Class //
+ *   public $property;
+ *
+ *   public function namespaces() {
+ *       return [ 'namespace\\to\\' ];
+ *   }
+ *
+ * @package karmabunny\kb
+ */
 class DocValidator {
 
     /** @var object */
     protected $target;
 
+    /** @var array */
+    protected $errors;
+
+    /** @var string[] */
+    protected $namespaces;
+
     /**
-     *
-     * @param object $target
+     * @param object $target Object to validate.
      */
-    public function __construct(object &$target)
+    public function __construct(object $target)
     {
         $this->target = $target;
+        $this->errors = [];
+        $this->namespaces = [];
+
+        $getter = [$target, 'namespaces'];
+        if (is_callable($getter)) {
+            $this->namespaces = $getter();
+        }
     }
 
     /**
+     * Validate the target.
      *
-     * @throws ValidationException
+     * @return bool True if valid. False if there were errors.
+     * @throws Exception
      */
     public function validate()
     {
         $class = new ReflectionClass($this->target);
         $properties = $class->getProperties(ReflectionProperty::IS_PUBLIC ^ ReflectionProperty::IS_STATIC);
 
-        $errors = [];
+        $this->errors = [];
 
         foreach ($properties as $property) {
             $comment = $property->getDocComment();
@@ -44,13 +76,13 @@ class DocValidator {
 
             $actual = self::getType($value);
             if ($actual === false) {
-                throw new \Exception("Property value '{$name}' has an unknown type.");
+                throw new Exception("Property value '{$name}' has an unknown type.");
                 continue;
             }
 
             // Special message for 'required' properties.
             if ($actual === 'null' && !in_array('null', $types)) {
-                $errors[$name] = ['required' => 'Property is required.'];
+                $this->errors[$name] = ['required' => 'Property is required.'];
                 continue;
             }
 
@@ -78,37 +110,61 @@ class DocValidator {
 
             // Still here? Must be broken.
             $expected = implode('|', $types);
-            $errors[$name] = ["Property is {$actual} instead of {$expected}."];
+            $this->errors[$name] = ["Property is {$actual} instead of {$expected}."];
         }
 
-        if (!empty($errors)) {
-            throw new ValidationException($errors);
-        }
+        return !$this->hasErrors();
     }
 
+    /**
+     * True if there were any validation errors.
+     *
+     * @return bool
+     */
+    public function hasErrors(): bool
+    {
+        return !empty($this->errors);
+    }
+
+    /**
+     * Get a list of all errors, indexed by property name.
+     * Field may have multiple errors defined.
+     *
+     * @return array
+     */
+    public function getErrors(): array
+    {
+        return $this->errors;
+    }
 
     /**
      * Determine if this class exists.
      *
-     * Unfortunately, if the typed comment has no namespace we can't magically get the namespace of a
+     * Unfortunately, if the typed comment has no namespace we can't magically
+     * get the namespace of that class. So users must specify a namespaces()
+     * function with a list of possible namespaces in which classes can exist.
+     *
+     * Alternatively, put the whole namespaced class name in the doc comment.
      *
      * @param string $name
      * @return string|false
      */
     public function classExists(string &$name)
     {
-        if (class_exists($name)) return $name;
-
-        $getter = [$this->target, 'namespaces'];
-        if (is_callable($getter)) {
-            $namespaces = $getter();
-
-            foreach ($namespaces as $ns) {
-                if (!class_exists($ns . $name)) continue;
-                $name = $ns . $name;
-                return $name;
-            }
+        // Look up classes with namespaces.
+        if (preg_match('/\/\//', $name) !== false) {
+            return class_exists($name) ? $name : false;
         }
+
+        // Search within our defined namespaces.
+        foreach ($this->namespaces as $ns) {
+            if (!class_exists($ns . $name)) continue;
+            $name = $ns . $name;
+            return $name;
+        }
+
+        // Search for built-ins.
+        if (class_exists($name)) return $name;
 
         return false;
     }
@@ -138,9 +194,13 @@ class DocValidator {
 
 
     /**
+     * Determine the type of a value.
+     *
+     * Because gettype() is deprecated apparently? But also it doesn't reflect
+     * the type names anyway.
      *
      * @param mixed $value
-     * @return string|false
+     * @return string|false False if the type is unknown.
      */
     public static function getType($value)
     {
