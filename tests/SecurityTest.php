@@ -39,22 +39,22 @@ class SecurityTest extends TestCase
     {
         return [
             [
-                Security::class . '::randBytes',
+                [Security::class, 'randBytes'],
                 [4096 * 512],
                 256
             ],
             [
-                Security::class . '::randStr',
+                [Security::class, 'randStr'],
                 [4096 * 512, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'],
                 26
             ],
             [
-                Security::class . '::randStr',
+                [Security::class, 'randStr'],
                 [4096 * 512, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'],
                 52
             ],
             [
-                Security::class . '::randStr',
+                [Security::class, 'randStr'],
                 [4096 * 512, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'],
                 62
             ],
