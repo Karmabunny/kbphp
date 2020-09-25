@@ -108,6 +108,28 @@ final class DocValidatorTest extends TestCase {
             $this->assertEquals($expected, $exception->errors['local'][0]);
         }
     }
+
+
+    public function testList()
+    {
+        $thing = self::thingo();
+        $thing->list = [1,2,3];
+        $thing->validate();
+        $this->assertTrue(true);
+
+        try {
+            $thing->list = 'string thing';
+            $thing->validate();
+            $this->fail('Expected ValidationException.');
+        }
+        catch (ValidationException $exception) {
+            $this->assertEquals(['list'], array_keys($exception->errors));
+
+            $expected = 'Property is string instead of int[]|null.';
+            $actual = $exception->errors['list'][0];
+            $this->assertEquals($expected, $actual);
+        }
+    }
 }
 
 
@@ -134,6 +156,9 @@ class DocThing extends Collection implements Validates {
 
     /** @var string|int */
     public $another;
+
+    /** @var int[]|null */
+    public $list;
 
     /** @var karmabunny\kb\Collection|null */
     public $object;

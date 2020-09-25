@@ -106,6 +106,10 @@ class DocValidator implements Validator {
                 if ($this->classExists($expected) and $value instanceof $expected) {
                     continue 2;
                 }
+
+                if ($actual === 'array' and $this->isArray($expected, $value)) {
+                    continue 2;
+                }
             }
 
             // Still here? Must be broken.
@@ -167,6 +171,56 @@ class DocValidator implements Validator {
         if (class_exists($name)) return $name;
 
         return false;
+    }
+
+
+    /**
+     *
+     * @param string $expected
+     * @param mixed $list
+     * @return bool
+     */
+    public function isArray(string $expected, $list): bool
+    {
+        $actual = self::getType($list);
+
+        if ($actual !== 'array') return false;
+        if ($expected === 'array') return true;
+
+        // Get the item type.
+        $matches = [];
+        if (preg_match('/^([^\[]+)\[\]$/', $expected, $matches) === false) return false;
+        $expected = $matches[1];
+
+        foreach ($list as $value) {
+            $actual = self::getType($value);
+            echo $expected, $actual, "\n";
+
+            if ($expected === 'float' and $actual === 'int') {
+                continue;
+            }
+
+            if ($expected === 'true' and $value === true) {
+                continue;
+            }
+
+            if ($expected === 'false' and $value === false) {
+                continue;
+            }
+
+            if ($expected === $actual) {
+                continue;
+            }
+
+            if ($this->classExists($expected) and $value instanceof $expected) {
+                continue;
+            }
+
+            // Nothing? Well it's invalid then.
+            return false;
+        }
+
+        return true;
     }
 
 
