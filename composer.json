@@ -3,7 +3,6 @@
     "name": "karmabunny/kb",
     "description": "Common KB utilities",
     "type": "library",
-    "version": "0.1",
     "license": "MIT",
     "require": {},
     "require-dev": {
