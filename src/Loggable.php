@@ -16,11 +16,11 @@ namespace karmabunny\kb;
 interface Loggable {
 
     /**
-     * Register a logger.
+     * Log something.
      *
-     * @param callable $logger (message, level, category, timestamp)
-     * @return int
+     * @param string|\Exception $message
+     * @param int $level default: LEVEL_INFO
+     * @return void
      */
-    public function addLogger(callable $logger);
-
+    public function log($message, int $level = null, string $_category = null, int $_timestamp = null);
 }

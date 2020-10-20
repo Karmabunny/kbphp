@@ -23,35 +23,47 @@ trait LoggerTrait {
      * @param callable $logger (message, level, category, timestamp)
      * @return int
      */
-    public function addLogger(callable $logger)
+    public function addLogger(callable $logger, bool $init = true)
     {
+        // Log something immediately so - if it breaks - it breaks early.
+        if ($init) {
+            $logger('Registered logger', Log::LEVEL_DEBUG, static::class, time());
+        }
+
         $index = count($this->loggers);
         $this->loggers[] = $logger;
-
-        // Log something immediately so - if it breaks - it breaks early.
-        $logger('Registered logger', Log::LEVEL_DEBUG, self::class, time());
 
         return $index;
     }
 
 
     /**
+     * Forward any logs from this loggable to a parent loggable.
+     *
+     * @param Loggable $parent
+     * @return void
+     */
+    public function attach(Loggable $parent)
+    {
+        $this->addLogger([$parent, 'log'], false);
+    }
+
+
+    /**
      * Log something.
      *
-     * Optionally, provide a level and category.
-     *
      * @param string|\Exception $message
-     * @param string $category default: self::class
      * @param int $level default: LEVEL_INFO
      * @return void
      */
-    private function log($message, int $level = null, string $category = null)
+    public function log($message, int $level = null, string $_category = null, int $_timestamp = null)
     {
         if ($level === null) $level = Log::LEVEL_INFO;
-        if ($category === null) $category = self::class;
+        if ($_category === null) $_category = static::class;
+        if ($_timestamp === null) $_timestamp = time();
 
         foreach ($this->loggers as $logger) {
-            $logger($message, $level, $category, time());
+            $logger($message, $level, $_category, $_timestamp);
         }
     }
 }
