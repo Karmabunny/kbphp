@@ -6,6 +6,8 @@
 
 namespace karmabunny\kb;
 
+use ArrayAccess;
+use IteratorAggregate;
 use JsonSerializable;
 use Serializable;
 
@@ -14,10 +16,20 @@ use Serializable;
  *
  * @package karmabunny/kb
  */
-class Collection implements \ArrayAccess, \IteratorAggregate, Serializable, JsonSerializable {
+class Collection implements
+        ArrayAccess,
+        IteratorAggregate,
+        Serializable,
+        JsonSerializable,
+        Arrayable,
+        Copyable
+{
 
     function __construct(iterable $config = [])
     {
+        if (!is_array($config)) {
+            $config = iterator_to_array($config);
+        }
         $this->update($config);
     }
 
@@ -78,7 +90,7 @@ class Collection implements \ArrayAccess, \IteratorAggregate, Serializable, Json
     }
 
 
-    public function update(iterable $config)
+    public function update(array $config)
     {
         foreach ($config as $key => $item) {
             $this->$key = $item;
@@ -87,17 +99,40 @@ class Collection implements \ArrayAccess, \IteratorAggregate, Serializable, Json
 
 
     /** @return static */
-    public function copy()
+    public function copy(array $fields = null)
     {
         $class = static::class;
-        return new $class($this);
+        $array = $this->toArray($fields);
+        return new $class($array);
     }
 
 
-    public function toArray()
+    public function toArray(array $fields = null): array
     {
         $array = [];
         foreach ($this as $key => $item) {
+            // Filtering.
+            if (!empty($fields) and !in_array($key, $fields)) {
+                continue;
+            }
+
+            // Shallow convert array containing arrayables.
+            if (is_array($item)) {
+                $array[$key] = array_map(function($item) {
+                    if ($item instanceof Arrayable) {
+                        return $item->toArray();
+                    }
+                    return $item;
+                }, $item);
+                continue;
+            }
+
+            // Convert arrayables.
+            if ($item instanceof Arrayable) {
+                $array[$key] = $item->toArray();
+                continue;
+            }
+
             $array[$key] = $item;
         }
         return $array;
