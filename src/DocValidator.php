@@ -62,11 +62,13 @@ class DocValidator implements Validator {
     public function validate(): bool
     {
         $class = new ReflectionClass($this->target);
-        $properties = $class->getProperties(ReflectionProperty::IS_PUBLIC ^ ReflectionProperty::IS_STATIC);
+        $properties = $class->getProperties(ReflectionProperty::IS_PUBLIC);
 
         $this->errors = [];
 
         foreach ($properties as $property) {
+            if ($property->isStatic()) continue;
+
             $comment = $property->getDocComment();
             $types = self::parseVar($comment);
             if ($types === false) continue;
