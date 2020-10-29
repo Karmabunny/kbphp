@@ -194,7 +194,6 @@ class DocValidator implements Validator {
 
         foreach ($list as $value) {
             $actual = self::getType($value);
-            echo $expected, $actual, "\n";
 
             if ($expected === 'float' and $actual === 'int') {
                 continue;
