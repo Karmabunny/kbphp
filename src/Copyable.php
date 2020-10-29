@@ -9,5 +9,5 @@ namespace karmabunny\kb;
 interface Copyable
 {
     /** @return static */
-    function copy(array $fields = null);
+    function copy();
 }

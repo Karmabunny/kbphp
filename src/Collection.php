@@ -9,6 +9,8 @@ namespace karmabunny\kb;
 use ArrayAccess;
 use IteratorAggregate;
 use JsonSerializable;
+use ReflectionClass;
+use ReflectionProperty;
 use Serializable;
 
 /**
@@ -25,6 +27,16 @@ class Collection implements
         Copyable
 {
 
+    /**
+     * Add field names here to prevent them from being serialized.
+     *
+     * That or implement the {@see NotSerializable} interface.
+     *
+     * @var array
+     */
+    protected static $NO_SERIALIZE = [];
+
+
     function __construct(iterable $config = [])
     {
         if (!is_array($config)) {
@@ -37,7 +49,24 @@ class Collection implements
     /** @inheritdoc */
     public function serialize(): string
     {
-        return serialize($this->toArray());
+        $array = [];
+
+        $reflect = new ReflectionClass($this);
+        $properties = $reflect->getProperties(ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC);
+
+        foreach ($properties as $property) {
+            if ($property->isStatic()) continue;
+
+            $key = $property->getName();
+            if (in_array($key, static::$NO_SERIALIZE)) continue;
+
+            $value = $this->$key;
+            if (is_object($value) and $value instanceof NotSerializable) continue;
+
+            $array[$key] = $value;
+        }
+
+        return serialize($array);
     }
 
 
@@ -99,11 +128,10 @@ class Collection implements
 
 
     /** @return static */
-    public function copy(array $fields = null)
+    public function copy()
     {
         $class = static::class;
-        $array = $this->toArray($fields);
-        return new $class($array);
+        return new $class($this);
     }
 
 
