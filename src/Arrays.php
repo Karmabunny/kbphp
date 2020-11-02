@@ -22,7 +22,10 @@ abstract class Arrays
      */
     static function array_first(array $array)
     {
-        return reset($array);
+        foreach ($array as $item) {
+            return $item;
+        }
+        return null;
     }
 
 
