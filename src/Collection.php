@@ -37,7 +37,11 @@ class Collection implements
     protected static $NO_SERIALIZE = [];
 
 
-    function __construct(iterable $config = [])
+    /**
+     *
+     * @param iterable $config
+     */
+    function __construct($config = [])
     {
         if (!is_array($config)) {
             $config = iterator_to_array($config);

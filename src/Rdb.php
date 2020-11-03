@@ -85,7 +85,7 @@ use RuntimeException;
 class Rdb
 {
 
-    public const FILTER_PREFIX = [
+    const FILTER_PREFIX = [
         'keys',
     ];
 

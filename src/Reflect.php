@@ -23,7 +23,7 @@ abstract class Reflect {
      * @param string $class
      * @return array
      */
-    public static function getMethods(string $class, ?string $filter = null): array
+    public static function getMethods(string $class, string $filter = null): array
     {
         $names = get_class_methods($class);
         $methods = [];

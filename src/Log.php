@@ -16,19 +16,19 @@ use Traversable;
 abstract class Log {
 
     /** Put your noisey stuff in here. */
-    public const LEVEL_DEBUG = LOG_DEBUG;
+    const LEVEL_DEBUG = LOG_DEBUG;
 
     /** Important things, but not verbose. */
-    public const LEVEL_INFO = LOG_INFO;
+    const LEVEL_INFO = LOG_INFO;
 
     /** Some needs to pay attention to this. */
-    public const LEVEL_WARNING = LOG_WARNING;
+    const LEVEL_WARNING = LOG_WARNING;
 
     /** No really, this is bad. */
-    public const LEVEL_ERROR = LOG_ERR;
+    const LEVEL_ERROR = LOG_ERR;
 
     /** Shh. */
-    public const LEVEL_SILENT = 0;
+    const LEVEL_SILENT = 0;
 
 
     /**
