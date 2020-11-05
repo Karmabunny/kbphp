@@ -44,6 +44,9 @@ abstract class Arrays
 
 
     /**
+     * Fill an array with the results of a callable.
+     *
+     * Each index is provided as an argument.
      *
      * @param int $size
      * @param callable $fn ($index) => $value
@@ -60,6 +63,10 @@ abstract class Arrays
 
 
     /**
+     * Fill a keyed array with the results of a callable.
+     *
+     * Each index is provided as an argument.
+     * The callable is expected to return an array pair [key, value].
      *
      * @param int $size
      * @param callable $fn ($index) => [$key, $value]
