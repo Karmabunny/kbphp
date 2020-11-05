@@ -41,4 +41,37 @@ abstract class Arrays
         foreach ($array as $item);
         return $item;
     }
+
+
+    /**
+     *
+     * @param int $size
+     * @param callable $fn ($index) => $value
+     * @return array
+     */
+    static function fill(int $size, callable $fn)
+    {
+        $array = [];
+        for ($i = 0; $i < $size; $i++) {
+            $array[] = $fn($i);
+        }
+        return $array;
+    }
+
+
+    /**
+     *
+     * @param int $size
+     * @param callable $fn ($index) => [$key, $value]
+     * @return array
+     */
+    static function fillKeyed(int $size, callable $fn)
+    {
+        $array = [];
+        for ($i = 0; $i < $size; $i++) {
+            list($key, $value) = $fn($i);
+            $array[$key] = $value;
+        }
+        return $array;
+    }
 }
