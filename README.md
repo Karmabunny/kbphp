@@ -4,8 +4,19 @@ Just a big bunch of your favourite utilities.
 
 Most of these have been repurposed from Sprout.
 
-Add more if you please. Keep the dependencies to nil though.
-Create other packages for that kind of stuff.
+Add more if you please.
+
+
+## Code standard
+
+### Keep the dependencies to nil.
+If you need them, then it doesn't belong in this library.
+
+### Must support php 7.0.
+But feel free to slip in some ponyfills.
+
+### Add the damn tests.
+Like, even just the happy-cases.
 
 
 ## Running tests
