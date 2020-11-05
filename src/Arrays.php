@@ -74,4 +74,29 @@ abstract class Arrays
         }
         return $array;
     }
+
+
+    /**
+     * Find a matching item.
+     *
+     * The callable is provided with the value FIRST and the key SECOND.
+     *
+     * You can write:
+     *  Arrays::find($stuff, fn($item) => $item->id === 100);
+     *
+     * Or maybe:
+     *  Array::find($stuff, fn($item, key) => $key === 12 and $item->name === 12);
+     *
+     * @param mixed<[] $array
+     * @param callable $fn ($value, $key) => bool
+     * @return mixed|null
+     */
+    static function find(array $array, callable $fn)
+    {
+        foreach ($array as $key => $item) {
+            if ($fn($item, $key)) return $item;
+        }
+
+        return null;
+    }
 }
