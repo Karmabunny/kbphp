@@ -20,7 +20,7 @@ abstract class Arrays
      * @param array $array
      * @return mixed
      */
-    static function array_first(array $array)
+    static function first(array $array)
     {
         foreach ($array as $item) {
             return $item;
@@ -35,7 +35,7 @@ abstract class Arrays
      * @param array $array
      * @return mixed
      */
-    static function array_last(array $array)
+    static function last(array $array)
     {
         $item = null;
         foreach ($array as $item);
