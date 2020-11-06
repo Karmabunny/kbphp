@@ -6,6 +6,11 @@
 
 namespace karmabunny\kb;
 
+use DateTime;
+use DateTimeImmutable;
+use DateTimeInterface;
+use Generator;
+
 /**
  * Various date and time utilities.
  *
@@ -51,5 +56,80 @@ abstract class Time
         }
 
         return $time . $unit . ($time == 1 ? ' ago' : 's ago');
+    }
+
+
+    /**
+     *
+     * Any date interface into a datetime.
+     *
+     * Legit, I think these are a builtin PHP 8 thing.
+     *
+     * Also, pretty sure that you can't actually implement the
+     * DateTimeInterface, so this is pretty safe.
+     *
+     * @param DateTimeInterface $interface
+     * @return DateTime
+     */
+    public static function toDateTime(DateTimeInterface $interface): DateTime
+    {
+        return $interface instanceof DateTimeImmutable
+            ? DateTime::createFromImmutable($interface)
+            : $interface;
+    }
+
+
+    /**
+     * Any date interface into a immutable.
+     *
+     * Legit, I think these are a builtin PHP 8 thing.
+     *
+     * Also, pretty sure that you can't actually implement the
+     * DateTimeInterface, so this is pretty safe.
+     *
+     * @param DateTimeInterface $interface
+     * @return DateTimeImmutable
+     */
+    public static function toDateTimeImmutable(DateTimeInterface $interface): DateTimeImmutable
+    {
+        return $interface instanceof DateTime
+            ? DateTimeImmutable::createFromMutable($interface)
+            : $interface;
+    }
+
+
+    /**
+     * Get a series of date periods between these two dates.
+     *
+     * For a 3 day period between 1st and 10th:
+     *  0: 1, 3
+     *  1: 3, 6
+     *  2: 6, 9,
+     *  3: 9, 10
+     *
+     * @param DateTimeInterface $start
+     * @param DateTimeInterface $end
+     * @param string $period A date modifier, like '+2 days'
+     * @return Generator<int, DateTimeInterface[], mixed, void>
+     */
+    public static function periods(DateTimeInterface $start, DateTimeInterface $end, string $period)
+    {
+        $start = self::toDateTimeImmutable($start);
+
+        while ($start < $end) {
+            $cursor = $start->modify($period);
+
+            // Don't overshoot - limit the end date.
+            if ($cursor > $end) {
+                $cursor = $end;
+            }
+
+            yield [
+                $start,
+                $cursor,
+            ];
+
+            $start = $cursor;
+        }
     }
 }
