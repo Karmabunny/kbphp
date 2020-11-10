@@ -23,16 +23,10 @@ trait LoggerTrait {
      * @param callable $logger (message, level, category, timestamp)
      * @return int
      */
-    public function addLogger(callable $logger, bool $init = true)
+    public function addLogger(callable $logger)
     {
-        // Log something immediately so - if it breaks - it breaks early.
-        if ($init) {
-            $logger('Registered logger', Log::LEVEL_DEBUG, static::class, time());
-        }
-
         $index = count($this->loggers);
         $this->loggers[] = $logger;
-
         return $index;
     }
 
@@ -45,7 +39,7 @@ trait LoggerTrait {
      */
     public function attach(Loggable $parent)
     {
-        $this->addLogger([$parent, 'log'], false);
+        $this->addLogger([$parent, 'log']);
     }
 
 
