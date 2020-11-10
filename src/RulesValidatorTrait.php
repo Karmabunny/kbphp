@@ -74,7 +74,9 @@ trait RulesValidatorTrait {
      * @throws ValidationException
      */
     public function validate() {
-        $valid = new RulesValidator($this);
+        $rules = $this->rules();
+        $valid = new RulesValidator($this, $rules);
+
         if (!$valid->validate()) {
             throw new ValidationException($valid->getErrors());
         }
@@ -88,7 +90,8 @@ trait RulesValidatorTrait {
      */
     public function valid(): bool
     {
-        $valid = new RulesValidator($this);
+        $rules = $this->rules();
+        $valid = new RulesValidator($this, $rules);
         return $valid->validate();
     }
 }

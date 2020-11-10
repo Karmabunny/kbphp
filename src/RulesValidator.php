@@ -81,6 +81,7 @@ class RulesValidator implements Validator
 {
     protected $labels;
     protected $data;
+    protected $rules;
     protected $field_errors;
     protected $general_errors;
     protected $validity;
@@ -116,10 +117,11 @@ class RulesValidator implements Validator
     /**
      * @param array|ArrayAccess $data Data to validate
      */
-    public function __construct($data)
+    public function __construct($data, array $rules = [])
     {
         $this->labels = null;
         $this->data = $data;
+        $this->rules = $rules;
         $this->field_errors = [];
         $this->general_errors = [];
         $this->validity = Validity::class;
@@ -206,7 +208,7 @@ class RulesValidator implements Validator
 
 
     /**
-     * Validate properties in an object as defined in a rules() method.
+     * Validate properties in an object as defined the rules config.
      *
      * @see RulesValidatorTrait
      * @return bool True if valid. False if there were errors.
@@ -214,12 +216,7 @@ class RulesValidator implements Validator
      */
     public function validate(): bool
     {
-        // The target must have a rules() method.
-        if (!is_object($this->data) or !is_callable([$this->data, 'rules'])) {
-            return false;
-        }
-
-        $rules = call_user_func([$this->data, 'rules']);
+        $rules = $this->rules;
 
         // Optionally swap out for a different validity class.
         if (isset($rules['validity'])) {
