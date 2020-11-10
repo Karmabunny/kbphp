@@ -12,6 +12,24 @@ use PHPUnit\Framework\TestCase;
  */
 final class TimeTest extends TestCase {
 
+    public function testUtime()
+    {
+        $one = Time::utime(true);
+        usleep(10000); // 10 msec
+        $one = Time::utime(true) - $one;
+
+        $this->assertGreaterThanOrEqual(10000, $one);
+        $this->assertLessThanOrEqual(10500, $one);
+
+        $two = Time::utime(false);
+        usleep(10000); // 10 msec
+        $two = Time::utime(false) - $two;
+
+        $this->assertGreaterThanOrEqual(10000, $two);
+        $this->assertLessThanOrEqual(10500, $two);
+
+    }
+
     public function testTimeAgo()
     {
         $this->assertTrue(Time::timeAgo(0.35) == 'Just now');

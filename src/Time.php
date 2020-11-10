@@ -23,6 +23,28 @@ abstract class Time
 
 
     /**
+     * Timestamp as an integer in microseconds.
+     *
+     * This uses hrtime for 7.2+ with a microtime fallback.
+     * You can force microtime by passing false.
+     *
+     * Note, if using hrtime the timestamp _is not_ a unix epoch.
+     *
+     * @param bool $hrtime Use high-resolution if available.
+     * @return int microseconds
+     */
+    public static function utime($hrtime = true): int
+    {
+        if ($hrtime and function_exists('hrtime')) {
+            return intdiv(hrtime(true), 1000);
+        }
+        else {
+            return (int) (@microtime(true) * 1000000);
+        }
+    }
+
+
+    /**
      * Returns a time in 'x minutes ago' format.
      *
      * Very small times (0, 1 seconds) are considered 'Just now'.
