@@ -6,57 +6,99 @@
 
 namespace karmabunny\kb;
 
-
 /**
+ * A job. Could be a cron or a worker. You decide.
  *
- *
+ * Has built-in config, logging, validation, stats.
  *
  * @package karmabunny\kb
  */
-abstract class Job
+abstract class Job implements Loggable
 {
+    use LoggerTrait;
 
-    /** @var int */
+    /** @var int Unix timestamp in seconds. */
     public $start;
 
     /** @var array */
     public $config;
 
 
+    /**
+     * Create and validate a job with this config.
+     *
+     * @param array $config
+     * @return void
+     * @throws ValidationException
+     */
     public function __construct(array $config)
     {
-        $this->config = $config;
         $this->start = time();
-    }
+        $this->config = $config;
 
-
-    abstract public function run();
-
-
-    public function stats()
-    {
-        $seconds = time() - $this->start;
-        $this->log('Time:', $seconds, 'seconds');
-    }
-
-
-    public function log(...$args)
-    {
-        echo implode(' ', $args), PHP_EOL;
+        $valid = new RulesValidator($this->config, $this->rules());
+        if (!$valid->validate()) {
+            throw new ValidationException($valid->getErrors());
+        }
     }
 
 
     /**
+     * Run the job.
+     *
+     * Put your job code in here.
+     *
+     * @return void
+     */
+    public abstract function run();
+
+
+    /**
+     * Validate your config, if you like.
+     *
+     * @see RulesValidator
+     * @return array
+     */
+    public abstract function rules(): array;
+
+
+    /**
+     * Get the current stats.
+     *
+     * This is automatically printed in {@see execute()}.
+     *
+     * @return array
+     */
+    public function stats(): array
+    {
+        $seconds = time() - $this->start;
+        $stats = "Time: {$seconds} seconds";
+        return [$stats];
+    }
+
+
+    /**
+     * Shorthand for creating, validating and running a job.
      *
      * @param array $config
-     * @return void
+     * @return static
      */
     public static function execute(array $config = [])
     {
-        /** @var Job */
+        /** @var Job $job */
         $class = static::class;
         $job = new $class($config);
+
+        $job->addLogger(function($message) {
+            echo $message, PHP_EOL;
+        });
+
         $job->run();
-        $job->stats();
+
+        foreach ($job->stats() as $stat) {
+            $job->log($stat);
+        }
+
+        return $job;
     }
 }
