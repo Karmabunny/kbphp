@@ -249,6 +249,7 @@ class RulesValidator implements Validator
             }
             // Ah what!
             else {
+                // TODO should this be a ValidationException?
                 throw new Exception("Invalid validator rule: {$key}");
             }
         }

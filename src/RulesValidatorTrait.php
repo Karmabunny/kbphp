@@ -43,11 +43,17 @@ trait RulesValidatorTrait {
      *
      * E.g.
      * [
+     *     // Settings and special options.
      *     'validity' => Validity::class,
      *     'required' => ['field1', 'field2'],
-     *     '//namespace//function' => ['field1', 'field2'],
+     *     // TODO trim
+     *
+     *     // Bulk validation.
+     *     '\\namespace\\function' => ['field1', 'field2'],
      *     'validityFunction' => ['field1', 'field2'],
-     *     ['field1', '//namespace//function', 'arg1', 'arg2', ...],
+     *
+     *     // Per field validation.
+     *     ['field1', '\\namespace\\function', 'arg1', 'arg2', ...],
      *     ['field2', [Namespace::class, 'function'], 'arg1', 'arg2', ...],
      *     ['field3', function($value) {
      *         throw ValidityError('oh noooo');
