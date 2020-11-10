@@ -106,4 +106,39 @@ abstract class Arrays
 
         return null;
     }
+
+
+    /**
+     * Flat arrays, with key support.
+     *
+     * @param array $array
+     * @return array
+     */
+    static function flatten(array $array): array
+    {
+        $return = [];
+        array_walk_recursive($array, function($item, $key) use (&$return) {
+            $return[$key] = $item;
+        });
+        return $return;
+    }
+
+
+    /**
+     * Make everything an array, all the way down.
+     *
+     * This converts any nested arrayables to arrays.
+     *
+     * @param Arrayable[]|array $array
+     * @return array
+     */
+    static function toArray(array $array): array
+    {
+        foreach ($array as &$item) {
+            if ($item instanceof Arrayable) {
+                $item = $item->toArray();
+            }
+        }
+        return $array;
+    }
 }
