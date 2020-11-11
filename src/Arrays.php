@@ -109,17 +109,28 @@ abstract class Arrays
 
 
     /**
-     * Flat arrays, with key support.
+     * Flat arrays, with optional key support.
      *
      * @param array $array
+     * @param bool $keys
      * @return array
      */
-    static function flatten(array $array): array
+    static function flatten(array $array, $keys = false): array
     {
         $return = [];
-        array_walk_recursive($array, function($item, $key) use (&$return) {
-            $return[$key] = $item;
-        });
+
+        if ($keys) {
+            $fn = function($item, $key) use (&$return) {
+                $return[$key] = $item;
+            };
+        }
+        else {
+            $fn = function($item) use (&$return) {
+                $return[] = $item;
+            };
+        }
+
+        array_walk_recursive($array, $fn);
         return $return;
     }
 
