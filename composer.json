@@ -14,6 +14,7 @@
         }
     },
     "scripts": {
-        "tests": "phpunit --testdox tests"
+        "tests": "phpunit --testdox tests",
+        "publish": "bash scripts/publish.sh"
     }
 }
