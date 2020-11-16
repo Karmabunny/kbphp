@@ -9,6 +9,8 @@ namespace karmabunny\kb;
 use Reflection;
 use ReflectionParameter;
 use ReflectionMethod;
+use ReflectionNamedType;
+use ReflectionType;
 
 /**
  * I guess this is useful.
@@ -77,7 +79,12 @@ abstract class Reflect {
             $value .= '?';
         }
 
-        $value .= (string) @$parameter->getType() ?: 'mixed';
+        /** @var ReflectionType */
+        $type = @$parameter->getType() ?: null;
+        $value .= $type instanceof ReflectionNamedType
+            ? $type->getName()
+            : 'mixed';
+
         $value .= ' ';
 
         if ($parameter->isVariadic()) {
