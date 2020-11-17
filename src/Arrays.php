@@ -143,8 +143,12 @@ abstract class Arrays
      * @param Arrayable[]|array $array
      * @return array
      */
-    static function toArray(array $array): array
+    static function toArray($array): array
     {
+        if ($array instanceof Arrayable) {
+            return $array->toArray();
+        }
+
         foreach ($array as &$item) {
             if ($item instanceof Arrayable) {
                 $item = $item->toArray();
