@@ -139,6 +139,28 @@ class Collection implements
     }
 
 
+    /**
+     * These are virtual fields for use in toArray().
+     *
+     * Define callbacks in here for extra things that you might want
+     * included in the array version of this collection.
+     *
+     * @example
+     *   return [
+     *       'virtual_thing' => [$this, 'getMyVirtualThing'],
+     *       'inline_thing' => function() {
+     *            return 'hey look: ' . time();
+     *       },
+     *   ];
+     *
+     * @return callable[]
+     */
+    public function fields(): array
+    {
+        return [];
+    }
+
+
     public function toArray(array $fields = null): array
     {
         $array = [];
@@ -153,6 +175,25 @@ class Collection implements
                 $item = Arrays::toArray($item);
             }
 
+            $array[$key] = $item;
+        }
+
+        // Virtual fields.
+        foreach ($this->fields() as $key => $item) {
+            // Filtering.
+            if (!empty($fields) and !in_array($key, $fields)) {
+                continue;
+            }
+
+            // Call it.
+            if (is_callable($item)) {
+                $item = $item();
+            }
+
+            // Recursively convert arrayables.
+            if (is_array($item) or $item instanceof Arrayable) {
+                $item = Arrays::toArray($item);
+            }
 
             $array[$key] = $item;
         }

@@ -75,6 +75,10 @@ final class CollectionTest extends TestCase {
         $iterator->rewind();
         $this->assertEquals(true, $iterator->valid());
         $this->assertEquals(999, $iterator->current());
+
+
+        // Test virtual stuff.
+        $this->assertEquals($thingo->getVirtualThing(), $array['thing']);
     }
 
 }
@@ -95,4 +99,17 @@ class Thingo extends Collection {
 
     /** @var array */
     public $complex = [];
+
+
+    public function fields(): array
+    {
+        return [
+            'thing' => [$this, 'getVirtualThing'],
+        ];
+    }
+
+    public function getVirtualThing()
+    {
+        return '1234567890';
+    }
 }
