@@ -148,25 +148,15 @@ class Collection implements
                 continue;
             }
 
-            // Shallow convert array containing arrayables.
-            if (is_array($item)) {
-                $array[$key] = array_map(function($item) {
-                    if ($item instanceof Arrayable) {
-                        return $item->toArray();
-                    }
-                    return $item;
-                }, $item);
-                continue;
+            // Recursively convert arrayables.
+            if (is_array($item) or $item instanceof Arrayable) {
+                $item = Arrays::toArray($item);
             }
 
-            // Convert arrayables.
-            if ($item instanceof Arrayable) {
-                $array[$key] = $item->toArray();
-                continue;
-            }
 
             $array[$key] = $item;
         }
+
         return $array;
     }
 }

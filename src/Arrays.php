@@ -140,7 +140,7 @@ abstract class Arrays
      *
      * This converts any nested arrayables to arrays.
      *
-     * @param Arrayable[]|array $array
+     * @param Arrayable|array $array
      * @return array
      */
     static function toArray($array): array
