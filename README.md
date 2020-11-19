@@ -45,11 +45,9 @@ Also the Validity class. Yay.
 Per-class logging utilities. Has logger forwarding. Kinda interesting.
 
 
-### Rdb (redis)
+### Jobs
 
-Thin wrapper around the php-redis extension.
-
-Although it's now recommended to use `predis/predis` instead.
+Generic type for crons and workers.
 
 
 ### Reflect
@@ -67,12 +65,17 @@ Some useful reflection things.
 
 ### Security
 
-Boring stuff.
+- secure random - bytes, string!
+- hash password
+- comparisons
 
 
 ### Time
 
-It's just timeago.
+- utime, microtime as an integer
+- time ago
+- converting things between DateTime, DateTimeImmutable, DateTimeInterface
+- date periods
 
 
 ### Arrays
@@ -82,3 +85,7 @@ Non-standard or weakly supported things.
 - array first
 - array last
 - fill w/ callback
+- find w/ callback
+- flatten!
+
+
