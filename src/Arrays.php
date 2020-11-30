@@ -18,6 +18,31 @@ abstract class Arrays
 {
 
     /**
+     * Get the first key of an array.
+     *
+     * @param array $array
+     * @return int|string|null
+     */
+    static function firstKey(array $array)
+    {
+        reset($array);
+        return key($array);
+    }
+
+
+    /**
+     * Get the last key of an array.
+     * @param array $array
+     * @return int|string|null
+     */
+    static function lastKey(array $array)
+    {
+        end($array);
+        return key($array);
+    }
+
+
+    /**
      * First item in the array.
      *
      * @param array $array
@@ -25,10 +50,9 @@ abstract class Arrays
      */
     static function first(array $array)
     {
-        foreach ($array as $item) {
-            return $item;
-        }
-        return null;
+        $key = self::firstKey($array);
+        if ($key === null) return null;
+        return $array[$key];
     }
 
 
@@ -40,9 +64,9 @@ abstract class Arrays
      */
     static function last(array $array)
     {
-        $item = null;
-        foreach ($array as $item);
-        return $item;
+        $key = self::lastKey($array);
+        if ($key === null) return null;
+        return $array[$key];
     }
 
 
