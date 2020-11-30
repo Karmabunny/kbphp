@@ -154,4 +154,26 @@ final class ArraysTest extends TestCase {
 
         $this->assertEquals($expected, $actual);
     }
+
+
+    public function testReverse()
+    {
+        $actual = iterator_to_array(Arrays::reverse([
+            5 => 'five',
+            4 => 'four',
+            3 => 'three',
+            2 => 'two',
+            1 => 'one',
+        ]));
+
+        $expected = [
+            5 => 'five',
+            4 => 'four',
+            3 => 'three',
+            2 => 'two',
+            1 => 'one',
+        ];
+
+        $this->assertEquals($expected, $actual);
+    }
 }

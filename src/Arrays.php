@@ -6,6 +6,9 @@
 
 namespace karmabunny\kb;
 
+use Generator;
+use Traversable;
+
 /**
  * Array utilities.
  *
@@ -40,6 +43,26 @@ abstract class Arrays
         $item = null;
         foreach ($array as $item);
         return $item;
+    }
+
+
+    /**
+     * Create a reversed iterator of an array.
+     *
+     * Useful for _big_ arrays because array_reverse() creates a copy, whereas
+     * this one does not.
+     *
+     * @param array|Traversable $array
+     * @return Generator<(int|string), mixed, mixed, void>
+     */
+    static function reverse($array)
+    {
+        end($array);
+        while (($key = key($array)) !== null)
+        {
+            yield $key => current($array);
+            prev($array);
+        }
     }
 
 
