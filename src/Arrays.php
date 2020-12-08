@@ -203,4 +203,35 @@ abstract class Arrays
         }
         return $array;
     }
+
+
+    /**
+     * Is this array a numeric/non-associated array.
+     *
+     * Opposite of isAssociated().
+     *
+     * @param array $array
+     * @return bool
+     */
+    static function isNumeric(array $array): bool
+    {
+        foreach ($array as $key => $_) {
+            if (!is_int($key)) return false;
+        }
+        return true;
+    }
+
+
+    /**
+     * Is this an associated/keyed array.
+     *
+     * Opposite of isNumeric().
+     *
+     * @param array $array
+     * @return bool
+     */
+    static function isAssociated(array $array): bool
+    {
+        return !self::isNumeric($array);
+    }
 }
