@@ -13,11 +13,8 @@ echo "Pushing tags"
 git push --tags
 
 echo "Rebuild package repo"
-php -- - <<'PHP'
-<?php
-$out = file_get_contents('https://bsts.bunnysites.com/api/composer/run?name=packages&script=build');
-$out = json_decode($out, true);
-echo $out['output'], PHP_EOL;
-PHP
+curl 'https://bsts.bunnysites.com/api/composer/packages/run?script=build'
+
+# TODO figure out how to verify the commit hash
 
 echo "Done"
