@@ -156,6 +156,21 @@ final class ArraysTest extends TestCase {
     }
 
 
+    public function testIsNumeric()
+    {
+        $this->assertTrue(Arrays::isNumeric([
+            'abc',
+            '123',
+        ]));
+
+        $this->assertFalse(Arrays::isNumeric([
+            'abc' => 'def',
+            123 => '567',
+            'thing',
+        ]));
+    }
+
+
     public function testReverse()
     {
         $actual = iterator_to_array(Arrays::reverse([
