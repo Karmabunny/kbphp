@@ -176,4 +176,50 @@ final class ArraysTest extends TestCase {
 
         $this->assertEquals($expected, $actual);
     }
+
+
+    public function testGetValue()
+    {
+        $array = [
+            'one' => [
+                [
+                    'id' => 123,
+                    'name' => 'abc'
+                ],
+                [
+                    'id' => 456,
+                    'name' => 'def',
+                    'property' => [
+                        'oh',
+                        'cool',
+                        'stuff',
+                    ],
+                ]
+            ],
+            'two' => 'neat!'
+        ];
+
+        $actual = Arrays::getValue($array, 'one');
+        $expected = $array['one'];
+        $this->assertEquals($expected, $actual);
+
+        $actual = Arrays::getValue($array, 'one.id');
+        $expected = [123, 456];
+        $this->assertEquals($expected, $actual);
+
+        $actual = Arrays::getValue($array, 'one.name');
+        $expected = ['abc', 'def'];
+        $this->assertEquals($expected, $actual);
+
+        $actual = Arrays::getValue($array, 'one.property');
+        $expected = [null, ['oh', 'cool', 'stuff']];
+        $this->assertEquals($expected, $actual);
+
+        $actual = Arrays::getValue($array, 'two');
+        $expected = $array['two'];
+        $this->assertEquals($expected, $actual);
+
+        $actual = Arrays::getValue($array, 'three');
+        $this->assertNull($actual);
+    }
 }

@@ -6,6 +6,7 @@
 
 namespace karmabunny\kb;
 
+use ArrayAccess;
 use Generator;
 use Traversable;
 
@@ -234,4 +235,52 @@ abstract class Arrays
     {
         return !self::isNumeric($array);
     }
+
+
+
+    /**
+     * Query an array.
+     *
+     * It's a funny concept, but quite powerful.
+     *
+     * For example, given an array like:
+     * [
+     *    [ 'subitem' => 123 ],
+     *    [ 'subitem' => 456 ],
+     * ]
+     * A query `subitem.id` would return:
+     * [ 123, 456 ]
+     *
+     *
+     * @param array|ArrayAccess $array
+     * @return mixed
+     */
+    static function getValue($array, string $query)
+    {
+        // Pull apart the query, get our bit, stitch it back together.
+        $parts = explode('.', $query);
+        $key = array_shift($parts);
+        $query = implode('.', $parts);
+
+        $value = $array[$key] ?? null;
+
+        // Not found, quit!
+        if ($value === null) return null;
+
+        // End of the query, we found the thing!
+        if (empty($query)) return $value;
+
+        // Get each valid item as an array, recursive of course.
+        if (is_iterable($value)) {
+            $values = [];
+            foreach ($value as $item) {
+                $values[] = self::getValue($item, $query);
+            }
+            return $values;
+        }
+
+        // Recurse on.
+        return self::getValue($value, $query);
+    }
+
 }
