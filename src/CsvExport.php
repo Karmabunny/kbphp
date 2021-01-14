@@ -6,20 +6,18 @@
 
 namespace karmabunny\kb;
 
+use Traversable;
+
 /**
  * A CSV Exporter.
  *
  * @todo Tests!
- * @todo It'd be nice to configure break+delimiter+nulls per exporter.
+ * @todo Option for no headers.
  *
  * @package karmabunny\kb
  */
 class CsvExport
 {
-
-    public const BREAK = "\n";
-
-    public const DELIMITER = ",";
 
     /** Identify dirty items. */
     private const DIRTY_RE = "/[ ,'\"\\r\\n]/";
@@ -27,37 +25,61 @@ class CsvExport
     /** Clean these out. */
     private const BREAK_RE = "/[\\r\\n]+/";
 
-    /** @var string[] */
-    protected $headers;
+    /** @var array */
+    public $rows = [];
 
     /** @var array */
-    public $rows;
+    public $formatters = [];
 
-    /** @var array */
-    public $formatters;
+    /** @var string */
+    public $break = "\n";
+
+    /** @var string */
+    public $delimiter = ",";
+
+    /** @var string */
+    public $null = "-";
+
+    /** @var array|null */
+    public $headers = null;
 
     /**
-     * Provide a keyed array of headers.
-     * - 'key' being the attribute name
-     * - 'value' being the exported name
      *
-     * Lucky for us, PHP preserves the order of keyed arrays.
+     * Configure the CSV output format.
+     * By default:
+     *  - break is a LF \n
+     *  - delimiter is a comma ,
+     *  - null is a hyphen -
      *
-     * @param mixed|null $headers
-     * @return void
+     * Headers is a map of keys -> values.
+     *
+     * For example:
+     *   $csv = new CsvExport([
+     *     'headers' => [ 'val1' => 'Value 1', 'val2' => 'Value 2' ],
+     *   ]);
+     *   $csv->add([ 'val1' => 'ABC', 'val2' => 'DEF' ]);
+     *   $csv->build();
+     *
+     * Produces:
+     *   Value 1,Value 2\n
+     *   ABC,DEF\n
+     *
+     * If headers is null it will produce headers from the first row.
+     *
+     * @param array $config [break, delimiter, null, headers]
      */
-    public function __construct($headers = null)
+    public function __construct($config = [])
     {
-        $this->headers = $headers;
-        $this->rows = [];
-        $this->formatters = [];
+        foreach ($config as $key => $val) {
+            $this->$key = $val;
+        }
     }
 
 
     /**
      * Add a row.
      *
-     * @param array|\Traversable $model
+     * @param array|Traversable $model
      * @return void
      */
     public function add($model)
@@ -89,7 +111,7 @@ class CsvExport
      * @param callable $cb
      * @return void
      */
-    public function format($attribute, callable $cb)
+    public function format(string|array $attribute, callable $cb)
     {
         if (is_string($attribute)) {
             $this->formatters[$attribute] = $cb;
@@ -112,7 +134,7 @@ class CsvExport
     {
         // Nulls are gross.
         if ($value === null) {
-            return '-';
+            return $this->null;
         }
 
         // Ooh, we have a formatter.
@@ -146,9 +168,13 @@ class CsvExport
         $csv = [];
 
         // Mush the headers and clean them.
-        $csv[] = implode(self::DELIMITER, array_map(function($item) {
-            return self::clean($item);
-        }, array_values($this->headers)));
+        if ($this->headers)
+        $csv[] = implode($this->delimiter,
+            array_map(function($item) {
+                return self::clean($item);
+            },
+            array_values($this->headers)
+        ));
 
         $headers = array_keys($this->headers);
 
@@ -161,12 +187,13 @@ class CsvExport
             }
 
             // Mush them.
-            $csv[] = implode(self::DELIMITER, $items);
+            $csv[] = implode($this->delimiter, $items);
         }
 
         // Mush them one more time.
-        return implode(self::BREAK, $csv);
+        return implode($this->break, $csv);
     }
+
 
     /**
      * Basically, CSVs don't like spaces or newlines or quotes.
