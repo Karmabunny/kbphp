@@ -123,7 +123,12 @@ class Collection implements
     }
 
 
-    public function update(array $config)
+    /**
+     *
+     * @param iterable $config
+     * @return void
+     */
+    public function update($config)
     {
         foreach ($config as $key => $item) {
             $this->$key = $item;
