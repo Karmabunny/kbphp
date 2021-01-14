@@ -36,17 +36,20 @@ class GettextParser
      */
     const MSG_RE = '/(?:(msgid|msgid_plural|msgstr)(?:\[(\d+)\])?\s+)?"([^"]*)"/';
 
+
     /**
      * For parsing gettext metadata.
      */
     const META_RE = '/([^:]+):\s+([^;]+);\\\\n/';
 
+
     /**
-     * The actual language code isn't often what people know it as.
-     * Like JA is Japanese, but most people would say JP.
-     * So put that in here.
+     * The actual language code isn't often what people know it as, more often
+     * people know it by the country of origin. For example, JA is Japanese
+     * from Japan (JP).
      */
-    const META_DISPLAY_NAME = '/X-Display-Name/i';
+    const META_COUNTRY_CODE = '/X-(?:Country-Code|Display-Name)/i';
+
 
     /**
      * These are our own rules for parsing plural types to play nice with
@@ -187,7 +190,7 @@ class GettextParser
                     list($_, $key, $value) = $match;
 
                     // Friendly display name.
-                    if (preg_match(self::META_DISPLAY_NAME, $key) !== 0) {
+                    if (preg_match(self::META_COUNTRY_CODE, $key) !== 0) {
                         $po->name = $value;
                         continue;
                     }
