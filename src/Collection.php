@@ -10,8 +10,6 @@ use ArrayAccess;
 use ArrayIterator;
 use IteratorAggregate;
 use JsonSerializable;
-use ReflectionClass;
-use ReflectionProperty;
 use Serializable;
 
 /**
@@ -53,13 +51,8 @@ class Collection implements
     {
         $array = [];
 
-        $reflect = new ReflectionClass($this);
-        $properties = $reflect->getProperties(ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC);
-
-        foreach ($properties as $property) {
-            if ($property->isStatic()) continue;
-
-            $key = $property->getName();
+        // Turns out ArrayIterator skips static and protected properties. Cool.
+        foreach ($this as $key => $value) {
             if (in_array($key, static::$NO_SERIALIZE)) continue;
 
             $value = $this->$key;
