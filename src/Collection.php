@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use ArrayAccess;
+use ArrayIterator;
 use IteratorAggregate;
 use JsonSerializable;
 use ReflectionClass;
@@ -43,9 +44,6 @@ class Collection implements
      */
     function __construct($config = [])
     {
-        if (!is_array($config)) {
-            $config = iterator_to_array($config);
-        }
         $this->update($config);
     }
 
@@ -91,7 +89,7 @@ class Collection implements
     /** @inheritdoc */
     public function getIterator(): \Iterator
     {
-        return new \ArrayIterator($this);
+        return new ArrayIterator($this);
     }
 
 
@@ -170,6 +168,11 @@ class Collection implements
     {
         $array = [];
         foreach ($this as $key => $item) {
+            // Skip unset/null properties.
+            // Ideally, we would still include explicitly set 'null' values.
+            // Buuuut that's a PHP 7.4 feature.
+            if (!isset($this->$key)) continue;
+
             // Filtering.
             if (!empty($fields) and !in_array($key, $fields)) {
                 continue;
