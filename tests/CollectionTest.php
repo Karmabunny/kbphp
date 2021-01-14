@@ -104,9 +104,44 @@ final class CollectionTest extends TestCase {
 
         $this->assertEquals($expected, $items);
     }
+
+
+    public function testSerialize()
+    {
+        $thingo = new Thingo([
+            'parent_id' => 123,
+            'empty' => null,
+        ]);
+
+        // 1. Set a secret.
+        $thingo->setSecret('nope');
+        $this->assertEquals(['nope', 'nope'], $thingo->getSecrets());
+
+        // 2. Change a static var.
+        Thingo::$common = 777;
+
+        $str = serialize($thingo);
+
+        // 2. Change it again before hydrating.
+        Thingo::$common = 888;
+
+        $other = unserialize($str);
+
+        // 1. The secret resets - doesn't pass through serialisation.
+        $this->assertEquals(['a secret', 'okay'], $other->getSecrets());
+
+        // 2. The static var isn't modified by unserialize.
+        $this->assertEquals(888, Thingo::$common);
+    }
 }
 
 class Thingo extends Collection {
+
+    public static $common = 555;
+
+    private $_shh = 'a secret';
+
+    protected $_quiet = 'okay';
 
     /** @var int */
     public $id = 1;
@@ -134,5 +169,16 @@ class Thingo extends Collection {
     public function getVirtualThing()
     {
         return '1234567890';
+    }
+
+    public function getSecrets()
+    {
+        return [$this->_shh, $this->_quiet];
+    }
+
+    public function setSecret(string $value)
+    {
+        $this->_shh = $value;
+        $this->_quiet = $value;
     }
 }
