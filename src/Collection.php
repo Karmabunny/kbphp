@@ -27,16 +27,6 @@ class Collection implements
 {
 
     /**
-     * Add field names here to prevent them from being serialized.
-     *
-     * That or implement the {@see NotSerializable} interface.
-     *
-     * @var array
-     */
-    protected static $NO_SERIALIZE = [];
-
-
-    /**
      *
      * @param iterable $config
      */
@@ -57,8 +47,6 @@ class Collection implements
 
         // Turns out ArrayIterator skips static and protected properties. Cool.
         foreach ($this as $key => $value) {
-            if (in_array($key, static::$NO_SERIALIZE)) continue;
-
             $value = $this->$key;
             if (is_object($value) and $value instanceof NotSerializable) continue;
 
