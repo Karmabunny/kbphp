@@ -294,9 +294,9 @@ abstract class CountryNames
      *
      * @param string $country_name
      * @param string $language default 'en'
-     * @return string
+     * @return string|null
      */
-    public static function getCountryCode(string $country_name, string $language = 'en'): string
+    public static function getCountryCode(string $country_name, string $language = 'en')
     {
         if (strlen($language) != 2) return null;
         $language = strtoupper($language);
