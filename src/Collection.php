@@ -42,6 +42,10 @@ class Collection implements
      */
     function __construct($config = [])
     {
+        // This makes things not break. Something about references.
+        if (!is_array($config)) {
+            $config = iterator_to_array($config);
+        }
         $this->update($config);
     }
 
