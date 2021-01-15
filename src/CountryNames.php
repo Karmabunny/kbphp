@@ -300,7 +300,20 @@ abstract class CountryNames
     {
         if (strlen($language) != 2) return null;
         $language = strtoupper($language);
+        $country_name = strtoupper($country_name);
 
+        // Just on a whim, try the first 3 characters.
+        $code = substr($country_name, 0, 3);
+
+        // Except Romania.
+        // They migrated to ROU but php-intl will still accept it.
+        if ($code === 'ROM') return 'ROU';
+
+        // If the names match, it must be right!
+        $locale = Locale::getDisplayRegion('-' . $code, $language);
+        if (strcasecmp($country_name, $locale) == 0) return $code;
+
+        // Okay, try them all.
         foreach (static::COUNTRY_CODES as $code) {
             $locale = Locale::getDisplayRegion('-' . $code, $language);
 
