@@ -20,10 +20,10 @@ class CsvExport
 {
 
     /** Identify dirty items. */
-    private const DIRTY_RE = "/[ ,'\"\\r\\n]/";
+    private const DIRTY_CHARS = ' "\r\n\t';
 
-    /** Clean these out. */
-    private const BREAK_RE = "/[\\r\\n]+/";
+    /** @var string */
+    private $dirty_re;
 
     /** @var array */
     public $rows = [];
@@ -35,21 +35,28 @@ class CsvExport
     public $break = "\n";
 
     /** @var string */
-    public $delimiter = ",";
+    public $delimiter = ',';
 
     /** @var string */
-    public $null = "-";
+    public $null = '\N';
+
+    /** @var string */
+    public $enclosure = '"';
+
+    /** @var string */
+    public $escape = '\\';
 
     /** @var array|null */
     public $headers = null;
 
     /**
-     *
      * Configure the CSV output format.
      * By default:
      *  - break is a LF \n
      *  - delimiter is a comma ,
-     *  - null is a hyphen -
+     *  - null is \N
+     *  - enclosure is "
+     *  - escape is \
      *
      * Headers is a map of keys -> values.
      *
@@ -66,13 +73,29 @@ class CsvExport
      *
      * If headers is null it will produce headers from the first row.
      *
-     * @param array $config [break, delimiter, null, headers]
+     * @param array $config [break, delimiter, null, enclosure, escape, headers]
      */
     public function __construct($config = [])
     {
         foreach ($config as $key => $val) {
             $this->$key = $val;
         }
+
+        $dirty = [
+            $this->break,
+            $this->delimiter,
+            $this->enclosure,
+            $this->escape,
+        ];
+
+        $dirty_chars = self::DIRTY_CHARS;
+        foreach ($dirty as $char) {
+            if (strpos($dirty_chars, $char) === false) {
+                $dirty_chars .= $char;
+            }
+        }
+
+        $this->dirty_re = "/[{$dirty_chars}]/";
     }
 
 
@@ -84,17 +107,38 @@ class CsvExport
      */
     public function add($model)
     {
+        if (!is_array($model)) {
+            $model = iterator_to_array($model);
+        }
+
         // Use the first model as the key names.
         // This creates a keyed array: 'attr' => 'attr'.
         if ($this->headers === null) {
-            $keys = array_keys($model->attributes);
+            $keys = array_keys($model);
             $this->headers = array_combine($keys, $keys);
         }
 
         // Only add items that match the header set.
         $this->rows[] = array_map(function($attribute) use ($model) {
-            return $model->attributes[$attribute];
+            return $model[$attribute] ?? null;
         }, array_keys($this->headers));
+    }
+
+
+    /**
+     * All all models within a traversable value.
+     *
+     * If an item in not an array or iterable, it is skipped.
+     *
+     * @param iterable $models
+     * @return void
+     */
+    public function addAll($models)
+    {
+        foreach ($models as $model) {
+            if (!is_iterable($model)) continue;
+            $this->add($model);
+        }
     }
 
 
@@ -111,7 +155,7 @@ class CsvExport
      * @param callable $cb
      * @return void
      */
-    public function format(string|array $attribute, callable $cb)
+    public function format($attribute, callable $cb)
     {
         if (is_string($attribute)) {
             $this->formatters[$attribute] = $cb;
@@ -144,15 +188,14 @@ class CsvExport
 
         // In then end though, we always want a string.
         try {
-            $value = (string) $value;
+            $value = @(string) $value;
         }
-        catch (\Exception $exception) {
-            error_log('Could not format CSV item: ' . $attribute);
+        catch (\Throwable $exception) {
             $value = 'ERR';
         }
 
         // Let's not break things.
-        $value = self::clean($value);
+        $value = $this->clean($value);
 
         return $value;
     }
@@ -168,13 +211,10 @@ class CsvExport
         $csv = [];
 
         // Mush the headers and clean them.
-        if ($this->headers)
-        $csv[] = implode($this->delimiter,
-            array_map(function($item) {
-                return self::clean($item);
-            },
-            array_values($this->headers)
-        ));
+        if ($this->headers) {
+            $headers = array_map([$this, 'clean'], array_values($this->headers));
+            $csv[] = implode($this->delimiter, $headers);
+        }
 
         $headers = array_keys($this->headers);
 
@@ -196,22 +236,18 @@ class CsvExport
 
 
     /**
-     * Basically, CSVs don't like spaces or newlines or quotes.
-     *
      * @param string $dirty
      * @return string cleaned
      */
-    public static function clean(string $dirty): string
+    public function clean(string $dirty): string
     {
-        if (preg_match(self::DIRTY_RE, $dirty)) {
-            $dirty = preg_replace(self::BREAK_RE, '', $dirty);
-            $dirty = str_replace("\"", "\\\"", $dirty);
-            $dirty = trim($dirty);
-            $dirty = '"' . $dirty . '"';
+        if (preg_match($this->dirty_re, $dirty)) {
+            $dirty = str_replace($this->enclosure, $this->escape . $this->enclosure, $dirty);
+            $dirty = $this->enclosure . $dirty . $this->enclosure;
             return $dirty;
         }
         else {
-            return trim($dirty);
+            return $dirty;
         }
     }
 }
