@@ -60,8 +60,8 @@ final class CollectionTest extends TestCase {
         $this->assertEquals(123, $array['parent_id']);
         $this->assertEquals('blah blah blah', $array['description']);
 
-        $this->assertFalse(isset($array['empty']));
-        $this->assertFalse(isset($array['name']));
+        $this->assertArrayNotHasKey('empty', $array);
+        $this->assertArrayNotHasKey('name', $array);
 
         $this->assertEquals($thingo->getVirtualThing(), $array['thing']);
     }
