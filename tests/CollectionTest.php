@@ -121,6 +121,7 @@ final class CollectionTest extends TestCase {
         Thingo::$common = 777;
 
         $str = serialize($thingo);
+        print_r($str);
 
         // 2. Change it again before hydrating.
         Thingo::$common = 888;
@@ -132,6 +133,11 @@ final class CollectionTest extends TestCase {
 
         // 2. The static var isn't modified by unserialize.
         $this->assertEquals(888, Thingo::$common);
+
+        // Regular properties are passed through properly.
+        $this->assertEquals($thingo->id, $other->id);
+        $this->assertEquals($thingo->parent_id, $other->parent_id);
+        $this->assertEquals($thingo->empty, $other->empty);
     }
 }
 
