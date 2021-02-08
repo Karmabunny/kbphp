@@ -8,8 +8,10 @@ namespace karmabunny\kb;
 
 
 /**
-* Encoding of data for various outputs
-**/
+ * Encoding of data for various outputs
+ *
+ * @package karmabunny\kb
+ */
 abstract class Enc
 {
 

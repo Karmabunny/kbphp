@@ -16,7 +16,7 @@ use Exception;
  * @see RulesValidator
  * @see Validity
  *
- * @package karmabunny/kb
+ * @package karmabunny\kb
  */
 trait RulesValidatorTrait {
 

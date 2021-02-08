@@ -32,7 +32,7 @@ namespace karmabunny\kb;
  *     }
  * }
  *
- * @package karmabunny/kb
+ * @package karmabunny\kb
  */
 interface Validates {
 

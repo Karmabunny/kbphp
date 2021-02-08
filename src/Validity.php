@@ -14,6 +14,8 @@ use InvalidArgumentException;
  *
  * All of its methods should give useful errors by throwing a {@see ValidityException}.
  * Used with the {@see RulesValidator} class.
+ *
+ * @package karmabunny\kb
  */
 abstract class Validity
 {

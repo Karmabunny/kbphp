@@ -9,7 +9,7 @@ namespace karmabunny\kb;
 /**
  * Validator errors.
  *
- * @package karmabunny/kb
+ * @package karmabunny\kb
  */
 class ValidationException extends \Exception {
 

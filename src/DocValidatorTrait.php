@@ -13,7 +13,7 @@ use Exception;
  *
  * @see DocValidator
  *
- * @package karmabunny/kb
+ * @package karmabunny\kb
  */
 trait DocValidatorTrait {
 

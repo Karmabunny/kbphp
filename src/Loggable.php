@@ -11,7 +11,7 @@ namespace karmabunny\kb;
  *
  * Implementation is provided in {@see LoggerTrait}.
  *
- * @package karmabunny/kb
+ * @package karmabunny\kb
  */
 interface Loggable {
 

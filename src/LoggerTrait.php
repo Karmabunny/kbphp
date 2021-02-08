@@ -9,7 +9,7 @@ namespace karmabunny\kb;
 /**
  * Hook logging handlers into a class.
  *
- * @package karmabunny/kb
+ * @package karmabunny\kb
  */
 trait LoggerTrait {
 

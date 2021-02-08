@@ -12,6 +12,8 @@ use InvalidArgumentException;
 
 /**
  * Functions for implementing security, including secure random numbers
+ *
+ * @package karmabunny\kb
  */
 class Security
 {

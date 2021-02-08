@@ -76,6 +76,8 @@ use InvalidArgumentException;
  *    if ($has_error) {
  *        Url::redirect('course/edit');
  *    }
+ *
+ * @package karmabunny\kb
  */
 class RulesValidator implements Validator
 {

@@ -11,7 +11,7 @@ use Locale;
 /**
  * Country names, using the intl extension.
  *
- * @todo add support for alpha3 codes
+ * @package karmabunny\kb
  */
 abstract class CountryNames
 {

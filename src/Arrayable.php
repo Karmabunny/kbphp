@@ -6,6 +6,10 @@
 
 namespace karmabunny\kb;
 
+/**
+ *
+ * @package karmabunny\kb
+ */
 interface Arrayable
 {
     function toArray(array $fields = null): array;

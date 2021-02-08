@@ -17,7 +17,7 @@ use Serializable;
 /**
  *
  *
- * @package karmabunny/kb
+ * @package karmabunny\kb
  */
 class Collection implements
         ArrayAccess,

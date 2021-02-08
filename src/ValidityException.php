@@ -6,4 +6,8 @@
 
 namespace karmabunny\kb;
 
+/**
+ *
+ * @package karmabunny\kb
+ */
 class ValidityException extends \Exception {}
