@@ -132,7 +132,7 @@ abstract class Time
      * @param DateTimeInterface $start
      * @param DateTimeInterface $end
      * @param string $period A date modifier, like '+2 days'
-     * @return Generator<int, DateTimeInterface[], mixed, void>
+     * @return Generator<DateTimeInterface[]>
      */
     public static function periods(DateTimeInterface $start, DateTimeInterface $end, string $period)
     {

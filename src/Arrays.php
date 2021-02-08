@@ -78,7 +78,7 @@ abstract class Arrays
      * this one does not.
      *
      * @param array|Traversable $array
-     * @return Generator<(int|string), mixed, mixed, void>
+     * @return Generator
      */
     static function reverse($array)
     {
@@ -142,7 +142,7 @@ abstract class Arrays
      * Or maybe:
      *  Array::find($stuff, fn($item, key) => $key === 12 and $item->name === 12);
      *
-     * @param mixed<[] $array
+     * @param array $array
      * @param callable $fn ($value, $key) => bool
      * @return mixed|null
      */
