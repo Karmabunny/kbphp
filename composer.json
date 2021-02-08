@@ -15,6 +15,7 @@
     },
     "scripts": {
         "tests": "phpunit --testdox tests",
-        "publish": "bash scripts/publish.sh"
+        "publish": "bash scripts/publish.sh",
+        "docs": "bash scripts/docs.sh"
     }
 }
