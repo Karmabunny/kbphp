@@ -5,6 +5,8 @@
  */
 
 use karmabunny\kb\XML;
+use karmabunny\kb\XMLException;
+use karmabunny\kb\XMLParseException;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -12,9 +14,31 @@ use PHPUnit\Framework\TestCase;
  */
 final class XMLTest extends TestCase {
 
+    public function testParse()
+    {
+        $xml = XML::parse('<this><works okay="hurrah!"/>wow</this>');
+
+        $this->assertEquals('wow', (string) $xml);
+        $this->assertEquals('hurrah!', (string) $xml->works['okay']);
+    }
+
+
+    public function testParseErrors()
+    {
+        try {
+            XML::parse('<no>this is clearly<br> broken</no>');
+            $this->fail('XML::parse() should throw.');
+        }
+        catch (Throwable $error) {
+            $this->assertInstanceOf(XMLException::class, $error);
+            $this->assertInstanceOf(XMLParseException::class, $error);
+        }
+    }
+
+
     public function testXpath()
     {
-        $doc = simplexml_load_string("
+        $doc = XML::parse("
             <test>
                 <one>thing</one>
                 <two>1234</two>
@@ -105,7 +129,7 @@ final class XMLTest extends TestCase {
             'ahh' => false,
         ]);
 
-        $doc = simplexml_load_string($xml);
+        $doc = XML::parse($xml);
 
         $this->assertTrue($doc !== false);
         $this->assertEquals('123', (string) $doc->xpath('//one')[0]);

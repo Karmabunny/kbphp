@@ -6,7 +6,9 @@
 
 namespace karmabunny\kb;
 
+use DOMDocument;
 use SimpleXMLElement;
+use Throwable;
 
 /**
  * XML helper methods.
@@ -14,6 +16,31 @@ use SimpleXMLElement;
  * @package karmabunny\kb
  */
 abstract class XML {
+
+    /**
+     * Parse an XML document.
+     *
+     * This will emit appropriate exception when encountering parsing errors.
+     *
+     * @param string $source
+     * @param int $options libxml options
+     * @return SimpleXMLElement
+     * @throws XMLParseException
+     */
+    public static function parse(string $source, int $options = 0)
+    {
+        $doc = new DOMDocument();
+
+        try {
+            $doc->loadXML($source, $options);
+        }
+        catch (Throwable $error) {
+            throw new XMLParseException($error->getMessage());
+        }
+
+        return simplexml_import_dom($doc);
+    }
+
 
     /**
      * Interpolate and escape XML strings.
