@@ -121,15 +121,15 @@ final class CollectionTest extends TestCase {
         Thingo::$common = 777;
 
         $str = serialize($thingo);
-        print_r($str);
+        // print_r($str);
 
         // 2. Change it again before hydrating.
         Thingo::$common = 888;
 
         $other = unserialize($str);
 
-        // 1. The secret resets - doesn't pass through serialisation.
-        $this->assertEquals(['a secret', 'okay'], $other->getSecrets());
+        // 1. The private secret resets, protected is lives through serialize.
+        $this->assertEquals(['a secret', 'nope'], $other->getSecrets());
 
         // 2. The static var isn't modified by unserialize.
         $this->assertEquals(888, Thingo::$common);
