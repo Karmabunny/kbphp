@@ -14,6 +14,32 @@ namespace karmabunny\kb;
 abstract class Url {
 
     /**
+     *
+     * @param array $query [key => value]
+     * @return string
+     */
+    public static function encode(array $query): string
+    {
+        return http_build_query($query);
+    }
+
+
+    /**
+     *
+     * @param string $query
+     * @return array [key => value]
+     */
+    public static function decode(string $query): array
+    {
+        $result = [];
+        if (!mb_parse_str($query, $result)) {
+            throw new UrlDecodeException('Failed to parse query', 0, null, $query);
+        }
+        return $result;
+    }
+
+
+    /**
      * Cleanly joins base urls + paths.
      *
      * A path can be just a string or a bunch of fragments.
@@ -29,18 +55,33 @@ abstract class Url {
      * Should return:
      * '/path/to/thing?param=123&neat[0]=one&neat[1]=two'
      *
-     * @param string $base
-     * @param string|array $path
+     * @param string|array $parts
      * @return string
      */
-    public static function build(string $base, $path): string
+    public static function build(...$parts): string
     {
-        $url = '/';
+        if (empty($parts)) return '/';
 
-        if (!is_array($path)) {
-            $url .= $path;
+        if (is_string($parts[0])) {
+            $base = array_shift($parts);
         }
         else {
+            $base = '/';
+        }
+
+        $url = '/';
+        $path = [];
+
+        foreach ($parts as $part) {
+            if (is_array($part)) {
+                $path = array_merge($path, $part);
+            }
+            else {
+                array_push($path, $part);
+            }
+        }
+
+        if (!empty($path)) {
             $parts = [];
             $query = [];
 
