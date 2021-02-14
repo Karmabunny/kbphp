@@ -30,7 +30,10 @@ trait ArrayableTrait
      *
      * @return callable[]
      */
-    public abstract function fields(): array;
+    public function fields(): array
+    {
+         return [];
+    }
 
 
     /**
