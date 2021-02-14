@@ -7,6 +7,37 @@ Most of these have been repurposed from Sprout.
 Add more if you please.
 
 
+## Usage
+
+Everything lives the `karmabunny\kb` namespace.
+
+Currently hosted on our private packagist: https://packages.bunnysites.com/
+
+1. Add this to your `composer.json` file.
+
+```json
+{
+  "config": {
+      "preferred-install": {
+          "karmabunny/*": "dist"
+      }
+  },
+  "repositories": [{
+    "type": "composer",
+    "url": "https://packages.bunnysites.com"
+  }]
+}
+```
+
+2. Add to your dependencies.
+
+(Currently using dev-master until we stabilise the API).
+
+```sh
+composer require karmabunny/kb:dev-master
+```
+
+
 ## Code standard
 
 ### Keep the dependencies to nil.
