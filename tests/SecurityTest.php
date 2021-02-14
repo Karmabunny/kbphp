@@ -7,6 +7,16 @@
 use karmabunny\kb\Security;
 use PHPUnit\Framework\TestCase;
 
+
+function iter_string(string $value): Generator
+{
+    $len = strlen($value);
+    for ($i = 0; $i < $len; $i++) {
+        yield $value[$i];
+    }
+}
+
+
 /**
 * Test suite
 **/
@@ -71,10 +81,9 @@ class SecurityTest extends TestCase
     public function testRandDistribution($func, array $args, $num_unique)
     {
         $bytes = call_user_func_array($func, $args);
-        $bytes = str_split($bytes);
 
         $dists = [];
-        foreach ($bytes as $b) {
+        foreach (iter_string($bytes) as $b) {
             $b = ord($b);
             if (isset($dists[$b])) {
                 $dists[$b]++;
@@ -84,7 +93,7 @@ class SecurityTest extends TestCase
         }
         $this->assertCount($num_unique, $dists);
 
-        $avg = count($bytes) / $num_unique;
+        $avg = strlen($bytes) / $num_unique;
         $thresh = $avg * 0.1;
         foreach ($dists as $b => $count) {
             $diff = abs($count - $avg);
