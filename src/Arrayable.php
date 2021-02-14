@@ -16,8 +16,7 @@ interface Arrayable
     /**
      * Convert this object to an array.
      *
-     * @param string[]|null $fields
      * @return array
      */
-    function toArray(array $fields = null): array;
+    function toArray(): array;
 }
