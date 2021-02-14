@@ -146,7 +146,10 @@ class Collection implements
     }
 
 
-    /** @return static */
+    /**
+     * @deprecated Use clone instead.
+     * @return static
+     */
     public function copy()
     {
         $class = static::class;

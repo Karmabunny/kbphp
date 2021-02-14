@@ -12,10 +12,14 @@ namespace karmabunny\kb;
  * Not quite the same as `clone $object;`. Not actually sure why you would
  * want this instead.
  *
+ * @deprecated Just use clone.
  * @package karmabunny\kb
  */
 interface Copyable
 {
-    /** @return static */
+    /**
+     * @deprecated
+     * @return static
+     */
     function copy();
 }
