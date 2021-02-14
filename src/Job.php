@@ -38,7 +38,8 @@ abstract class Job implements Loggable
 
         $valid = new RulesValidator($this->config, $this->rules());
         if (!$valid->validate()) {
-            throw new ValidationException($valid->getErrors());
+            throw (new ValidationException)
+                ->addErrors($valid->getErrors());
         }
     }
 

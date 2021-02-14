@@ -290,7 +290,7 @@ class RulesValidator implements Validator
             call_user_func_array($func, $args);
             return true;
 
-        } catch (ValidityException $ex) {
+        } catch (ValidationException $ex) {
             $this->addFieldError($field_name, $ex->getMessage());
             return false;
         }
@@ -342,7 +342,7 @@ class RulesValidator implements Validator
                 call_user_func_array($func, $args);
                 $results[$index] = true;
 
-            } catch (ValidityException $ex) {
+            } catch (ValidationException $ex) {
                 $this->addArrayFieldError($field_name, $index, $ex->getMessage());
                 $results[$index] = false;
             }
@@ -382,7 +382,7 @@ class RulesValidator implements Validator
             call_user_func_array($func, $args);
             return true;
 
-        } catch (ValidityException $ex) {
+        } catch (ValidationException $ex) {
             $this->addMultipleFieldError($fields, $ex->getMessage());
             return false;
         }

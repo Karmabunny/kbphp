@@ -84,7 +84,8 @@ trait RulesValidatorTrait {
         $valid = new RulesValidator($this, $rules);
 
         if (!$valid->validate()) {
-            throw new ValidationException($valid->getErrors());
+            throw (new ValidationException)
+                ->addErrors($valid->getErrors());
         }
     }
 

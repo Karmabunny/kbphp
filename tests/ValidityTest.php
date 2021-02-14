@@ -5,7 +5,7 @@
  */
 
 use karmabunny\kb\Validity;
-use karmabunny\kb\ValidityException;
+use karmabunny\kb\ValidationException;
 use PHPUnit\Framework\TestCase;
 
 class ValidityTest extends TestCase
@@ -30,7 +30,7 @@ class ValidityTest extends TestCase
             Validity::email($value);
             $this->assertTrue($success);
         }
-        catch (ValidityException $ex) {
+        catch (ValidationException $ex) {
             $this->assertFalse($success);
         }
     }
@@ -56,7 +56,7 @@ class ValidityTest extends TestCase
             Validity::positiveInt($value);
             $this->assertTrue($success);
         }
-        catch (ValidityException $ex) {
+        catch (ValidationException $ex) {
             $this->assertFalse($success);
         }
     }
@@ -92,7 +92,7 @@ class ValidityTest extends TestCase
             Validity::binary($value);
             $this->assertTrue($success);
         }
-        catch (ValidityException $ex) {
+        catch (ValidationException $ex) {
             $this->assertFalse($success);
         }
     }
@@ -125,7 +125,7 @@ class ValidityTest extends TestCase
             Validity::dateMySQL($value);
             $this->assertTrue($success);
         }
-        catch (ValidityException $ex) {
+        catch (ValidationException $ex) {
             $this->assertFalse($success);
         }
     }

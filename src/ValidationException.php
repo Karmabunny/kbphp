@@ -6,12 +6,15 @@
 
 namespace karmabunny\kb;
 
+use Exception;
+
 /**
  * Validator errors.
  *
  * @package karmabunny\kb
  */
-class ValidationException extends \Exception {
+class ValidationException extends Exception
+{
 
     /**
      * Keyed string => string[].
@@ -22,56 +25,30 @@ class ValidationException extends \Exception {
 
 
     /**
-     * Construct an appropriate validation message.
-     *
-     * @param array $errors Keyed string => string[].
-     */
-    public function __construct($errors)
-    {
-        $this->errors = $errors;
-
-        if (count($errors) == 1) {
-            $name = key($errors);
-            $this->message = "Validation failed for '{$name}'";
-
-            $value = $errors[$name];
-            if (count($value) == 1) {
-                $this->message .= ', ' . current($errors[$name]);
-            }
-        }
-        else {
-            $names = array_map(function($name) {
-                return "'{$name}'";
-            }, array_keys($errors));
-
-            $this->message = 'Validation failed for ' . implode(', ', $names);
-        }
-    }
-
-
-    /**
      * Merge errors properly.
      *
      * Whereas array_merge() will clobber messages within duplicate keys.
      *
      * @param array ...$arrays
-     * @return array
+     * @return static
      */
-    public static function mergeErrors(...$arrays): array
+    public function addErrors($errors)
     {
-        $all = [];
-
-        foreach ($arrays as $errors) {
-            foreach ($errors as $name => $messages) {
-                if (isset($all[$name])) {
-                    array_push($all[$name], ...$messages);
-                }
-                else {
-                    $all[$name] = $messages;
-                }
+        foreach ($errors as $name => $messages) {
+            if (isset($this->errors[$name])) {
+                array_push($this->errors[$name], ...$messages);
+            }
+            else {
+                $this->errors[$name] = $messages;
             }
         }
 
-        return $all;
+        $names = array_map(function($name) {
+            return "'{$name}'";
+        }, array_keys($this->errors));
+
+        $this->message = 'Validation failed for ' . implode(', ', $names);
+
+        return $this;
     }
 }

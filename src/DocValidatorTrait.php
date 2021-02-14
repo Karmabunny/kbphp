@@ -28,7 +28,8 @@ trait DocValidatorTrait {
     {
         $valid = new DocValidator($this);
         if (!$valid->validate()) {
-            throw new ValidationException($valid->getErrors());
+            throw (new ValidationException)
+                ->addErrors($valid->getErrors());
         }
     }
 

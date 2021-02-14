@@ -27,8 +27,9 @@ namespace karmabunny\kb;
  *     $docs = new DocsValidator($this);
  *     $rules = new RulesValidator($this);
  *     if (!$docs->validate() or !$rules->validate()) {
- *         $errors = ValidationException::mergeErrors($docs->getErrors(), $rules->getErrors());
- *         throw new ValidationException($errors);
+ *         throw (new ValidationException)
+ *              ->addErrors($docs->getErrors())
+ *              ->addErrors($docs->getErrors());
  *     }
  * }
  *
