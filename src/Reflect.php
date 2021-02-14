@@ -6,6 +6,7 @@
 
 namespace karmabunny\kb;
 
+use Generator;
 use Reflection;
 use ReflectionParameter;
 use ReflectionMethod;
@@ -17,7 +18,65 @@ use ReflectionType;
  *
  * @package karmabunny\kb
  */
-abstract class Reflect {
+abstract class Reflect
+{
+
+
+    /**
+     * Find all the classes in a list of directories.
+     *
+     * This is not recursive.
+     *
+     * @param string[] $paths
+     * @params string $filter A full namespaced class name
+     * @return Generator<int, string, mixed, void>
+     */
+    public static function loadAllClasses(array $paths, string $filter = null): Generator
+    {
+        // Load all the files in each directory.
+        foreach ($paths as $dir) {
+            yield from self::loadClasses($dir, $filter);
+        }
+    }
+
+
+    /**
+     * Find all the classes in a directory, with a filter!
+     *
+     * This is not recursive.
+     *
+     * Yes, this cheats the autoloader. Idk how to do this otherwise.
+     * This relies heavily on PSR-4 - if anything is out of place it won't
+     * pick it up. I would think nested namespaces would also fail here too.
+     *
+     * This actually loads (require_once) the class. Use this carefully.
+     *
+     * @param string $path
+     * @param string $filter A full namespaced class name
+     * @return Generator<int, string, mixed, void>
+     */
+    public static function loadClasses(string $path, string $filter = null): Generator
+    {
+        foreach (glob($path . '/*.php') as $file) {
+            // Load it.
+            require_once $file;
+
+            $class = basename($file, '.php');
+
+            // Re-map into full paths, as best we can.
+            foreach (get_declared_classes() as $full_class) {
+                if (!preg_match("/{$class}$/", $full_class)) continue;
+
+                // This should always pass.
+                if (!class_exists($full_class, false)) continue;
+
+                // All classes must subtype the filter.
+                if ($filter and !is_subclass_of($full_class, $filter)) continue;
+                yield $full_class;
+            }
+        }
+    }
+
 
     /**
      * Get a list of method names and their parameters.
