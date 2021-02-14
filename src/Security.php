@@ -21,6 +21,8 @@ class Security
     /**
     * Password algorithms
     **/
+    const PASSWORD_DEFAULT = PASSWORD_DEFAULT;
+    const PASSWORD_BCRYPT = PASSWORD_BCRYPT;
     const PASSWORD_SHA_SALT = 2;
     const PASSWORD_BCRYPT12 = 3;
     const PASSWORD_SHA_SALT_5000 = 5;
@@ -88,25 +90,21 @@ class Security
     /**
      * Constant-time string comparison
      *
+     * @deprecated Use hash_equals() instead.
      * @param string $known_string The known hash
      * @param string $user_string The user supplied hash to check
      * @return bool True if the strings match, false if they don't
      */
     public static function compareStrings($known_string, $user_string)
     {
-        if (function_exists('hash_equals')) {
-            return hash_equals($known_string, $user_string);
-        } else {
-            $ret = strlen($known_string) ^ strlen($user_string);
-            $ret |= array_sum(unpack("C*", $known_string ^ $user_string));
-            return !$ret;
-        }
+        return hash_equals($known_string, $user_string);
     }
 
 
     /**
      * Check a password hash against an entered password
      *
+     * @deprecated Use password_hash() instead.
      * @param string $known_hash The known hash to check against, typically from the database
      * @param int $algorithm Password algorithm, {@see self}
      * @param string $salt
@@ -116,25 +114,29 @@ class Security
     public static function doPasswordCheck($known_hash, $algorithm, $salt, $user_string)
     {
         switch ($algorithm) {
+            case self::PASSWORD_DEFAULT:
+            case self::PASSWORD_BCRYPT:
+                return password_verify($user_string, $known_hash);
+
             case self::PASSWORD_SHA:
                 $expected = sha1($user_string);
-                return Security::compareStrings($known_hash, $expected);
+                return hash_equals($known_hash, $expected);
 
             case self::PASSWORD_SHA_SALT:
                 $expected = sha1(sha1($salt . $user_string . $salt));
-                return Security::compareStrings($known_hash, $expected);
+                return hash_equals($known_hash, $expected);
 
             case self::PASSWORD_SHA_SALT_5000:
                 $expected = $salt . $user_string . $salt;
                 for ($i = 1; $i <= 5000; $i++) {
                     $expected = sha1($expected);
                 }
-                return Security::compareStrings($known_hash, $expected);
+                return hash_equals($known_hash, $expected);
 
             case self::PASSWORD_BCRYPT12:
                 // The entire known password is used as a salt when generating the expected hash
                 $expected = crypt($user_string, $known_hash);
-                return Security::compareStrings($known_hash, $expected);
+                return hash_equals($known_hash, $expected);
         }
 
         return false;
@@ -144,17 +146,20 @@ class Security
     /**
      * Return a hashed password, password algorithm, and salt, for inserting into the database
      *
+     * @deprecated Use password_hash() instead.
      * @param string $password Plaintext password
      * @param int $algorithmPassword algorithm. If not specified, the default is used.
      * @return array 0 => hash, 1 => algorithm, 2 => salt
      */
-    public static function hashPassword($password, $algorithm = null)
+    public static function hashPassword($password, $algorithm = self::PASSWORD_DEFAULT)
     {
-        if ($algorithm == null) {
-            $algorithm = self::defaultAlgorithm();
-        }
-
         switch ($algorithm) {
+            case self::PASSWORD_DEFAULT:
+            case self::PASSWORD_BCRYPT:
+                $hash = password_hash($password, $algorithm);
+                $salt = self::randStr(4);
+                break;
+
             case self::PASSWORD_PLAIN:
             case self::PASSWORD_SHA:
                 throw new InvalidArgumentException('Read-only password algorithm specified');
@@ -192,44 +197,5 @@ class Security
         }
 
         return [$hash, $algorithm, $salt];
-    }
-
-
-    /**
-     * Checks if a given password algorithm is available
-     *
-     * @param int $algorithm Password algorithm
-     * @return bool True if the specified algorithm is available, False otherwise
-     */
-    public static function checkAlgorithm($algorithm)
-    {
-        switch ($algorithm) {
-            case self::PASSWORD_SHA:
-            case self::PASSWORD_SHA_SALT:
-            case self::PASSWORD_PLAIN:
-            case self::PASSWORD_SHA_SALT_5000:
-                return true;
-
-            case self::PASSWORD_BCRYPT12:
-                return (CRYPT_BLOWFISH == 1);
-        }
-
-        return false;
-    }
-
-
-    /**
-     * Return the algorithm for new accounts.
-     * Existing accounts will be re-crypted into this algorithm upon next login.
-     *
-     * @return int Password algorithm
-     **/
-    public static function defaultAlgorithm()
-    {
-        if (self::checkAlgorithm(self::PASSWORD_BCRYPT12)) {
-            return self::PASSWORD_BCRYPT12;
-        } else {
-            return self::PASSWORD_SHA_SALT_5000;
-        }
     }
 }

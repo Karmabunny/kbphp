@@ -102,68 +102,11 @@ class SecurityTest extends TestCase
     }
 
 
-    public function testCompareStrings()
-    {
-        $this->assertTrue(Security::compareStrings('aaa', 'aaa'));
-        $this->assertFalse(Security::compareStrings('aaa', 'bbb'));
-    }
-
-    public function testCompareStringsTimingSafe()
-    {
-        if (getenv('TRAVIS'))  {
-            $this->markTestSkipped('Timing not stable in Travis CI');
-        }
-
-        $xxx = str_repeat('x', 1024 * 32);
-        $yyy = str_repeat('x', 1024 * 32 - 1) . 'y';
-        $zzz = 'z' . str_repeat('x', 1024 * 32 - 1);
-        $matches = [0.0, 0.0, 0.0];
-
-        // When using hash_equals its much faster than the fallback
-        // and this makes the timing unstable so more iterations are required
-        if (function_exists('hash_equals')) {
-            $iter = 5000;
-        } else {
-            $iter = 500;
-        }
-
-        // Test one - both strings matching
-        for ($i = 0; $i < $iter; ++$i) {
-            $start = microtime(true);
-            Security::compareStrings($xxx, $xxx);
-            $matches[0] += (microtime(true) - $start) * 1000;
-        }
-
-        // Test two - matching except last character
-        for ($i = 0; $i < $iter; ++$i) {
-            $start = microtime(true);
-            Security::compareStrings($xxx, $yyy);
-            $matches[1] += (microtime(true) - $start) * 1000;
-        }
-
-        // Test three - matching except first character
-        for ($i = 0; $i < $iter; ++$i) {
-            $start = microtime(true);
-            Security::compareStrings($xxx, $zzz);
-            $matches[2] += (microtime(true) - $start) * 1000;
-        }
-
-        // Calculate the average time across all three tests
-        $average = array_sum($matches) / count($matches);
-
-        // Compare each test against the average, as a percentage
-        // Require to be within 10% or better
-        foreach ($matches as $idx => $val) {
-            $diff = abs($val - $average);
-            $perc = $diff / $average * 100.0;
-            $this->assertLessThan(10, $perc);
-        }
-    }
-
-
     public function dataAlgorithms()
     {
         return [
+            [Security::PASSWORD_DEFAULT],
+            [Security::PASSWORD_BCRYPT],
             [Security::PASSWORD_SHA_SALT],
             [Security::PASSWORD_SHA_SALT_5000],
             [Security::PASSWORD_BCRYPT12],
@@ -177,8 +120,6 @@ class SecurityTest extends TestCase
     **/
     public function testHashMatchCheck($alg)
     {
-        if (! Security::checkAlgorithm($alg)) return;
-
         list ($a, $b, $c) = Security::hashPassword('Match', $alg);
         $result = Security::doPasswordCheck($a, $b, $c, 'Match');
         $this->assertTrue($result);
@@ -197,7 +138,6 @@ class SecurityTest extends TestCase
     **/
     public function testHashWithSalts($alg)
     {
-        if (! Security::checkAlgorithm($alg)) return;
         list ($a1, $b1, $c1) = Security::hashPassword('Match', $alg);
         list ($a2, $b2, $c2) = Security::hashPassword('Match', $alg);
         $this->assertTrue($b1 == $b2);
@@ -206,11 +146,4 @@ class SecurityTest extends TestCase
         $this->assertTrue($c1 != $c2);
     }
 
-
-    public function testCheckAlgorithm()
-    {
-        $this->assertTrue(Security::checkAlgorithm(Security::PASSWORD_SHA_SALT));
-        $this->assertTrue(Security::checkAlgorithm(Security::PASSWORD_SHA_SALT_5000));
-        $this->assertFalse(Security::checkAlgorithm(1234));
-    }
 }
