@@ -6,7 +6,7 @@
 
 namespace karmabunny\kb;
 
-use Traversable;
+use ArrayIterator;
 
 /**
  * Mostly just level defs.
@@ -91,28 +91,91 @@ abstract class Log {
      * @param mixed $thing
      * @return string
      */
-    public static function stringify($thing): string
+    public static function stringify($value, $indent = 0): string
     {
-        // Objects with toStrings.
-        if (is_object($thing) and is_callable([$thing, '__toString'])) {
-            return $thing->__toString();
+        // Bad hack.
+        if (!$indent and is_object($value)) $indent = 2;
+
+        $pad = str_repeat(' ', $indent);
+
+        if ($value === null) {
+            return 'NULL';
         }
 
-        if ($thing instanceof Traversable) {
-            $thing = iterator_to_array($thing);
+        // Json'd for \n escapes and whatnot.
+        if (is_scalar($value)) {
+            return json_encode($value);
         }
 
-        // Easy stuff.
-        if (is_array($thing)) {
-            return json_encode($thing, JSON_PRETTY_PRINT);
+        // Recurse into models, class names otherwise.
+        if (is_object($value)) {
+            $out = get_class($value) . PHP_EOL;
+
+            if (!is_iterable($value)) {
+                $value = new ArrayIterator($value);
+            }
+
+            foreach ($value as $key => $item) {
+                $out .= "{$pad}{$key}:";
+                $out .= (!is_array($item) or empty($item)) ? ' ' : PHP_EOL;
+                $out .= self::stringify($item, $indent + 2);
+                $out .= PHP_EOL;
+            }
+
+            // Also virtual fields.
+            if ($value instanceof Collection) {
+                foreach ($value->fields() as $key => $item) {
+                    // Call it.
+                    if (!is_callable($item)) continue;
+                    $item = $item();
+
+                    $out .= "{$pad}{$key}:";
+                    $out .= (!is_array($item) or empty($item)) ? ' ' : PHP_EOL;
+                    $out .= self::stringify($item, $indent + 2);
+                    $out .= PHP_EOL;
+                }
+            }
+
+            return trim($out, PHP_EOL);
         }
 
-        // Some neat decimal places.
-        if (is_float($thing)) {
-            return sprintf('%.5f', $thing);
+        // Looped and recursive.
+        if (is_array($value)) {
+            if (empty($value)) {
+                return '[]';
+            }
+
+            $out = '';
+            foreach ($value as $index => $item) {
+                $out .= "{$pad}[{$index}]:";
+                $out .= (!is_array($item) or empty($item)) ? ' ' : PHP_EOL;
+                $out .= self::stringify($item, $indent + 2);
+                $out .= PHP_EOL;
+            }
+            return trim($out, PHP_EOL);
         }
 
-        // Everything else.
-        return (string) $thing;
+        // Gross.
+        if (is_resource($value)) {
+            $value = (int) $value;
+            return "resource({$value})";
+        }
+
+        // God forbid.
+        return '???';
+    }
+
+
+    /**
+     * Dump and die!
+     *
+     * @param mixed $thing
+     * @return void
+     */
+    public static function dump($thing)
+    {
+        while (ob_get_level() > 0) ob_end_clean();
+        header('content-type: text/plain');
+        die(self::stringify($thing));
     }
 }
