@@ -243,4 +243,134 @@ abstract class XML {
         // Well it's SOMETHING.
         return true;
     }
+
+
+    /**
+     * Requires that at least one element with the given tag exist and returns
+     * the first found.
+     *
+     * @param SimpleXMLElement $parent
+     * @param string $tag_name
+     * @return SimpleXMLElement
+     * @throws XMLAssertException If there were no nodes with that tag
+     */
+    public static function expectFirst(SimpleXMLElement $parent, string $tag_name)
+    {
+        $element = self::first($parent, $tag_name);
+
+        if ($element === null) {
+            throw new XMLAssertException("Missing element required '{$tag_name}''");
+        }
+
+        return $element;
+    }
+
+
+    /**
+     * Requires that at least one element with the given tag exist, and
+     * returns the text content of the first found.
+     *
+     * @param SimpleXMLElement $parent
+     * @param string $tag_name
+     * @return string
+     * @throws XMLAssertException If there were no nodes with that tag name
+     */
+    public static function expectFirstText(SimpleXMLElement $parent, string $tag_name)
+    {
+        return self::text(self::expectFirst($parent, $tag_name));
+    }
+
+
+    /**
+     * Fetches the first element of a given tag name or null if none are found.
+     *
+     * @param SimpleXMLElement $parent
+     * @param string $tag_name
+     * @return SimpleXMLElement|null
+     */
+    public static function first(SimpleXMLElement $parent, string $tag_name)
+    {
+        $element = $parent->xpath('./' . $tag_name)[0] ?? null;
+        if ($element === null) return null;
+        return $element;
+    }
+
+
+    /**
+     * Fetches the text of the first element of a given tag name, or null if
+     * the element wasn't found.
+     *
+     * @param SimpleXMLElement $parent
+     * @param string $tag_name
+     * @return string|null
+     */
+    public static function firstText(SimpleXMLElement $parent, string $tag_name)
+    {
+        $element = self::first($parent, $tag_name);
+        if ($element === null) return null;
+
+        return self::text($element);
+    }
+
+
+    /**
+     * Iterates over the children (1 level deep) of a parent and fetches the
+     * first of all wanted elements by tag name.
+     *
+     * Note, if there are two of the same tag name, it will only get the first.
+     *
+     * Output is indexed by the relevant tag name.
+     *
+     * @param SimpleXMLElement $parent
+     * @param string[] $wanted
+     * @return SimpleXMLElement An array of all the wanted children
+     * @throws XMLAssertException If not all wanted tags are found
+     */
+    public static function gatherChildren(SimpleXMLElement $parent, array $wanted)
+    {
+        $wanted = array_fill_keys($wanted, true);
+        $fetched = [];
+
+        foreach ($parent->children() as $element) {
+            if (!$element) continue;
+
+            $name = $element->getName();
+            if (!array_key_exists($name, $wanted)) continue;
+
+            $fetched[$name] = $element;
+            unset($wanted[$name]);
+        }
+
+        if (!empty($wanted)) {
+            $tags = implode(', ', array_keys($wanted));
+            throw new XMLAssertException('Missing wanted tags: ' . $tags);
+        }
+
+        return $fetched;
+    }
+
+
+    /**
+     * Fetches the text content of a node and trims it.
+     *
+     * @param SimpleXMLElement $node
+     * @return string
+     */
+    public static function text(SimpleXMLElement $node)
+    {
+        return trim((string) $node);
+    }
+
+
+    /**
+     * Fetches an attribute from an element and trims it.
+     *
+     * @param SimpleXMLElement $elem
+     * @param string $name
+     * @return string
+     */
+    public static function attr(SimpleXMLElement $elem, string $name)
+    {
+        return trim($elem->attributes()[$name] ?? '');
+    }
 }
