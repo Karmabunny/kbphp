@@ -237,4 +237,45 @@ final class ArraysTest extends TestCase {
         $actual = Arrays::getValue($array, 'three');
         $this->assertNull($actual);
     }
+
+
+    public function testCreateMap()
+    {
+        $objects = [
+            (object)[ 'id' => 111, 'name' => 'one' ],
+            (object)[ 'id' => 222, 'name' => 'two' ],
+            (object)[ 'id' => 333, 'name' => 'three' ],
+            (object)[ 'id' => 100, 'name' => 'four' ],
+            (object)[ 'id' => 111, 'name' => 'five' ],
+        ];
+
+        $actual = Arrays::createMap($objects, 'id', 'name');
+        $expected = [
+            111 => 'five',
+            222 => 'two',
+            333 => 'three',
+            100 => 'four',
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+
+        $arrays = [
+            [ 'id' => 111, 'name' => 'one' ],
+            'not an object',
+            [ 'id' => 222, 'name' => null ],
+            (object)[ 'name' => 'missing key' ],
+            [ 'ID' => 100, 'name' => 'misspelled key' ],
+            [ 'id' => 333, 'name' => 'hello?' ],
+        ];
+
+        $actual = Arrays::createMap($arrays, 'id', 'name');
+        $expected = [
+            111 => 'one',
+            222 => null,
+            333 => 'hello?',
+        ];
+
+        $this->assertEquals($expected, $actual);
+    }
 }

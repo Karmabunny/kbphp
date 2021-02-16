@@ -8,6 +8,7 @@ namespace karmabunny\kb;
 
 use ArrayAccess;
 use Generator;
+use Throwable;
 use Traversable;
 
 /**
@@ -281,6 +282,45 @@ abstract class Arrays
 
         // Recurse on.
         return self::getValue($value, $query);
+    }
+
+
+    /**
+     * Shorthand for putting together [key => value] maps.
+     *
+     * This will silently skip over invalid items:
+     * - string/int/null instead of array/object
+     * - invalid key types (int/string only)
+     * - missing keys/names
+     *
+     * @param array $items
+     * @param string $key
+     * @param string $name
+     * @return void
+     */
+    static function createMap(array $items, string $key, string $name)
+    {
+        $map = [];
+
+        foreach ($items as $item) {
+            try {
+                if (is_object($item)) {
+                    $index = $item->$key;
+                    $value = $item->$name;
+                }
+                else if (is_array($item)) {
+                    $index = $item[$key];
+                    $value = $item[$name];
+                }
+
+                $index = (string) $index;
+
+                $map[$index] = $value;
+            }
+            catch (Throwable $error) {}
+        }
+
+        return $map;
     }
 
 }
