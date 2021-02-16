@@ -41,6 +41,39 @@ final class ArraysTest extends TestCase {
         $expected = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512];
 
         $this->assertEquals($expected, $actual);
+
+        // Modifying keys.
+        $actual = Arrays::fill(4, function(&$key) {
+            $value = 2 ** $key;
+            $key = 'abc' . ($key + 1);
+            return $value;
+        });
+
+        $expected = [
+            'abc1' => 1,
+            'abc2' => 2,
+            'abc3' => 4,
+            'abc4' => 8,
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        // A more realistic use case.
+        $actual = Arrays::fill(7, function(&$i) {
+            $i += 1;
+            return null;
+        });
+        $expected = [
+            1 => null,
+            2 => null,
+            3 => null,
+            4 => null,
+            5 => null,
+            6 => null,
+            7 => null,
+        ];
+
+        $this->assertEquals($expected, $actual);
     }
 
 

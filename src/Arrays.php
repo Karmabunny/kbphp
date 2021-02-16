@@ -97,15 +97,21 @@ abstract class Arrays
      *
      * Each index is provided as an argument.
      *
+     * The $index arg is a reference and can be modified to alter the key.
+     *
+     * For a more straight-forward API, see filledKeys().
+     *
      * @param int $size
-     * @param callable $fn ($index) => $value
+     * @param callable $fn (&$index) => $value
      * @return array
      */
     static function fill(int $size, callable $fn)
     {
         $array = [];
         for ($i = 0; $i < $size; $i++) {
-            $array[] = $fn($i);
+            $key = $i;
+            $value = $fn($key);
+            $array[$key] = $value;
         }
         return $array;
     }
