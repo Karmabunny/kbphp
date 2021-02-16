@@ -30,6 +30,17 @@ abstract class Time
         'second' => 's',
     ];
 
+    const EMPTY_WEEK = [
+        1 => null,
+        2 => null,
+        3 => null,
+        4 => null,
+        5 => null,
+        6 => null,
+        7 => null,
+    ];
+
+
     /**
      * Timestamp as an integer in microseconds.
      *
@@ -202,6 +213,55 @@ abstract class Time
 
 
     /**
+     * Get week aligned months.
+     *
+     * For example: April 2021
+     * ```
+     *   Mo Tu We Th Fr Sa Su
+     *    -  -  -  1  2  3  4
+     *    5  6  7  8  9 10 11
+     *   12 13 14 15 16 17 18
+     *   19 20 21 22 23 24 25
+     *   26 27 28 29 30  -  -
+     * ```
+     *
+     * The output is a 3-dimension array.
+     *
+     *   [month][week][day] => DateTimeInterface
+     *
+     * @param int $year
+     * @param int $from 1-indexed, inclusive
+     * @param int $to 1-indexed, inclusive
+     * @return Generator<DateTimeInterface[][]>
+     */
+    public static function monthGrid(int $year, int $from, int $to)
+    {
+        $months = self::months($year, $from, $to);
+
+        foreach ($months as $month => $days) {
+            $week = self::EMPTY_WEEK;
+            $weeks = [];
+
+            foreach ($days as $day) {
+                $dow = (int) $day->format('N');
+                $week[$dow] = $day;
+
+                if ($dow === 7) {
+                    $weeks[] = $week;
+                    $week = self::EMPTY_WEEK;
+                }
+            }
+
+            if ($week[1] and !$week[7]) {
+                $weeks[] = $week;
+            }
+
+            yield $month => $weeks;
+        }
+    }
+
+
+    /**
      * Get the current date and selectively replace components.
      *
      * Example:
@@ -257,13 +317,13 @@ abstract class Time
     public static function weekdays(): array
     {
         return [
-            'Monday',
-            'Tuesday',
-            'Wednesday',
-            'Thursday',
-            'Friday',
-            'Saturday',
-            'Sunday',
+            1 => 'Monday',
+            2 => 'Tuesday',
+            3 => 'Wednesday',
+            4 => 'Thursday',
+            5 => 'Friday',
+            6 => 'Saturday',
+            7 => 'Sunday',
         ];
     }
 }

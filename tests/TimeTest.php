@@ -107,6 +107,22 @@ final class TimeTest extends TestCase {
     }
 
 
+    public function testMonthGrid()
+    {
+        // Jan to March.
+        $months = Time::monthGrid(2021, 1, 3);
+        $months = iterator_to_array($months);
+
+        $this->assertCount(3, $months);
+        $this->assertCount(5, $months[1]);
+        $this->assertCount(4, $months[2]);
+        $this->assertCount(5, $months[3]);
+
+        // March, 2nd week, Saturday.
+        $this->assertEquals('2021-03-13', $months[3][1][6]->format('Y-m-d'));
+    }
+
+
     public function testNow()
     {
         $expected = '2020-' . date('m-d');
