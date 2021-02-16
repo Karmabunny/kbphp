@@ -133,4 +133,32 @@ final class TimeTest extends TestCase {
         $actual = Time::now(['month' => 1, 'day' => 1])->format('Y-m-d');
         $this->assertEquals($expected, $actual);
     }
+
+
+    public function testWeekdays()
+    {
+        $actual = Time::weekdays();
+        $expected = [
+            1 => 'Monday',
+            2 => 'Tuesday',
+            3 => 'Wednesday',
+            4 => 'Thursday',
+            5 => 'Friday',
+            6 => 'Saturday',
+            7 => 'Sunday',
+        ];
+        $this->assertEquals($expected, $actual);
+
+        $actual = Time::weekdays(3);
+        $expected = [
+            1 => 'Mon',
+            2 => 'Tue',
+            3 => 'Wed',
+            4 => 'Thu',
+            5 => 'Fri',
+            6 => 'Sat',
+            7 => 'Sun',
+        ];
+        $this->assertEquals($expected, $actual);
+    }
 }

@@ -194,10 +194,11 @@ abstract class Time
      */
     public static function months(int $year, int $from, int $to)
     {
-        $cursor = new DateTimeImmutable("{$year}-{$from}-01");
 
         while ($from <= $to) {
+            $cursor = new DateTimeImmutable("{$year}-{$from}-01");
             $count = (int) $cursor->format('t');
+
             $days = [];
 
             for ($day = 1; $day <= $count; $day++) {
@@ -205,9 +206,7 @@ abstract class Time
             }
 
             yield $from => $days;
-
             $from += 1;
-            $cursor = new DateTimeImmutable("{$year}-{$from}-01");
         }
     }
 
@@ -310,13 +309,12 @@ abstract class Time
     /**
      * List of week day names (starting from Monday).
      *
-     * It's a function because it might be i18n later. Idk.
-     *
+     * @param int $length substring length
      * @return string[]
      */
-    public static function weekdays(): array
+    public static function weekdays(int $length = 0): array
     {
-        return [
+        $days = [
             1 => 'Monday',
             2 => 'Tuesday',
             3 => 'Wednesday',
@@ -325,5 +323,13 @@ abstract class Time
             6 => 'Saturday',
             7 => 'Sunday',
         ];
+
+        if ($length) {
+            foreach ($days as &$day) {
+                $day = substr($day, 0, $length);
+            }
+        }
+
+        return $days;
     }
 }
