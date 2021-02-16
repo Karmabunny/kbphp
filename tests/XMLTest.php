@@ -5,6 +5,7 @@
  */
 
 use karmabunny\kb\XML;
+use karmabunny\kb\XMLAssertException;
 use karmabunny\kb\XMLException;
 use karmabunny\kb\XMLParseException;
 use PHPUnit\Framework\TestCase;
@@ -172,5 +173,86 @@ final class XMLTest extends TestCase {
         $this->assertEquals('default', XML::enum($xml, '/path/to/value[2]', $map));
         $this->assertEquals([3, 3, 3], XML::enum($xml, '/path/to/value[3]', $map));
         $this->assertEquals('default', XML::enum($xml, '/path/to/value[4]', $map));
+    }
+
+
+    public function testHelpers()
+    {
+        $xml = XML::parse("
+            <test hello='world' goodmorning='sunshine'>
+                <nested>
+                    <same>zero</same>
+                </nested>
+                <same>one</same>
+                <same>two</same>
+                <same>three</same>
+                <another>four</another>
+                <another>five</another>
+                <same>six</same>
+                seven
+            </test>
+        ");
+
+        $this->assertEquals($xml->xpath('//test/same[1]')[0], XML::first($xml, 'same'));
+        $this->assertEquals($xml->xpath('//test/another[1]')[0], XML::first($xml, 'another'));
+
+        $this->assertEquals('one', XML::firstText($xml, 'same'));
+        $this->assertEquals('four', XML::firstText($xml, 'another'));
+
+        $this->assertEquals('world', XML::attr($xml, 'hello'));
+        $this->assertEquals('seven', XML::text($xml));
+    }
+
+
+    public function testExpected()
+    {
+        $xml = XML::parse("
+            <test hello='world'>
+                <nested>
+                    <same>zero</same>
+                    <two>three</two>
+                    <four>five</four>
+                    <four>six</four>
+                </nested>
+                <same>one</same>
+                <same>two</same>
+                <same>three</same>
+                <two>four</two>
+                <two>four</two>
+                <same>six</same>
+                seven
+            </test>
+        ");
+
+        $this->assertEquals($xml->xpath('//test/same')[0], XML::expectFirst($xml, 'same'));
+        $this->assertEquals('one', XML::expectFirstText($xml, 'same'));
+
+        try {
+            XML::expectFirst($xml, 'doesnt_exist');
+            $this->fail('Expected XMLAssertException');
+        }
+        catch (XMLAssertException $exception) {
+            $this->assertStringContainsString('doesnt_exist', $exception->getMessage());
+        }
+
+        $actual = XML::gatherChildren($xml->nested, ['same', 'two', 'four']);
+        $expected = [
+            'same' => $xml->nested->same,
+            'two' => $xml->nested->two,
+            'four' => $xml->nested->four[0],
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        try {
+            XML::gatherChildren($xml->nested, ['ohhh', 'nooo', 'two', 'four']);
+            $this->fail('Expected XMLAssertException');
+        }
+        catch (XMLAssertException $exception) {
+            $this->assertStringContainsString('ohhh', $exception->getMessage());
+            $this->assertStringContainsString('nooo', $exception->getMessage());
+            $this->assertStringNotContainsString('two', $exception->getMessage());
+            $this->assertStringNotContainsString('four', $exception->getMessage());
+        }
     }
 }
