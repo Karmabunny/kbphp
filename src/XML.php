@@ -29,6 +29,13 @@ abstract class XML {
      */
     public static function parse(string $source, int $options = 0)
     {
+        // I honestly don't care about anyone trying to load entities.
+        // It's unsafe and in PHP8+ it's permanently disabled.
+        // So if they _really_ want it, they can enable it.
+        if (PHP_VERSION_ID < 80000) {
+            libxml_disable_entity_loader(true);
+        }
+
         $doc = new DOMDocument();
 
         try {
