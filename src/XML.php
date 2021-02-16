@@ -42,7 +42,7 @@ abstract class XML {
             $doc->loadXML($source, $options);
         }
         catch (Throwable $error) {
-            throw new XMLParseException($error->getMessage());
+            throw new XMLParseException($error->getMessage(), $error->getCode(), $error);
         }
 
         return simplexml_import_dom($doc);
