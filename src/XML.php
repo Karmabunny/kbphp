@@ -192,8 +192,12 @@ abstract class XML {
             case 'n':
             case 'undefined': // Javascript
             case 'none': // Python
-            case '\n': // Postgres
                 return false;
+        }
+
+        // Postgres + MySQL
+        if (trim($thing) === '\N') {
+            return false;
         }
 
         // An empty element like: <This/> is true.
@@ -202,7 +206,7 @@ abstract class XML {
         }
 
         // Perhaps it's numerical.
-        if ($thing == 0) {
+        if (preg_match('/^[+\-\.0-9]+$/', trim($thing)) and $thing == 0) {
             return false;
         }
 

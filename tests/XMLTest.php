@@ -56,10 +56,12 @@ final class XMLTest extends TestCase {
                     <bool>false</bool>
                     <human>no</human>
                 </false>
+                <sql>\N</sql>
+                <fakesql>\\n</fakesql>
             </test>
         ");
 
-        $this->assertTrue($doc !== false);
+        $this->assertNotNull($doc);
 
         // String (default)
         $this->assertEquals('thing', XML::xpath($doc, '//one'));
@@ -72,16 +74,21 @@ final class XMLTest extends TestCase {
         // Truthy
         $this->assertEquals(true, XML::xpath($doc, '//true/this', 'bool'));
         $this->assertEquals(true, XML::xpath($doc, '//true/attr', 'bool'));
-        $this->assertEquals(true, XML::xpath($doc, '//true/attr["false"]', 'bool'));
+        $this->assertEquals(true, XML::xpath($doc, '//true/attr/@false', 'bool'));
         $this->assertEquals(true, XML::xpath($doc, '//true/number', 'bool'));
         $this->assertEquals(true, XML::xpath($doc, '//true/bool', 'bool'));
 
         // Falsey
-        // $this->assertEquals(false, XML::xpath($doc, '//false/attr["true"]', 'bool', true));
+        $this->assertEquals(false, XML::xpath($doc, '//false/attr/@true', 'bool', true));
         $this->assertEquals(false, XML::xpath($doc, '//false/this', 'bool'));
         $this->assertEquals(false, XML::xpath($doc, '//false/number', 'bool'));
         $this->assertEquals(false, XML::xpath($doc, '//false/bool', 'bool'));
         $this->assertEquals(false, XML::xpath($doc, '//false/human', 'bool'));
+
+        // Trisky SQL null looks like a line break.
+        $this->assertEquals(false, XML::xpath($doc, '//sql', 'bool'));
+        $this->assertEquals(true, XML::xpath($doc, '//fakesql', 'bool'));
+        $this->assertEquals('\n', XML::xpath($doc, '//fakesql', 'string'));
 
         // Missing
         $this->assertEquals('', XML::xpath($doc, '//missing'));
@@ -131,7 +138,7 @@ final class XMLTest extends TestCase {
 
         $doc = XML::parse($xml);
 
-        $this->assertTrue($doc !== false);
+        $this->assertNotNull($doc);
         $this->assertEquals('123', (string) $doc->xpath('//one')[0]);
         $this->assertEquals('abc', (string) $doc->xpath('//two')[0]);
         $this->assertEquals('abc', (string) $doc->xpath('//another')[0]);
