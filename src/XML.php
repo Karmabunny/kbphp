@@ -156,15 +156,38 @@ abstract class XML {
     }
 
 
+    /**
+     * Convert an integer into something more useful, with a map.
+     *
+     * The first element of the map will be the fallback if the value isn't
+     * found or the map can't find an element.
+     *
+     * Example:
+     * ```
+     *   XML::enum($dom, '//path/to/number', [
+     *      0 => 'null',
+     *      1 => 'yes',
+     *      2 => 'no',
+     *   ]);
+     *   // => outputs one of null/yes/no
+     *   // => unknown/no-value is 'null'
+     * ```
+     *
+     * @param SimpleXMLElement $xml
+     * @param string $path
+     * @param array $params
+     * @return mixed
+     */
     public static function enum(SimpleXMLElement $xml, string $path, array $params)
     {
         $value = self::xpath($xml, $path, 'int', 0);
+        $value = $params[$value] ?? null;
 
-        if (!isset($params[$value])) {
-            return next($params);
+        if ($value === null) {
+            return Arrays::first($params);
         }
 
-        return $params[$value];
+        return $value;
     }
 
 

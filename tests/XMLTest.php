@@ -147,4 +147,30 @@ final class XMLTest extends TestCase {
         $this->assertEquals('darkness', (string) $doc->xpath('//ooh')[0]['hello']);
         $this->assertEquals(0, count($doc->xpath('//ahh')));
     }
+
+
+    public function testEnum()
+    {
+        $xml = XML::parse("
+            <path>
+                <to>
+                    <value>1</value>
+                    <value>2</value>
+                    <value>3</value>
+                    <value>???</value>
+                </to>
+            </path>
+        ");
+
+        $map = [
+            '' => 'default',
+            1 => 'one',
+            3 => [3, 3, 3],
+        ];
+
+        $this->assertEquals('one', XML::enum($xml, '/path/to/value[1]', $map));
+        $this->assertEquals('default', XML::enum($xml, '/path/to/value[2]', $map));
+        $this->assertEquals([3, 3, 3], XML::enum($xml, '/path/to/value[3]', $map));
+        $this->assertEquals('default', XML::enum($xml, '/path/to/value[4]', $map));
+    }
 }
