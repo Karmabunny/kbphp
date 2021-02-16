@@ -10,6 +10,11 @@ use DOMDocument;
 use SimpleXMLElement;
 use Throwable;
 
+// Just to be sure.
+if (PHP_VERSION_ID < 80000) {
+    libxml_disable_entity_loader(true);
+}
+
 /**
  * XML helper methods.
  *
@@ -20,15 +25,29 @@ abstract class XML {
     /**
      * Parse an XML document.
      *
-     * This will emit appropriate exception when encountering parsing errors.
+     * Example:
+     * ```
+     * XML::parse($xml_source, [
+     *    'options' => LIBXML_NOCDATA | LIBXML_NOBLANKS,
+     *    'filename' => __DIR__ '/etc.xml',
+     *    'validate' => $xsd_source,
+     * ]);
+     * ```
+     * Config:
+     * - 'filename' include for prettier errors.
+     * - 'options' are an bitwise OR of libxml options.
+     * - 'validate' an XSD file for additional validation.
+     *
+     * @link https://www.php.net/manual/en/libxml.constants.php
      *
      * @param string $source
-     * @param int $options libxml options
+     * @param array $config [options, filename, validate]
      * @return SimpleXMLElement
-     * @throws XMLParseException
+     * @throws XMLException
      */
-    public static function parse(string $source, int $options = 0)
+    public static function parse(string $source, array $config = [])
     {
+
         // I honestly don't care about anyone trying to load entities.
         // It's unsafe and in PHP8+ it's permanently disabled.
         // So if they _really_ want it, they can enable it.
@@ -36,16 +55,55 @@ abstract class XML {
             libxml_disable_entity_loader(true);
         }
 
-        $doc = new DOMDocument();
+        if (!isset($config['options'])) $config['options'] = 0;
+        if (!isset($config['filename'])) $config['filename'] = '<anonymous>';
 
-        try {
-            $doc->loadXML($source, $options);
-        }
-        catch (Throwable $error) {
-            throw new XMLParseException($error->getMessage(), $error->getCode(), $error);
+        $doc = new DOMDocument();
+        $doc->documentURI = $config['filename'];
+
+        libxml_use_internal_errors(true);
+        $doc->loadXML($source, $config['options']);
+        self::collectLibXmlErrors(XMLParseException::class, $doc->documentURI);
+
+        // Conditionally validate it.
+        if ($validate = $config['validate'] ?? null) {
+            libxml_use_internal_errors(true);
+            $doc->schemaValidateSource($validate);
+            self::collectLibXmlErrors(XMLSchemaException::class, $doc->documentURI);
         }
 
         return simplexml_import_dom($doc);
+    }
+
+
+    /**
+     * Convert libxml errors into an exception.
+     *
+     * @param string $type
+     * @param string|null $filename
+     * @return void
+     * @throws XMLException
+     */
+    private static function collectLibXmlErrors(string $type, $filename)
+    {
+        $errors = libxml_get_errors();
+        if (empty($errors)) return;
+
+        // Get the last 'fatal' error on the stack.
+        foreach ($errors as $error) {
+            switch ($error->level) {
+                case LIBXML_ERR_FATAL: break;
+                default: unset($error);
+            }
+        }
+
+        libxml_clear_errors();
+        libxml_use_internal_errors(false);
+
+        if (isset($error)) {
+            if ($filename) $error->file = $filename;
+            throw new $type($error);
+        }
     }
 
 

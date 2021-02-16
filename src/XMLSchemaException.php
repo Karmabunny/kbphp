@@ -9,11 +9,11 @@ namespace karmabunny\kb;
 use LibXMLError;
 
 /**
- * An error when parsing XML.
+ * An error when validating against an XSD schema.
  *
  * @package karmabunny\kb
  */
-class XMLParseException extends XMLException
+class XMLSchemaException extends XMLException
 {
     public function __construct(LibXMLError $error)
     {
