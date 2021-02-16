@@ -79,7 +79,42 @@ final class TimeTest extends TestCase {
         $this->assertEquals('2020-10-16', $dates[4]);
         $this->assertEquals('2020-10-19', $dates[5]);
 
+        // The last entry is truncated.
         $this->assertEquals('2020-10-19', $dates[6]);
         $this->assertEquals('2020-10-20', $dates[7]);
+    }
+
+
+    public function testMonths()
+    {
+        // Feb to Apr, 3 months.
+        $months = Time::months(2021, 2, 4);
+        $months = iterator_to_array($months);
+
+        $this->assertCount(3, $months);
+        $this->assertCount(28, $months[2]);
+        $this->assertCount(31, $months[3]);
+        $this->assertCount(30, $months[4]);
+
+        $this->assertEquals($months[2][1]->format('Y-m-d'), '2021-02-01');
+        $this->assertEquals($months[2][28]->format('Y-m-d'), '2021-02-28');
+
+        $this->assertEquals($months[3][1]->format('Y-m-d'), '2021-03-01');
+        $this->assertEquals($months[3][31]->format('Y-m-d'), '2021-03-31');
+
+        $this->assertEquals($months[4][1]->format('Y-m-d'), '2021-04-01');
+        $this->assertEquals($months[4][30]->format('Y-m-d'), '2021-04-30');
+    }
+
+
+    public function testNow()
+    {
+        $expected = '2020-' . date('m-d');
+        $actual = Time::now(['year' => 2020])->format('Y-m-d');
+        $this->assertEquals($expected, $actual);
+
+        $expected = date('Y-01-01');
+        $actual = Time::now(['month' => 1, 'day' => 1])->format('Y-m-d');
+        $this->assertEquals($expected, $actual);
     }
 }

@@ -21,6 +21,14 @@ abstract class Time
 
     const MYSQL_DATE_FORMAT = 'Y-m-d H:i:s';
 
+    const COMPONENT_MAP = [
+        'year' => 'Y',
+        'month' => 'm',
+        'day' => 'd',
+        'hour' => 'H',
+        'minute' => 'i',
+        'second' => 's',
+    ];
 
     /**
      * Timestamp as an integer in microseconds.
@@ -153,5 +161,109 @@ abstract class Time
 
             $start = $cursor;
         }
+    }
+
+
+    /**
+     * Get groups of months.
+     *
+     * All inputs and outputs are 1-indexed.
+     *
+     * For example:
+     *   Time::months(2021, 1, 12) => January to December
+     *   $months[1] => January
+     *   $months[12] => December
+     *   $months[2][1] => Feb 1st
+     *   $months[2][28] => Feb 28th
+     *
+     * @param int $year
+     * @param int $from 1-indexed, inclusive
+     * @param int $to 1-indexed, inclusive
+     * @return Generator<DateTimeInterface[]>
+     */
+    public static function months(int $year, int $from, int $to)
+    {
+        $cursor = new DateTimeImmutable("{$year}-{$from}-01");
+
+        while ($from <= $to) {
+            $count = (int) $cursor->format('t');
+            $days = [];
+
+            for ($day = 1; $day <= $count; $day++) {
+                $days[$day] = new DateTimeImmutable("{$year}-{$from}-{$day}");
+            }
+
+            yield $from => $days;
+
+            $from += 1;
+            $cursor = new DateTimeImmutable("{$year}-{$from}-01");
+        }
+    }
+
+
+    /**
+     * Get the current date and selectively replace components.
+     *
+     * Example:
+     * ```
+     *   // 'today' is 2021-02-03 14:30:10
+     *   Time::now(['year' => 2000]);
+     *   // => '2000-02-03 14:30:10'
+     *
+     *   // Don't forget that `\date()` does this too:
+     *   date('2000-m-d');
+     *   // => 2000-02-03
+     *
+     *   // But `new DateTime()` does not:
+     *   new DateTime('2000-m-d');
+     *   // => throws error
+     * ```
+     *
+     * Config keys:
+     * - year
+     * - month
+     * - day
+     * - hour
+     * - minute
+     * - second
+     *
+     * @param array|string $config
+     * @return DateTimeImmutable
+     */
+    public static function now($config = []): DateTimeInterface
+    {
+        $now = new DateTimeImmutable();
+
+        foreach (self::COMPONENT_MAP as $key => $format) {
+            if (!isset($config[$key])) {
+                $config[$key] = $now->format($format);
+            }
+        }
+
+        $date = "{$config['year']}-{$config['month']}-{$config['day']}";
+        $time = "{$config['hour']}:{$config['minute']}:{$config['second']}";
+
+        return new DateTimeImmutable("{$date}T{$time}");
+    }
+
+
+    /**
+     * List of week day names (starting from Monday).
+     *
+     * It's a function because it might be i18n later. Idk.
+     *
+     * @return string[]
+     */
+    public static function weekdays(): array
+    {
+        return [
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday',
+            'Sunday',
+        ];
     }
 }
