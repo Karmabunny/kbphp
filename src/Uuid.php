@@ -50,6 +50,15 @@ abstract class Uuid
 
     const V1_RANDOM = 2;
 
+    const NS_DNS = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
+
+    const NS_URL = '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
+
+    const NS_OID = '6ba7b812-9dad-11d1-80b4-00c04fd430c8';
+
+    const NS_X500 = '6ba7b813-9dad-11d1-80b4-00c04fd430c8';
+
+
     /**
      * Get a nil UUID string.
      *
@@ -106,6 +115,23 @@ abstract class Uuid
     {
         // 16 bytes, 8 bits per byte = 128 bits.
         $bytes = self::uuidFromBytes(random_bytes(16), 4);
+        return self::format(bin2hex($bytes));
+    }
+
+
+    /**
+     * Get a valid UUIDv5 string.
+     *
+     * @param string $namespace
+     * @param string $name
+     * @return string
+     * @throws Exception Not enough entropy
+     */
+    public static function uuid5(string $namespace, string $name): string
+    {
+        $bytes = sha1($namespace . $name, true);
+        $bytes = substr($bytes, 0, 16);
+        $bytes = self::uuidFromBytes($bytes, 5);
         return self::format(bin2hex($bytes));
     }
 
