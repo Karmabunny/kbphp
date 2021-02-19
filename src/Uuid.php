@@ -6,8 +6,14 @@
 
 namespace karmabunny\kb;
 
+use Exception;
+
 /**
- * This class provides a minimal implementation of UUIDv4.
+ * This class provides a minimal implementation of UUID.
+ *
+ * Supports:
+ * - UUIDv1
+ * - UUIDv4
  *
  * UUIDs are made of 5 parts.
  *
@@ -40,6 +46,10 @@ namespace karmabunny\kb;
 abstract class Uuid
 {
 
+    const V1_LAZY = 1;
+
+    const V1_RANDOM = 2;
+
     /**
      * Get a nil UUID string.
      *
@@ -52,9 +62,45 @@ abstract class Uuid
 
 
     /**
+     * Get a valid UUIDv1 string.
+     *
+     * Option flags:
+     * - V1_RANDOM - Force random mac address
+     * - V1_LAZY - Use faster/less-accurate datetime
+     *
+     * @param int $options
+     * @return string
+     * @throws Exception Not enough entropy
+     */
+    public static function uuid1($options = 0): string
+    {
+        // 60-bit time in 100ths of nanoseconds
+        $timestamp = self::getSubNanoTime($options & self::V1_LAZY);
+
+        // 48 bit mac, or random.
+        $mac = $options & self::V1_RANDOM
+            ? bindec(random_bytes(6))
+            : hexdec(self::getMacAddress());
+
+        $bytes = pack('NnnnNn',
+            $timestamp,           // high
+            $timestamp >> 32,     // mid
+            $timestamp >> 48,     // low
+            self::getSequence(),  // seq
+            $mac >> 16,           // mac (high 32 bit)
+            $mac                  // mac (low 16 bit)
+        );
+
+        $bytes = self::uuidFromBytes($bytes, 1);
+        return self::format(bin2hex($bytes));
+    }
+
+
+    /**
      * Get a valid UUIDv4 string.
      *
      * @return string
+     * @throws Exception Not enough entropy
      */
     public static function uuid4(): string
     {
@@ -67,7 +113,7 @@ abstract class Uuid
     /**
      * Apply variant mask + versions to a bytes string.
      *
-     * @param string $bytes
+     * @param string $bytes 16-byte string
      * @param int $version
      * @return string also bytes, but with version + variant stuff
      */
@@ -135,7 +181,7 @@ abstract class Uuid
     public static function valid(string $uuid, int $version = null): bool
     {
         // Strip dashes, validate length.
-        $uuid = preg_replace('/[^0-9a-f]/', '', $uuid);
+        $uuid = self::strip($uuid);
         if (strlen($uuid) != 32) return false;
 
         // Empty uids are valid! I guess?
@@ -175,9 +221,91 @@ abstract class Uuid
     {
         if (!self::valid($uuid)) return true;
 
-        $uuid = preg_replace('/[^0-9a-f]/', '', $uuid);
+        $uuid = self::strip($uuid);
         if ($uuid === '00000000000000000000000000000000') return true;
         return false;
+    }
+
+
+    /**
+     * Get a 60-bit timestamp from 15 Oct 1582.
+     *
+     * A little weird, yes.
+     *
+     * @param bool $lazy force using microtime (faster, less accurate)
+     * @return int
+     */
+    private static function getSubNanoTime($lazy = false)
+    {
+        // Unix timestamp of the epoch (negative int).
+        static $epoch;
+        if (!$epoch) {
+            $epoch = (int) (strtotime(date('1582-10-15')) * 1000 * 1000 * 10);
+        }
+
+        // Linux nanoseconds, or microtime fallback.
+        $time = 0;
+
+        if (!$lazy) {
+            $time = (int) (@exec('date +%s%N') / 100);
+        }
+
+        if (!$time) {
+            $time = (int) (microtime(true) * 1000 * 1000 * 10);
+        }
+
+        return $time - $epoch;
+    }
+
+
+    /**
+     * The system mac address, or something random if nothing found.
+     *
+     * Most systems will have an 'ethX' or 'enpXsN' interface.
+     *
+     * @return string
+     * @throws Exception
+     */
+    private static function getMacAddress()
+    {
+        static $mac;
+        if ($mac) return $mac;
+
+        // Take a stab.
+        $paths = glob('/sys/class/net/e*/address');
+        if (empty($paths)) goto give_up;
+
+        $mac = @file_get_contents($paths[0]);
+        if (empty($mac)) goto give_up;
+
+        $mac = self::strip($mac);
+        if (strlen($mac) !== 12) goto give_up;
+        if (hexdec($mac) === 0) goto give_up;
+
+        // Got one!
+        return $mac;
+
+        // Random 6 bytes x 8bits = 48bits
+        give_up:
+        $mac = bin2hex(random_bytes(6));
+        return $mac;
+    }
+
+
+    /**
+     * Get a 'clock sequence'.
+     *
+     * This is a kind of fallback if the datetimes are the same.
+     *
+     * @return int 16-bit number.
+     */
+    private static function getSequence()
+    {
+        static $base;
+        if (!$base) $base = getmypid() ?: 1;
+
+        $base += 1;
+        return $base % 0xffff;
     }
 
 
@@ -188,6 +316,20 @@ abstract class Uuid
     {
         $value = unpack('n', substr($bytes, $offset, 2));
         return (int) $value[1];
+    }
+
+
+    /**
+     * Normalize a hex string.
+     *
+     * Lowercase + numbers, nothing else.
+     *
+     * @param string $hex
+     * @return string
+     */
+    private static function strip(string $hex): string
+    {
+        return preg_replace('/[^0-9a-f]/', '', strtolower($hex));
     }
 
 
