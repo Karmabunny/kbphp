@@ -302,11 +302,16 @@ abstract class Arrays
      * @param array $items
      * @param string $key
      * @param string $name
-     * @return void
+     * @param string|null $select Include a 'choose' option
+     * @return array
      */
-    static function createMap(array $items, string $key, string $name)
+    static function createMap(array $items, string $key, string $name, string $select = null)
     {
         $map = [];
+
+        if ($select) {
+            $map[''] = $select;
+        }
 
         foreach ($items as $item) {
             try {
