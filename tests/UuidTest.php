@@ -24,6 +24,8 @@ final class UuidTest extends TestCase
             $id1 = Uuid::uuid1();
             $id2 = Uuid::uuid1();
 
+            $this->assertEquals(36, strlen($id1));
+            $this->assertEquals(36, strlen($id2));
             $this->assertNotEquals($id1, $id2);
         }
     }
@@ -35,6 +37,8 @@ final class UuidTest extends TestCase
             $id1 = Uuid::uuid1(Uuid::V1_LAZY);
             $id2 = Uuid::uuid1(Uuid::V1_LAZY);
 
+            $this->assertEquals(36, strlen($id1));
+            $this->assertEquals(36, strlen($id2));
             $this->assertNotEquals($id1, $id2);
         }
     }
@@ -47,6 +51,8 @@ final class UuidTest extends TestCase
             $id1 = Uuid::uuid1(Uuid::V1_RANDOM);
             $id2 = Uuid::uuid1(Uuid::V1_RANDOM);
 
+            $this->assertEquals(36, strlen($id1));
+            $this->assertEquals(36, strlen($id2));
             $this->assertNotEquals($id1, $id2);
         }
     }

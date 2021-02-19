@@ -11,12 +11,15 @@ use Exception;
 /**
  * This class provides a minimal implementation of UUID.
  *
+ * **Important!** This will not work on 32-bit systems. You must have a 64-bit
+ * proccessor and 64-bit PHP.
+ *
  * Supports:
  * - UUIDv1
  * - UUIDv4
+ * - UUIDv5
  *
- * UUIDs are made of 5 parts.
- *
+ * UUIDs are made of 5 parts:
  * - 32b - time-low
  * - 16b - time-mid
  * - 16b - time-high-and-version
@@ -46,16 +49,22 @@ use Exception;
 abstract class Uuid
 {
 
+    /** Use less-accurate but faster datetime generation for UUIDv1. */
     const V1_LAZY = 1;
 
+    /** Use a random instead of mac addresses for UUIDv1. */
     const V1_RANDOM = 2;
 
+    /** DNS addresses - hostnames mostly */
     const NS_DNS = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
 
+    /** Full URLs - with all the bits: scheme, host, port, path */
     const NS_URL = '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
 
+    /** Object IDs - like 4.1.2 */
     const NS_OID = '6ba7b812-9dad-11d1-80b4-00c04fd430c8';
 
+    /** ITU x500 namespace */
     const NS_X500 = '6ba7b813-9dad-11d1-80b4-00c04fd430c8';
 
 
@@ -74,8 +83,12 @@ abstract class Uuid
      * Get a valid UUIDv1 string.
      *
      * Option flags:
-     * - V1_RANDOM - Force random mac address
+     * - V1_RANDOM - Force random MAC address
      * - V1_LAZY - Use faster/less-accurate datetime
+     *
+     * These flags _may_ be enabled automatically if support is lacking:
+     * - missing MAC address will fallback to V1_RANDOM mode
+     * - missing hig-precision datetime will fallback to V1_LAZY
      *
      * @param int $options
      * @return string
@@ -86,10 +99,20 @@ abstract class Uuid
         // 60-bit time in 100ths of nanoseconds
         $timestamp = self::getSubNanoTime($options & self::V1_LAZY);
 
-        // 48 bit mac, or random.
-        $mac = $options & self::V1_RANDOM
-            ? bindec(random_bytes(6))
-            : hexdec(self::getMacAddress());
+
+        // Random mac addresses.
+        if ($options & self::V1_RANDOM) {
+            $mac = bindec(random_bytes(6));
+        }
+        else {
+            // 48 bit mac.
+            $mac = hexdec(self::getMacAddress());
+
+            // Random fallback.
+            if (!$mac) {
+                $mac = bindec(random_bytes(6));
+            }
+        }
 
         $bytes = pack('NnnnNn',
             $timestamp,           // high
@@ -125,7 +148,6 @@ abstract class Uuid
      * @param string $namespace
      * @param string $name
      * @return string
-     * @throws Exception Not enough entropy
      */
     public static function uuid5(string $namespace, string $name): string
     {
@@ -254,6 +276,30 @@ abstract class Uuid
 
 
     /**
+     * Does this system have a suitable MAC address.
+     *
+     * @return bool
+     */
+    public static function hasMacAddress(): bool
+    {
+        return self::getMacAddress() !== null;
+    }
+
+
+    /**
+     * Does this system have support for high-precision datetimes?
+     *
+     * This uses the unix `date` command.
+     *
+     * @return bool
+     */
+    public static function hasHighPrecisionDatetime(): bool
+    {
+        return (bool) (@exec('date +%s%N') / 100);
+    }
+
+
+    /**
      * Get a 60-bit timestamp from 15 Oct 1582.
      *
      * A little weird, yes.
@@ -285,12 +331,11 @@ abstract class Uuid
 
 
     /**
-     * The system mac address, or something random if nothing found.
+     * The system mac address.
      *
      * Most systems will have an 'ethX' or 'enpXsN' interface.
      *
-     * @return string
-     * @throws Exception
+     * @return string|null
      */
     private static function getMacAddress()
     {
@@ -299,21 +344,16 @@ abstract class Uuid
 
         // Take a stab.
         $paths = glob('/sys/class/net/e*/address');
-        if (empty($paths)) goto give_up;
+        if (empty($paths)) return null;
 
         $mac = @file_get_contents($paths[0]);
-        if (empty($mac)) goto give_up;
+        if (empty($mac)) return null;
 
         $mac = self::strip($mac);
-        if (strlen($mac) !== 12) goto give_up;
-        if (hexdec($mac) === 0) goto give_up;
+        if (strlen($mac) !== 12) return null;
+        if (hexdec($mac) === 0) return null;
 
         // Got one!
-        return $mac;
-
-        // Random 6 bytes x 8bits = 48bits
-        give_up:
-        $mac = bin2hex(random_bytes(6));
         return $mac;
     }
 
