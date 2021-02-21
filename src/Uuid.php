@@ -55,16 +55,16 @@ abstract class Uuid
     /** Use a random instead of mac addresses for UUIDv1. */
     const V1_RANDOM = 2;
 
-    /** DNS addresses - hostnames mostly */
+    /** DNS addresses - host names mostly */
     const NS_DNS = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
 
-    /** Full URLs - with all the bits: scheme, host, port, path */
+    /** URLs - with all/some the bits: scheme, host, port, path */
     const NS_URL = '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
 
-    /** Object IDs - like 4.1.2 */
+    /** Object IDs - ISO OID - like 4.1.2 */
     const NS_OID = '6ba7b812-9dad-11d1-80b4-00c04fd430c8';
 
-    /** ITU x500 namespace */
+    /** ITU X.500 DN (in DER text output format) */
     const NS_X500 = '6ba7b813-9dad-11d1-80b4-00c04fd430c8';
 
 
