@@ -68,7 +68,7 @@ abstract class Job implements Loggable
      *
      * This is automatically printed in {@see execute()}.
      *
-     * @return array
+     * @return string[]
      */
     public function stats(): array
     {
@@ -88,8 +88,9 @@ abstract class Job implements Loggable
      */
     public static function execute(array $config = [])
     {
-        /** @var Job $job */
         $class = static::class;
+
+        /** @var Job $job */
         $job = new $class($config);
 
         $job->addLogger(function($message) {
