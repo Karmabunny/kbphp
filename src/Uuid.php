@@ -65,7 +65,7 @@ abstract class Uuid
     const NS_OID = '6ba7b812-9dad-11d1-80b4-00c04fd430c8';
 
     /** ITU X.500 DN (in DER text output format) */
-    const NS_X500 = '6ba7b813-9dad-11d1-80b4-00c04fd430c8';
+    const NS_X500 = '6ba7b814-9dad-11d1-80b4-00c04fd430c8';
 
 
     /**
