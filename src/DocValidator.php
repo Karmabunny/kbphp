@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use Exception;
+use Generator;
 use ReflectionClass;
 use ReflectionProperty;
 
@@ -18,13 +19,14 @@ use ReflectionProperty;
  * 2. OR indicate where to find it with the namespaces() function
  *
  * E.g.
- *   /** @var Class //
+ * ```
+ *   // @var Class
  *   public $property;
  *
  *   public function namespaces() {
  *       return [ 'namespace\\to\\' ];
  *   }
- *
+ * ```
  * @package karmabunny\kb
  */
 class DocValidator implements Validator {
@@ -38,7 +40,10 @@ class DocValidator implements Validator {
     /** @var string[] */
     protected $namespaces;
 
+
     /**
+     * Create a new validator.
+     *
      * @param object $target Object to validate.
      */
     public function __construct(object $target)
@@ -53,74 +58,26 @@ class DocValidator implements Validator {
         }
     }
 
+
     /**
      * Validate the target.
      *
      * @return bool True if valid. False if there were errors.
-     * @throws Exception
      */
     public function validate(): bool
     {
-        $class = new ReflectionClass($this->target);
-        $properties = $class->getProperties(ReflectionProperty::IS_PUBLIC);
-
+        // Start fresh.
         $this->errors = [];
 
-        foreach ($properties as $property) {
-            if ($property->isStatic()) continue;
-
-            $comment = $property->getDocComment();
-            $types = self::parseVar($comment);
-            if ($types === false) continue;
-
-            $name = $property->getName();
-            $value = $property->getValue($this->target);
-
-            $actual = self::getType($value);
-            if ($actual === false) {
-                throw new Exception("Property value '{$name}' has an unknown type.");
-                continue;
-            }
-
-            // Special message for 'required' properties.
-            if ($actual === 'null' && !in_array('null', $types)) {
-                $this->errors[$name] = ['required' => 'Property is required.'];
-                continue;
-            }
-
-            foreach ($types as $expected) {
-                if ($expected === 'float' and $actual === 'int') {
-                    continue 2;
-                }
-
-                if ($expected === 'true' and $value === true) {
-                    continue 2;
-                }
-
-                if ($expected === 'false' and $value === false) {
-                    continue 2;
-                }
-
-                if ($expected === $actual) {
-                    continue 2;
-                }
-
-                if ($this->classExists($expected) and $value instanceof $expected) {
-                    continue 2;
-                }
-
-                if ($actual === 'array' and $this->isArray($expected, $value)) {
-                    continue 2;
-                }
-            }
-
-            // Still here? Must be broken.
-            $expected = implode('|', $types);
-            $this->errors[$name] = ["Property is {$actual} instead of {$expected}."];
+        // For all doc properties.
+        foreach (self::getDocTypes($this->target) as $type) {
+            $this->checkRequired($type);
+            $this->checkTypes($type);
         }
 
         return !$this->hasErrors();
     }
+
 
     /**
      * True if there were any validation errors.
@@ -132,8 +89,10 @@ class DocValidator implements Validator {
         return !empty($this->errors);
     }
 
+
     /**
      * Get a list of all errors, indexed by property name.
+     *
      * Field may have multiple errors defined.
      *
      * @return array
@@ -143,23 +102,219 @@ class DocValidator implements Validator {
         return $this->errors;
     }
 
+
     /**
-     * Determine if this class exists.
+     * Check if the doc type is required.
+     *
+     * This will add invalid types to the errors.
+     *
+     * @param DocType $type
+     * @return bool True if valid.
+     */
+    public function checkRequired(DocType $type): bool
+    {
+        $actual = $type->getValueType();
+        $expected = $type->getCommentTypes();
+
+        if ($actual === 'null' and !in_array('null', $expected)) {
+            $this->errors[$type->name]['required'] = 'Property is required.';
+            return false;
+        }
+
+        return true;
+    }
+
+
+    /**
+     * Check the validity of a doc type.
+     *
+     * This will add invalid types to the errors.
+     *
+     * @param DocType $type
+     * @return bool True if valid.
+     */
+    public function checkTypes(DocType $type): bool
+    {
+        $actual = $type->getValueType();
+        $expected_types = $type->getCommentTypes();
+
+        // Loop over all the doc types.
+        // If just one of them matches then we're golden.
+        foreach ($expected_types as &$expected) {
+            // echo "valid: {$type->name} - $expected was $actual\n";
+            if ($this->isValid($expected, $type->value)) {
+                return true;
+            }
+
+            // Rewrite invalid classes with full names.
+            if ($class = $this->lookupClass($expected)) {
+                $expected = '\\' . trim($class, '\\');
+            }
+        }
+
+        // Still here? Must be invalid.
+        $expected = implode('|', $expected_types);
+        $this->errors[$type->name][] = "Expected {$expected} instead of {$actual}.";
+
+        return false;
+    }
+
+
+    /**
+     * Get a list of 'doc types' of an object.
+     *
+     * @param object $target
+     * @return Generator<DocType>
+     */
+    public static function getDocTypes($target): Generator
+    {
+        $class = new ReflectionClass($target);
+        $properties = $class->getProperties(ReflectionProperty::IS_PUBLIC);
+
+        foreach ($properties as $property) {
+            if ($property->isStatic()) continue;
+
+            $name = $property->getName();
+            $comment = $property->getDocComment() ?: '';
+            $value = $property->getValue($target);
+
+            yield new DocType([
+                'name' => $name,
+                'comment' => $comment,
+                'value' => $value,
+            ]);
+        }
+    }
+
+
+    /**
+     * Determine if the 'value' and 'actual' type match the 'expected' type.
+     *
+     * This does not modify the errors.
+     *
+     * @param string $expected type name
+     * @param mixed $value real value
+     * @return bool True if valid.
+     */
+    protected function isValid(string $expected, $value): bool
+    {
+        if ($value === null and $expected === 'null') {
+            return true;
+        }
+
+        // Number checks are special.
+        // $value is one of: string, int, float.
+        if (is_numeric($value)) {
+
+            // Expectant ints can floats as long as they're 'whole'.
+            if ($expected === 'int' and floatval($value) == intval($value)) {
+                return true;
+            }
+
+            // Expectant floats can receive anything.
+            if ($expected === 'float') {
+                return true;
+            }
+        }
+
+        if (is_string($value) and $expected === 'string') {
+            return true;
+        }
+
+        if (is_bool($value) and $expected === 'bool') {
+            return true;
+        }
+
+        if ($value === true and $expected === 'true') {
+            return true;
+        }
+
+        if ($value === false and $expected === 'false') {
+            return true;
+        }
+
+        if (
+            is_object($value) and
+            ($class = $this->lookupClass($expected)) and
+            $value instanceof $class
+        ) {
+            return true;
+        }
+
+        if (
+            is_array($value) and
+            $this->isValidArray($expected, $value)
+        ) {
+            return true;
+        }
+
+        if (is_resource($value) and $expected === 'resource') {
+            return true;
+        }
+
+        return false;
+    }
+
+
+    /**
+     * Determine if all items of an array match the expected type.
+     *
+     * This does not modify the errors.
+     *
+     * @param string $expected type name
+     * @param array $values list of real array values.
+     * @return bool True if valid.
+     */
+    protected function isValidArray(string $expected, array $values): bool
+    {
+        // Get the item type - like item[].
+        // Strip the [] bit.
+        $matches = [];
+        if (!preg_match('/^(.+)\[\]$/', $expected, $matches)) return false;
+        $expected = $matches[1];
+
+        // This is _slightly_ different to the loop in checkTypes().
+        // This halts when there is an invalid type.
+        foreach ($values as $value) {
+            // Prevent recursion - we're only going 1-level deep.
+            if (is_array($value) and $expected === 'array') {
+                continue;
+            }
+            if (is_array($value) or $expected === 'array') {
+                return false;
+            }
+
+            // Jump in.
+            if (!$this->isValid($expected, $value)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+    /**
+     * Determine the full namespaced version of this class.
      *
      * Unfortunately, if the typed comment has no namespace we can't magically
-     * get the namespace of that class. So users must specify a namespaces()
-     * function with a list of possible namespaces in which classes can exist.
+     * get the namespace of that class. At least, not without triggering the
+     * autoloader in some way.
+     *
+     * So users must specify a `namespaces()` method in which classes may exist.
      *
      * Alternatively, put the whole namespaced class name in the doc comment.
      *
      * @param string $name
-     * @return string|false
+     * @return string|null null if not found.
      */
-    public function classExists(string &$name)
+    protected function lookupClass(string $name)
     {
+        if (!trim($name)) return null;
+
         // Look up classes with namespaces.
-        if (preg_match('/\/\//', $name) !== false) {
-            return class_exists($name) ? $name : false;
+        if (strpos('/\/\//', $name) !== false) {
+            return class_exists($name) ? $name : null;
         }
 
         // Search within our defined namespaces.
@@ -172,116 +327,6 @@ class DocValidator implements Validator {
         // Search for built-ins.
         if (class_exists($name)) return $name;
 
-        return false;
+        return null;
     }
-
-
-    /**
-     *
-     * @param string $expected
-     * @param mixed $list
-     * @return bool
-     */
-    public function isArray(string $expected, $list): bool
-    {
-        $actual = self::getType($list);
-
-        if ($actual !== 'array') return false;
-        if ($expected === 'array') return true;
-
-        // Get the item type.
-        $matches = [];
-        if (preg_match('/^([^\[]+)\[\]$/', $expected, $matches) === false) return false;
-        $expected = $matches[1];
-
-        foreach ($list as $value) {
-            $actual = self::getType($value);
-
-            if ($expected === 'float' and $actual === 'int') {
-                continue;
-            }
-
-            if ($expected === 'true' and $value === true) {
-                continue;
-            }
-
-            if ($expected === 'false' and $value === false) {
-                continue;
-            }
-
-            if ($expected === $actual) {
-                continue;
-            }
-
-            if ($this->classExists($expected) and $value instanceof $expected) {
-                continue;
-            }
-
-            // Nothing? Well it's invalid then.
-            return false;
-        }
-
-        return true;
-    }
-
-
-    /**
-     * Extract the types from a doc comment.
-     *
-     * Like: `@var type1|type2`
-     * Returns an array of all type strings.
-     *
-     * @param string|false $comment
-     * @return string[]|false False if invalid.
-     */
-    public static function parseVar($comment)
-    {
-        if ($comment === false) return false;
-
-        $matches = [];
-        if (preg_match('/@var\s+([^\s]+)/', $comment, $matches) === false) {
-            return false;
-        };
-
-        list($_, $var) = $matches;
-        return explode('|', $var);
-    }
-
-
-    /**
-     * Determine the type of a value.
-     *
-     * Because gettype() is deprecated apparently? But also it doesn't reflect
-     * the type names anyway.
-     *
-     * @param mixed $value
-     * @return string|false False if the type is unknown.
-     */
-    public static function getType($value)
-    {
-        if ($value === null) {
-            return 'null';
-        }
-        if (is_bool($value)) {
-            return 'bool';
-        }
-        if (is_int($value)) {
-            return 'int';
-        }
-        if (is_float($value)) {
-            return 'float';
-        }
-        if (is_string($value)) {
-            return 'string';
-        }
-        if (is_object($value)) {
-            return 'object';
-        }
-        if (is_array($value)) {
-            return 'array';
-        }
-
-        return false;
-    }
-
 }

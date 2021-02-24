@@ -15,23 +15,21 @@ use PHPUnit\Framework\TestCase;
  */
 final class DocValidatorTest extends TestCase {
 
-    public static function thingo()
+    private static function createThing()
     {
         return new DocThing([
-            'id' => 111,
-            'amount' => 222.22,
-            'scalar' => 4.44,
-            'nope' => 5,
-            'okay' => '666',
-            'another' => 777,
-            'class' => new Collection([]),
+            'id' => '111',
+            'decimal' => 4.44,
+            'integer' => 5,
+            'generic' => '777',
+            'list' => [],
+            'object' => new Collection([]),
         ]);
     }
 
-
     public function testGood()
     {
-        $thing = self::thingo();
+        $thing = self::createThing();
         $thing->validate();
         $this->assertTrue(true);
     }
@@ -48,10 +46,11 @@ final class DocValidatorTest extends TestCase {
         catch (ValidationException $exception) {
             $expected = [
                 'id',
-                'scalar',
-                'nope',
-                'okay',
-                'another',
+                'decimal',
+                'integer',
+                'generic',
+                'list',
+                'object',
             ];
 
             $this->assertEquals($expected, array_keys($exception->errors));
@@ -65,7 +64,7 @@ final class DocValidatorTest extends TestCase {
     public function testInteger()
     {
         try {
-            $thing = self::thingo();
+            $thing = self::createThing();
             $thing->id = 123.123;
             $thing->validate();
 
@@ -74,7 +73,7 @@ final class DocValidatorTest extends TestCase {
         catch (ValidationException $exception) {
             $this->assertEquals(['id'], array_keys($exception->errors));
 
-            $expected = "Property is float instead of int.";
+            $expected = 'Expected int instead of float.';
             $this->assertEquals($expected, $exception->errors['id'][0]);
         }
     }
@@ -82,29 +81,54 @@ final class DocValidatorTest extends TestCase {
 
     public function testFloat()
     {
-        $thing = self::thingo();
-        $thing->amount = 1;
-        $thing->scalar = 0;
+        $thing = self::createThing();
+
+        // integers are okay.
+        $thing->optional = 1;
         $thing->validate();
-        $this->assertTrue(true);
+
+        // strings are okay.
+        $thing->decimal = '0.1';
+        $thing->validate();
+
+        // Empty strings are not ok.
+        try {
+            $thing->decimal = '';
+            $thing->validate();
+            $this->fail('Expected ValidationException.');
+        }
+        catch (ValidationException $exception) {
+            $this->assertEquals(['decimal'], array_keys($exception->errors));
+        }
+
+        // Rando strings are not ok.
+        try {
+            $thing->decimal = 'asdf';
+            $thing->validate();
+            $this->fail('Expected ValidationException.');
+        }
+        catch (ValidationException $exception) {
+            $this->assertEquals(['decimal'], array_keys($exception->errors));
+        }
     }
 
 
     public function testObject()
     {
         try {
-            $thing = self::thingo();
+            $thing = self::createThing();
             $thing->object = new \stdClass();
             $thing->local = new \stdClass();
             $thing->validate();
         }
         catch (ValidationException $exception) {
+            // echo print_r($exception->errors, true), PHP_EOL;
             $this->assertEquals(['object', 'local'], array_keys($exception->errors));
 
-            $expected = "Property is object instead of karmabunny\\kb\\Collection|null.";
+            $expected = "Expected \karmabunny\\kb\\Collection instead of \stdClass.";
             $this->assertEquals($expected, $exception->errors['object'][0]);
 
-            $expected = "Property is object instead of Collection|null.";
+            $expected = "Expected \karmabunny\\kb\\Collection|null instead of \stdClass.";
             $this->assertEquals($expected, $exception->errors['local'][0]);
         }
     }
@@ -112,11 +136,17 @@ final class DocValidatorTest extends TestCase {
 
     public function testList()
     {
-        $thing = self::thingo();
+        $thing = self::createThing();
+
+        // integer list - ok
         $thing->list = [1,2,3];
         $thing->validate();
-        $this->assertTrue(true);
 
+        // integer strings - ok
+        $thing->list = ['1', '2', '123'];
+        $thing->validate();
+
+        // Wrong type - string
         try {
             $thing->list = 'string thing';
             $thing->validate();
@@ -125,7 +155,21 @@ final class DocValidatorTest extends TestCase {
         catch (ValidationException $exception) {
             $this->assertEquals(['list'], array_keys($exception->errors));
 
-            $expected = 'Property is string instead of int[]|null.';
+            $expected = 'Expected int[] instead of string.';
+            $actual = $exception->errors['list'][0];
+            $this->assertEquals($expected, $actual);
+        }
+
+        // Wrong item type - string[]
+        try {
+            $thing->list = ['one', 'two', 'three'];
+            $thing->validate();
+            $this->fail('Expected ValidationException.');
+        }
+        catch (ValidationException $exception) {
+            $this->assertEquals(['list'], array_keys($exception->errors));
+
+            $expected = 'Expected int[] instead of string[].';
             $actual = $exception->errors['list'][0];
             $this->assertEquals($expected, $actual);
         }
@@ -140,30 +184,27 @@ class DocThing extends Collection implements Validates {
     public $id;
 
     /** @var float|null optional */
-    public $amount;
+    public $optional;
 
     /** @var int */
     public $default = 333;
 
     /** @var float */
-    public $scalar;
+    public $decimal;
 
     /** @var int */
-    public $nope;
+    public $integer;
 
-    /** @var string|int */
-    public $okay;
+    /** @var array|string */
+    public $generic;
 
-    /** @var string|int */
-    public $another;
-
-    /** @var int[]|null */
+    /** @var int[] */
     public $list;
 
-    /** @var karmabunny\kb\Collection|null */
+    /** @var karmabunny\kb\Collection */
     public $object;
 
-    /** @var Collection|null */
+    /** @var Collection|null optional */
     public $local;
 
     public static function namespaces(): array
