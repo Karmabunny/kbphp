@@ -21,42 +21,52 @@ trait RulesValidatorTrait
     /**
      * Specify validators to run across the object properties.
      *
-     * There are two syntaxes:
+     * The syntax is as follow:
      *
-     * 1. bulk validation
-     *    - doesn't support validator arguments
-     *    - only supports string callables (because it's a key)
+     * ```
+     * // A built-in rule from the 'Validity' class.
+     * 'rule-name' => ['field1', 'field2']
      *
-     * 2. per field validation
-     *    - supports validator arguments
-     *    - supports array and inline callables
+     * // A custom validity class.
+     * 'exotic-rule' => ['field1', 'field2'],
+     * 'validity' => MyValidity::class,
+     *
+     * // Specifying rule arguments.
+     * 'rule-name' => ['field1', 'field2', 'args' => [0, 10]]
+     *
+     * // A custom inline validator.
+     * 'rule-name' => ['field1', 'field2', 'func' => 'trim']
+     * ```
      *
      * Special rules exist for 'validity' and 'required':
      *
-     * - 'validity' will switch out the Validity helper class for a custom one.
-     *   This provides namespace free validations.
+     * The 'validity' rule will switch out the Validity helper class for a
+     * custom one. It's probably best to inherit the built-in Validity class
+     * so you don't break any inherited rules.
      *
-     * - 'required' is a RulesValidator method and any 'required' methods in
-     *   the given validity helper will be ignored.
+     * ```
+     * 'validity' => Validity:class
+     * ```
      *
-     * E.g.
-     * [
-     *     // Settings and special options.
-     *     'validity' => Validity::class,
-     *     'required' => ['field1', 'field2'],
-     *     // TODO trim
+     * The 'required' rule cannot accept 'args' or 'func'.
      *
-     *     // Bulk validation.
-     *     '\\namespace\\function' => ['field1', 'field2'],
-     *     'validityFunction' => ['field1', 'field2'],
+     * ```
+     * 'required' => ['field1', 'field2']
+     * ```
      *
-     *     // Per field validation.
-     *     ['field1', '\\namespace\\function', 'arg1', 'arg2', ...],
-     *     ['field2', [Namespace::class, 'function'], 'arg1', 'arg2', ...],
-     *     ['field3', function($value) {
-     *         throw ValidityError('oh noooo');
-     *     }],
-     * ]
+     * Custom inline validators will ignore the 'rule-name'. You can instead
+     * use this as a sort of ID to reuse the in inherited classes.
+     *
+     * ```
+     * // Parent class.
+     * 'my-rule' => ['field1', 'func' => 'trim']
+     *
+     * // Child class.
+     * $rules = parent::rules($scenario);
+     * $rules['my-rule'][] = 'field2';
+     * ```
+     *
+     * Refer to the {@see Validity} class for more about validator functions.
      *
      * @return array
      */
