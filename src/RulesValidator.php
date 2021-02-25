@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use ArrayAccess;
+use ArrayObject;
 use Exception;
 use InvalidArgumentException;
 
@@ -28,7 +29,6 @@ use InvalidArgumentException;
  *
  *    if ($valid->hasErrors()) {
  *        $_SESSION['register']['field_errors'] = $valid->getFieldErrors();
- *        $valid->createNotifications();
  *        Url::redirect('user/register');
  *    }
  * @example
@@ -42,7 +42,6 @@ use InvalidArgumentException;
  *
  *    if ($valid->hasErrors()) {
  *        $_SESSION['course_edit']['field_errors'] = $valid->getFieldErrors();
- *        $valid->createNotifications();
  *        $has_error = true;
  *    }
  *
@@ -68,7 +67,6 @@ use InvalidArgumentException;
  *
  *        if ($multi_valid->hasErrors()) {
  *            $_SESSION['course_edit']['field_errors']['multiedit_students'][$idx] = $multi_valid->getFieldErrors();
- *            $multi_valid->createNotifications();
  *            $has_error = true;
  *        }
  *    }
@@ -117,12 +115,20 @@ class RulesValidator implements Validator
 
 
     /**
-     * @param array|ArrayAccess $data Data to validate
+     * @param array|object $data Data to validate
      */
     public function __construct($data, array $rules = [])
     {
+        if (is_array($data) or $data instanceof ArrayAccess) {
+            $this->data = $data;
+        }
+        else {
+            // An object with no ArrayAccess, so we're wrapping it up!
+            // It's easier to just use a Collection - so please do.
+            $this->data = new ArrayObject($data, ArrayObject::STD_PROP_LIST | ArrayObject::ARRAY_AS_PROPS);
+        }
+
         $this->labels = null;
-        $this->data = $data;
         $this->rules = $rules;
         $this->field_errors = [];
         $this->general_errors = [];
@@ -144,7 +150,7 @@ class RulesValidator implements Validator
     /**
      * Update the data to validate
      *
-     * @param array|ArrayAccess $data Data to validate
+     * @param array|object $data Data to validate
      */
     public function setData($data)
     {

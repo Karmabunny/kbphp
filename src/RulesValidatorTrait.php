@@ -11,15 +11,13 @@ use Exception;
 /**
  * Use validator functions to validate properties.
  *
- * RulesValidator uses array access, so an ArrayAccess interface is also enforced.
- *
  * @see RulesValidator
  * @see Validity
  *
  * @package karmabunny\kb
  */
-trait RulesValidatorTrait {
-
+trait RulesValidatorTrait
+{
     /**
      * Specify validators to run across the object properties.
      *
@@ -63,14 +61,6 @@ trait RulesValidatorTrait {
      * @return array
      */
     public abstract function rules(string $scenario = null): array;
-
-    public abstract function offsetExists($offset);
-
-    public abstract function offsetGet($offset);
-
-    public abstract function offsetSet($offset, $value);
-
-    public abstract function offsetUnset($offset);
 
 
     /**
