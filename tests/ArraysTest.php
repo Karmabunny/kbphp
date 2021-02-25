@@ -255,6 +255,14 @@ final class ArraysTest extends TestCase {
                         'stuff',
                     ],
                 ],
+                // Mixed numeric/associated keys.
+                // This will only appear for a query: 'one.messy.*'
+                // And not in: 'one.id' or 'one.name'
+                'messy' => [
+                    'id' => 789,
+                    'name' => 'ghi',
+                    'boy' => 'seems ok',
+                ],
             ],
             'two' => 'neat!',
             'three' => null,
@@ -342,6 +350,15 @@ final class ArraysTest extends TestCase {
         $actual = Arrays::value($array, 'one.property');
         $expected = ['oh', 'cool', 'stuff'];
         $this->assertEquals($expected, $actual);
+
+
+        // Mixed numeric/associated arrays.
+        $actual = Arrays::value($array, 'one.messy.boy');
+        $expected = 'seems ok';
+        $this->assertEquals($expected, $actual);
+
+        $actual = Arrays::value($array, 'one.boy');
+        $this->assertNull($actual);
 
 
         // Numeric keys aren't a thing.

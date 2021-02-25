@@ -305,14 +305,15 @@ abstract class Arrays
         // At this point it doesn't matter the value type. Anything works.
         if (!strlen($query)) return $value;
 
-        // Presented with a _numeric_ array, we look for the key in each item.
-        if (self::isNumeric($value)) {
+        // Presented with an array, pick out the numeric bits, if any.
+        if (is_array($value)) {
             $values = [];
 
-            foreach ($value as $item) {
-                $item = self::value($item, $query);
+            foreach ($value as $key => $item) {
+                if (!is_numeric($key)) continue;
+                if ($item === null) continue;
 
-                // Skip empty values.
+                $item = self::value($item, $query);
                 if ($item === null) continue;
 
                 // Nested numeric arrays are merged and flattened.
@@ -325,10 +326,11 @@ abstract class Arrays
                 }
             }
 
-            // This surprisingly doesn't cause a mess.
-            if (empty($values)) return null;
-
-            return $values;
+            // Only if we got what we want, otherwise defer to the
+            // recursive associated method (below).
+            if (!empty($values)) {
+                return $values;
+            }
         }
 
         // Recurse on.
