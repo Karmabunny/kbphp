@@ -19,30 +19,39 @@ trait DocValidatorTrait {
 
 
     /**
+     * Validate this scenario (or default).
+     *
+     * This will throw if invalid or pass silently if valid.
+     *
+     * @param string|null $scenario null for default.
      *
      * @return void
      * @throws ValidationException
-     * @throws Exception
      */
-    public function validate()
+    public function validate(string $scenario = null)
     {
-        $valid = new DocValidator($this);
-        if (!$valid->validate()) {
-            throw (new ValidationException)
-                ->addErrors($valid->getErrors());
+        $errors = $this->valid($scenario);
+        if ($errors !== true) {
+            throw (new ValidationException)->addErrors($errors);
         }
     }
 
 
     /**
+     * Validate this scenario (or default).
      *
-     * @return bool
+     * @param string|null $scenario null for default.
+     * @return array|true True if valid, errors array if invalid.
      * @throws Exception
      */
-    public function valid()
+    public function valid(string $scenario = null)
     {
         $valid = new DocValidator($this);
-        return $valid->validate();
+        if (!$valid->validate()) {
+            return $valid->getErrors();
+        }
+
+        return true;
     }
 }
 

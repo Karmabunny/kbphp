@@ -42,6 +42,6 @@ interface Validates {
      *
      * @throws ValidationException
      */
-    public function validate();
+    public function validate(string $scenario = null);
 
 }

@@ -62,7 +62,7 @@ trait RulesValidatorTrait {
      *
      * @return array
      */
-    public abstract function rules(): array;
+    public abstract function rules(string $scenario = null): array;
 
     public abstract function offsetExists($offset);
 
@@ -74,31 +74,38 @@ trait RulesValidatorTrait {
 
 
     /**
+     * Validate this scenario (or default).
      *
+     * This will throw if invalid or pass silently if valid.
+     *
+     * @param string|null $scenario null for default.
      * @return void
      * @throws Exception
      * @throws ValidationException
      */
-    public function validate() {
-        $rules = $this->rules();
-        $valid = new RulesValidator($this, $rules);
-
-        if (!$valid->validate()) {
-            throw (new ValidationException)
-                ->addErrors($valid->getErrors());
+    public function validate(string $scenario = null) {
+        $errors = $this->valid($scenario);
+        if ($errors !== true) {
+            throw (new ValidationException)->addErrors($errors);
         }
     }
 
 
     /**
+     * Validate this scenario (or default).
      *
-     * @return bool
+     * @param string|null $scenario null for default.
+     * @return array|true True if valid, errors array if invalid.
      * @throws Exception
      */
-    public function valid(): bool
+    public function valid(string $scenario = null)
     {
-        $rules = $this->rules();
+        $rules = $this->rules($scenario);
         $valid = new RulesValidator($this, $rules);
-        return $valid->validate();
+
+        if (!$valid->validate()) {
+            return $valid->getErrors();
+        }
+        return true;
     }
 }
