@@ -181,6 +181,7 @@ class RulesValidator implements Validator
         $this->labels[$field] = $label;
     }
 
+
     /**
      * Set the validity helper.
      *
@@ -188,8 +189,12 @@ class RulesValidator implements Validator
      */
     public function setValidity(string $class)
     {
+        if (!class_exists($class)) {
+            throw new Exception("Invalid validity class: {$class}");
+        }
         $this->validity = $class;
     }
+
 
     /**
      * For a given function, search if it exists in the {@see Validity} class.
@@ -197,12 +202,11 @@ class RulesValidator implements Validator
      * @param callable|string $func The function to expand.
      * @return callable|false False if not callable.
      */
-    protected function expandNs(&$func)
+    protected function expandNs($func)
     {
         // Check for methods on a validity class first.
         $expanded = [$this->validity, $func];
         if (is_callable($expanded)) {
-            $func = $expanded;
             return $expanded;
         }
 
@@ -232,37 +236,57 @@ class RulesValidator implements Validator
             unset($rules['validity']);
         }
 
-        foreach ($rules as $key => $args) {
-            // [field, func, ...args].
-            if (is_int($key)) {
-                $field = array_shift($args);
-                $func = array_shift($args);
+        foreach ($rules as $rule => $fields) {
+            unset($func);
 
-                if ($func === 'required') {
-                    $this->required([$field]);
-                }
-                else {
-                    $this->check($field, $func, ...$args);
-                }
+            // Required validations are a bit special.
+            if ($rule === 'required') {
+                $this->required($fields);
+                continue;
             }
-            // Special condition for required fields.
-            else if ($key === 'required') {
-                $this->required($args);
-            }
-            // func => [fields]
-            else if (is_array($args)) {
-                foreach ($args as $field) {
-                    $this->check($field, $key);
+
+            // Look for custom validators first.
+            if ($func = @$fields['func']) {
+                unset($fields['func']);
+
+                if (!is_callable($func)) {
+                    throw new Exception("Invalid custom rule: {$rule} - {$func}");
                 }
             }
-            // Ah what!
+            // Then check built-in validators.
+            else if ($func = $this->expandNs($rule)) {
+                $func = $this->expandNs($rule);
+                // Uh. nothing.
+            }
             else {
-                // TODO should this be a ValidationException?
-                throw new Exception("Invalid validator rule: {$key}");
+                throw new Exception("Unknown rule: {$rule}");
+            }
+
+            // Get args.
+            $args = $fields['args'] ?? [];
+            unset($fields['args']);
+
+            foreach ($fields as $field) {
+                $value = $this->data[$field] ?? null;
+
+                // Empty field are valid - these are checked by required.
+                if ($value === null) continue;
+                if (self::isEmpty($value)) continue;
+
+                try {
+                    // We're also re-writing the value if not-null.
+                    // This lets built-ins like 'trim' do their thing.
+                    if ($value = $func($value, ...$args)) {
+                        $this->data[$field] = $value;
+                    }
+                }
+                catch (ValidationException $ex) {
+                    $this->addFieldError($field, $ex->getMessage());
+                }
             }
         }
 
-        return !$this->hasErrors();
+        return empty($this->field_errors);
     }
 
 
@@ -334,7 +358,7 @@ class RulesValidator implements Validator
             throw new InvalidArgumentException("Field <{$field_name}> is not an array");
         }
 
-        $this->expandNs($func);
+        $func = $this->expandNs($func);
 
         $args = func_get_args();
         array_shift($args);
