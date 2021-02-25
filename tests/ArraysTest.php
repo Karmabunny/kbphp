@@ -262,6 +262,9 @@ final class ArraysTest extends TestCase {
                     'id' => 789,
                     'name' => 'ghi',
                     'boy' => 'seems ok',
+                    'list' => [[ 'flat' => [ 'ola' ] ]],
+                    'not_flat' => [[[ 'hi' ]]],
+                    'no_dice' => [[[ 'find' => 'me' ]]],
                 ],
             ],
             'two' => 'neat!',
@@ -342,11 +345,12 @@ final class ArraysTest extends TestCase {
 
         // Collect a nested numeric list.
         $actual = Arrays::value($array, 'one.nested.list');
-        $expected = [1,2,3,4,5,6,7];
+        $expected = [ [1,2,3], [4,5,6,7] ];
         $this->assertEquals($expected, $actual);
 
 
         // This one only exists in the second item, but is easily accessed.
+        // The result is flattened because there is only one result.
         $actual = Arrays::value($array, 'one.property');
         $expected = ['oh', 'cool', 'stuff'];
         $this->assertEquals($expected, $actual);
@@ -359,6 +363,20 @@ final class ArraysTest extends TestCase {
 
         $actual = Arrays::value($array, 'one.boy');
         $this->assertNull($actual);
+
+
+        // More flattening.
+        $actual = Arrays::value($array, 'one.messy.list.flat');
+        $expected = ['ola'];
+        $this->assertEquals($expected, $actual);
+
+        $actual = Arrays::value($array, 'one.messy.not_flat');
+        $expected = [[['hi']]];
+        $this->assertEquals($expected, $actual);
+
+        $actual = Arrays::value($array, 'one.messy.no_dice.find_me');
+        $this->assertNull($actual);
+
 
 
         // Numeric keys aren't a thing.

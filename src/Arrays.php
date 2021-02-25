@@ -316,14 +316,12 @@ abstract class Arrays
                 $item = self::value($item, $query);
                 if ($item === null) continue;
 
-                // Nested numeric arrays are merged and flattened.
-                if (self::isNumeric($item)) {
-                    array_push($values, ...$item);
-                }
-                // Nested associated arrays are not.
-                else {
-                    $values[] = $item;
-                }
+                $values[] = $item;
+            }
+
+            // Cheeky flatten for single item arrays.
+            while (count($values) === 1 and is_array(@$values[0])) {
+                $values = $values[0];
             }
 
             // Only if we got what we want, otherwise defer to the
