@@ -268,13 +268,30 @@ abstract class Arrays
      * It's a funny concept, but quite powerful.
      *
      * For example, given an array like:
+     * ```
      * [
-     *    [ 'subitem' => 123 ],
-     *    [ 'subitem' => 456 ],
+     *    'items' => [
+     *      [ 'subitem' => [ 'id' => 123, 'list' => [1,2,3] ] ],
+     *      [ 'subitem' => [ 'id' => 456, 'list' => [4,5,6] ] ],
+     *    ],
+     *    'options' => [
+     *       'host' => 'localhost',
+     *       'port' => 5060,
+     *    ]
      * ]
-     * A query `subitem.id` would return:
-     * [ 123, 456 ]
      *
+     * // A query `items.subitem.id` would return:
+     * => [ 123, 456 ]
+     *
+     * // Or `items.subitem.list`:
+     * => [ [1, 2, 3], [4, 5, 6] ]
+     *
+     * // Perhaps `options`:
+     * => [ 'host' => 'localhost', 'port' => '5060' ]
+     *
+     * // And `options.host`:
+     * => 'localhost'
+     * ```
      *
      * @param array $array
      * @return mixed
