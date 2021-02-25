@@ -244,6 +244,21 @@ abstract class Arrays
     }
 
 
+    /**
+     * Query an array.
+     *
+     * @see Arrays::value()
+     * @deprecated use Arrays::value()
+     *
+     * @param array|ArrayAccess $array
+     * @param string $query
+     * @return mixed
+     */
+    static function getValue($array, string $query)
+    {
+        return self::value($array, $query);
+    }
+
 
     /**
      * Query an array.
@@ -258,11 +273,10 @@ abstract class Arrays
      * A query `subitem.id` would return:
      * [ 123, 456 ]
      *
-     *
      * @param array|ArrayAccess $array
      * @return mixed
      */
-    static function getValue($array, string $query)
+    static function value($array, string $query)
     {
         // Pull apart the query, get our bit, stitch it back together.
         $parts = explode('.', $query);
@@ -281,13 +295,13 @@ abstract class Arrays
         if (is_iterable($value)) {
             $values = [];
             foreach ($value as $item) {
-                $values[] = self::getValue($item, $query);
+                $values[] = self::value($item, $query);
             }
             return $values;
         }
 
         // Recurse on.
-        return self::getValue($value, $query);
+        return self::value($value, $query);
     }
 
 
