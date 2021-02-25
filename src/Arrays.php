@@ -218,11 +218,13 @@ abstract class Arrays
      *
      * Opposite of isAssociated().
      *
-     * @param array $array
+     * @param mixed $array
      * @return bool
      */
-    static function isNumeric(array $array): bool
+    static function isNumeric($array): bool
     {
+        if (!is_array($array)) return false;
+
         foreach ($array as $key => $_) {
             if (!is_int($key)) return false;
         }
@@ -235,10 +237,10 @@ abstract class Arrays
      *
      * Opposite of isNumeric().
      *
-     * @param array $array
+     * @param mixed $array
      * @return bool
      */
-    static function isAssociated(array $array): bool
+    static function isAssociated($array): bool
     {
         return !self::isNumeric($array);
     }
@@ -304,7 +306,7 @@ abstract class Arrays
         if (!strlen($query)) return $value;
 
         // Presented with a _numeric_ array, we look for the key in each item.
-        if (is_array($value) and self::isNumeric($value)) {
+        if (self::isNumeric($value)) {
             $values = [];
 
             foreach ($value as $item) {
@@ -314,7 +316,7 @@ abstract class Arrays
                 if ($item === null) continue;
 
                 // Nested numeric arrays are merged and flattened.
-                if (is_array($value) and self::isNumeric($item)) {
+                if (self::isNumeric($item)) {
                     array_push($values, ...$item);
                 }
                 // Nested associated arrays are not.
