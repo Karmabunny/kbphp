@@ -273,34 +273,64 @@ abstract class Arrays
      * A query `subitem.id` would return:
      * [ 123, 456 ]
      *
-     * @param array|ArrayAccess $array
+     *
+     * @param array $array
      * @return mixed
      */
     static function value($array, string $query)
     {
+        // Must be an array.
+        if (!is_array($array)) return null;
+
         // Pull apart the query, get our bit, stitch it back together.
+        // e.g. 'one.two.three' becomes:
+        // key => 'one'
+        // query => 'two.three'
         $parts = explode('.', $query);
         $key = array_shift($parts);
         $query = implode('.', $parts);
 
+        // No support for numeric keys.
+        if (is_numeric($key)) return null;
+
+        // Look it up.
         $value = $array[$key] ?? null;
 
         // Not found, quit!
         if ($value === null) return null;
 
         // End of the query, we found the thing!
-        if (empty($query)) return $value;
+        // At this point it doesn't matter the value type. Anything works.
+        if (!strlen($query)) return $value;
 
-        // Get each valid item as an array, recursive of course.
-        if (is_iterable($value)) {
+        // Presented with a _numeric_ array, we look for the key in each item.
+        if (is_array($value) and self::isNumeric($value)) {
             $values = [];
+
             foreach ($value as $item) {
-                $values[] = self::value($item, $query);
+                $item = self::value($item, $query);
+
+                // Skip empty values.
+                if ($item === null) continue;
+
+                // Nested numeric arrays are merged and flattened.
+                if (is_array($value) and self::isNumeric($item)) {
+                    array_push($values, ...$item);
+                }
+                // Nested associated arrays are not.
+                else {
+                    $values[] = $item;
+                }
             }
+
+            // This surprisingly doesn't cause a mess.
+            if (empty($values)) return null;
+
             return $values;
         }
 
         // Recurse on.
+        // The value must be a value or associated array.
         return self::value($value, $query);
     }
 

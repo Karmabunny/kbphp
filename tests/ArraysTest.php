@@ -229,28 +229,91 @@ final class ArraysTest extends TestCase {
     public function testGetValue()
     {
         $array = [
+            'zero' => [
+                [ 'a' ],
+                [ 'b', 'c' ],
+            ],
             'one' => [
                 [
                     'id' => 123,
-                    'name' => 'abc'
+                    'name' => 'abc',
+                    'nested' => [
+                        'list' => [ 1, 2, 3 ],
+                        'hello' => 'world',
+                    ],
                 ],
                 [
                     'id' => 456,
                     'name' => 'def',
+                    'nested' => [
+                        'list' => [ 4, 5, 6, 7 ],
+                        'hello' => 'sunshine',
+                    ],
                     'property' => [
                         'oh',
                         'cool',
                         'stuff',
                     ],
-                ]
+                ],
             ],
-            'two' => 'neat!'
+            'two' => 'neat!',
+            'three' => null,
+            'four' => [
+                'connection' => [
+                    'host' => 'abc.com',
+                    'port' => 5060,
+                    'options' => [],
+                ],
+            ],
         ];
+
+        // Accessing root level arrays.
+        $actual = Arrays::value($array, 'zero');
+        $expected = $array['zero'];
+        $this->assertEquals($expected, $actual);
 
         $actual = Arrays::value($array, 'one');
         $expected = $array['one'];
         $this->assertEquals($expected, $actual);
 
+        $actual = Arrays::value($array, 'two');
+        $expected = $array['two'];
+        $this->assertEquals($expected, $actual);
+
+        $actual = Arrays::value($array, 'three');
+        $expected = $array['three'];
+        $this->assertEquals($expected, $actual);
+
+
+        // Non existing keys are null.
+        $actual = Arrays::value($array, 'five');
+        $this->assertNull($actual);
+
+        $actual = Arrays::value($array, 'four.one');
+        $this->assertNull($actual);
+
+        $actual = Arrays::value($array, 'four.four');
+        $this->assertNull($actual);
+
+        $actual = Arrays::value($array, 'one.two');
+        $this->assertNull($actual);
+
+
+        // Get a deep nested value.
+        $actual = Arrays::value($array, 'four.connection.host');
+        $expected = 'abc.com';
+        $this->assertEquals($expected, $actual);
+
+        $actual = Arrays::value($array, 'four.connection.port');
+        $expected = 5060;
+        $this->assertEquals($expected, $actual);
+
+        $actual = Arrays::value($array, 'four.connection.options');
+        $expected = [];
+        $this->assertEquals($expected, $actual);
+
+
+        // Collect values from a numeric array.
         $actual = Arrays::value($array, 'one.id');
         $expected = [123, 456];
         $this->assertEquals($expected, $actual);
@@ -259,15 +322,42 @@ final class ArraysTest extends TestCase {
         $expected = ['abc', 'def'];
         $this->assertEquals($expected, $actual);
 
+
+        // Collect a nested associated list.
+        $actual = Arrays::value($array, 'one.nested');
+        $expected = [
+            ['list' => [1,2,3], 'hello' => 'world'],
+            ['list' => [4,5,6,7], 'hello' => 'sunshine'],
+        ];
+        $this->assertEquals($expected, $actual);
+
+
+        // Collect a nested numeric list.
+        $actual = Arrays::value($array, 'one.nested.list');
+        $expected = [1,2,3,4,5,6,7];
+        $this->assertEquals($expected, $actual);
+
+
+        // This one only exists in the second item, but is easily accessed.
         $actual = Arrays::value($array, 'one.property');
-        $expected = [null, ['oh', 'cool', 'stuff']];
+        $expected = ['oh', 'cool', 'stuff'];
         $this->assertEquals($expected, $actual);
 
-        $actual = Arrays::value($array, 'two');
-        $expected = $array['two'];
-        $this->assertEquals($expected, $actual);
 
-        $actual = Arrays::value($array, 'three');
+        // Numeric keys aren't a thing.
+        $actual = Arrays::value($array, 'one.0.property');
+        $this->assertNull($actual);
+
+        $actual = Arrays::value($array, 'one.1.property');
+        $this->assertNull($actual);
+
+        $actual = Arrays::value($array, 'zero.0');
+        $this->assertNull($actual);
+
+        $actual = Arrays::value($array, 'zero.1');
+        $this->assertNull($actual);
+
+        $actual = Arrays::value($array, 'one.nested.list.0');
         $this->assertNull($actual);
     }
 
