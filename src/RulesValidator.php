@@ -301,23 +301,20 @@ class RulesValidator implements Validator
      *
      * @param string $field_name The field to check
      * @param callable $func The function or method to call.
+     * @param array $args
      * @return bool True if validation was successful, false if it failed
      */
-    public function check($field_name, $func)
+    public function check($field_name, $func, ...$args)
     {
-        if (!isset($this->data[$field_name]) or self::isEmpty($this->data[$field_name])) {
-            return true;
-        }
+        $value = $this->data[$field_name] ?? null;
 
-        $this->expandNs($func);
+        if ($value === null) return true;
+        if (self::isEmpty($value)) return true;
 
-        $args = func_get_args();
-        array_shift($args);
-        array_shift($args);
-        array_unshift($args, $this->data[$field_name]);
+        $func = $this->expandNs($func);
 
         try {
-            call_user_func_array($func, $args);
+            $func($value, ...$args);
             return true;
 
         } catch (ValidationException $ex) {
@@ -347,29 +344,26 @@ class RulesValidator implements Validator
      *
      * @param string $field_name The field to check
      * @param callable $func The function or method to call.
+     * @param array $args
      * @return array Key => Boolean True if validation was successful, false if it failed
      */
-    public function arrayCheck($field_name, $func)
+    public function arrayCheck($field_name, $func, ...$args)
     {
-        if (!isset($this->data[$field_name]) or self::isEmpty($this->data[$field_name])) {
-            return true;
-        }
-        if (!is_array($this->data[$field_name])) {
+        $values = $this->data[$field_name] ?? null;
+
+        if ($values === null) return true;
+        if (self::isEmpty($values)) return true;
+
+        if (!is_array($values)) {
             throw new InvalidArgumentException("Field <{$field_name}> is not an array");
         }
 
         $func = $this->expandNs($func);
 
-        $args = func_get_args();
-        array_shift($args);
-        array_unshift($args, $this->data[$field_name]);
-
         $results = [];
-        foreach ($this->data[$field_name] as $index => $value) {
-            $args[0] = $value;
-
+        foreach ($values as $index => $value) {
             try {
-                call_user_func_array($func, $args);
+                $func($value, ...$args);
                 $results[$index] = true;
 
             } catch (ValidationException $ex) {
@@ -392,9 +386,10 @@ class RulesValidator implements Validator
      *
      * @param array $fields The fields to check
      * @param callable $func The function or method to call.
+     * @param array $args
      * @return bool True if validation was successful, false if it failed
      */
-    public function multipleCheck(array $fields, $func)
+    public function multipleCheck(array $fields, $func, ...$args)
     {
         $this->expandNs($func);
 
@@ -403,13 +398,8 @@ class RulesValidator implements Validator
             $vals[] = @$this->data[$field_name];
         }
 
-        $args = func_get_args();
-        array_shift($args);
-        array_shift($args);
-        array_unshift($args, $vals);
-
         try {
-            call_user_func_array($func, $args);
+            $func($vals, ...$args);
             return true;
 
         } catch (ValidationException $ex) {
