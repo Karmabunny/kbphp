@@ -151,7 +151,8 @@ abstract class Uuid
      */
     public static function uuid5(string $namespace, string $name): string
     {
-        $bytes = sha1($namespace . $name, true);
+        $bytes = hex2bin(self::strip($namespace));
+        $bytes = sha1($bytes . $name, true);
         $bytes = substr($bytes, 0, 16);
         $bytes = self::uuidFromBytes($bytes, 5);
         return self::format(bin2hex($bytes));
