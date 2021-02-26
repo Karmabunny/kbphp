@@ -175,7 +175,7 @@ abstract class Uuid
         $bytes = substr_replace($bytes, $time_high, 6, 2);
 
         // Get bytes [8,9] - 16 bytes.
-        $clock_seq = self::getOctalPair($bytes, 6);
+        $clock_seq = self::getOctalPair($bytes, 8);
         $clock_seq = pack('n', self::applyVariant($clock_seq));
 
         $bytes = substr_replace($bytes, $clock_seq, 8, 2);
