@@ -73,14 +73,14 @@ final class UuidTest extends TestCase
 
     public function testUuid5()
     {
-        $ns = Uuid::uuid4();
+        // Because uuid5 is deterministic, we can make sure our algorithm
+        // is correct against the RFC implementation.
 
-        $namespaces = [
-            Uuid::NS_DNS,
-            Uuid::NS_URL,
-            Uuid::NS_OID,
-            Uuid::NS_X500,
-        ];
+        $actual = Uuid::uuid5(Uuid::NS_URL, "https://example.com");
+        $expected = '4fd35a71-71ef-5a55-a9d9-aa75c889a6d0';
+        $this->assertEquals($expected, $actual);
+
+        $ns = Uuid::uuid4();
 
         for ($i = 0; $i < self::ITERATIONS_V5; $i++) {
             $id1 = Uuid::uuid5($ns, 'one');
