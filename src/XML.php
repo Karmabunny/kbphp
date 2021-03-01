@@ -27,21 +27,22 @@ if (PHP_VERSION_ID < 80000) {
 abstract class XML {
 
     /**
-     * Parse an XML document.
+     * Parse an XML document from a string.
      *
      * Example:
      * ```
      * XML::parse($xml_source, [
      *    'options' => LIBXML_NOCDATA | LIBXML_NOBLANKS,
      *    'filename' => __DIR__ '/etc.xml',
-     *    'validate' => $xsd_source,
+     *    'schema' => $xsd_source,
      * ]);
      * ```
      * Config:
      * - 'filename' include for prettier errors.
      * - 'options' are an bitwise OR of libxml options.
-     * - 'validate' an XSD file for additional validation.
-     * - 'encoding'
+     * - 'schema' or 'schema_filename' an XSD file for additional validation.
+     * - 'encoding' (default: UTF-8).
+     * - 'recover' try to parse non-well formed documents.
      *
      * @link https://www.php.net/manual/en/libxml.constants.php
      *
@@ -52,7 +53,108 @@ abstract class XML {
      */
     public static function parse(string $source, array $config = [])
     {
+        $doc = self::createDocument($config);
 
+        libxml_use_internal_errors(true);
+        $doc->loadXML($source, $config['options']);
+        self::collectLibXmlErrors(XMLParseException::class, $doc->documentURI);
+
+        // Conditionally validate it.
+        if ($schema = $config['schema'] ?? null) {
+            self::validate($doc, $schema);
+        }
+        else if ($filename = $config['schema_filename'] ?? null) {
+            self::validateFile($doc, $filename);
+        }
+
+        return $doc;
+    }
+
+
+    /**
+     * Parse an XML document from a file.
+     *
+     * Example:
+     * ```
+     * XML::parseFile($filename, [
+     *    'options' => LIBXML_NOCDATA | LIBXML_NOBLANKS,
+     *    'schema_filename' => $xsd_source,
+     * ]);
+     * ```
+     * Config:
+     * - 'options' are an bitwise OR of libxml options.
+     * - 'schema' or 'schema_filename' an XSD file for additional validation.
+     * - 'encoding' (default: UTF-8).
+     * - 'recover' try to parse non-well formed documents.
+     *
+     * @link https://www.php.net/manual/en/libxml.constants.php
+     *
+     * @param string $source
+     * @param array $config
+     * @return DOMDocument
+     * @throws XMLException
+     */
+    public static function parseFile(string $filename, array $config = [])
+    {
+        $config['filename'] = $filename;
+        $doc = self::createDocument($config);
+
+        libxml_use_internal_errors(true);
+        $doc->load($filename, $config['options']);
+        self::collectLibXmlErrors(XMLParseException::class, $doc->documentURI);
+
+        // Conditionally validate it.
+        if ($schema = $config['schema'] ?? null) {
+            self::validate($doc, $schema);
+        }
+        else if ($filename = $config['schema_filename'] ?? null) {
+            self::validateFile($doc, $filename);
+        }
+
+        return $doc;
+    }
+
+
+    /**
+     * Validate the document against a schema.
+     *
+     * @param DOMDocument $doc
+     * @param string $source
+     * @return void
+     * @throws XMLException
+     */
+    public static function validate(DOMDocument $doc, string $source)
+    {
+        libxml_use_internal_errors(true);
+        $doc->schemaValidateSource($source);
+        self::collectLibXmlErrors(XMLSchemaException::class, $doc->documentURI);
+    }
+
+
+    /**
+     * Validate the document against a schema file.
+     *
+     * @param DOMDocument $doc
+     * @param string $filename
+     * @return void
+     * @throws XMLException
+     */
+    public static function validateFile(DOMDocument $doc, string $filename)
+    {
+        libxml_use_internal_errors(true);
+        $doc->schemaValidate($filename);
+        self::collectLibXmlErrors(XMLSchemaException::class, $doc->documentURI);
+    }
+
+
+    /**
+     * Create a configured document ready for parsing.
+     *
+     * @param array $config
+     * @return DOMDocument
+     */
+    private static function createDocument(array &$config)
+    {
         // I honestly don't care about anyone trying to load entities.
         // It's unsafe and in PHP8+ it's permanently disabled.
         if (PHP_VERSION_ID < 80000) {
@@ -66,15 +168,8 @@ abstract class XML {
         $doc = new DOMDocument('1.0', $config['encoding']);
         $doc->documentURI = $config['filename'];
 
-        libxml_use_internal_errors(true);
-        $doc->loadXML($source, $config['options']);
-        self::collectLibXmlErrors(XMLParseException::class, $doc->documentURI);
-
-        // Conditionally validate it.
-        if ($validate = $config['validate'] ?? null) {
-            libxml_use_internal_errors(true);
-            $doc->schemaValidateSource($validate);
-            self::collectLibXmlErrors(XMLSchemaException::class, $doc->documentURI);
+        if (isset($config['recover'])) {
+            $doc->recover = true;
         }
 
         return $doc;
