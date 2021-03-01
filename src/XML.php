@@ -112,21 +112,102 @@ abstract class XML {
     }
 
 
+    public static function processConditionals(DOMNode &$node, array $conditions)
+    {
+        $conditionals = self::xpath($node, '//processing-instruction("if")');
+        /** @var DOMDocument */
+        $document = $node->ownerDocument ?? $node;
+
+        foreach ($conditionals as $condition) {
+            if (!($condition instanceof DOMProcessingInstruction)) continue;
+            if (!$condition->parentNode) continue;
+            if (!$condition->data) continue;
+
+            $matches = [];
+            if (!preg_match('/ *([^ ]+) */', $condition->data, $matches)) continue;
+
+            $name = $matches[1];
+
+            // Has attributes, it's an inline.
+            if (preg_match_all('/([^= ]+) *= *(([\'"])([^\'"]*)\3)/', $condition->data, $matches, PREG_SET_ORDER)) {
+
+                if (empty($conditions[$name])) {
+                    $condition->parentNode->removeChild($condition);
+                    continue;
+                }
+
+                $element = $document->createElement($name);
+
+                foreach ($matches as $match) {
+                    $name = $match[1];
+                    $value = $match[4];
+                    $element->setAttribute($name, $value);
+                }
+
+                $condition->parentNode->replaceChild($element, $condition);
+            }
+            // No attributes, it's a block.
+            else {
+                $body = [];
+
+                /** @var DOMProcessingInstruction|null */
+                $element = $condition->nextSibling;
+
+                while (
+                    ($element = $element->nextSibling) and
+                    ((!($element instanceof DOMProcessingInstruction) or
+                    $element->target !== 'endif'))
+                ) {
+                    $body[] = $element;
+                }
+
+                if (
+                    !$element or
+                    !($element instanceof DOMProcessingInstruction) or
+                    $element->target !== 'endif'
+                ) {
+                    throw new XMLException('Cannot find endif from line ' . $condition->getLineNo());
+                }
+
+                if (empty($conditions[$name])) {
+                    foreach ($body as $item) {
+                        $condition->parentNode->removeChild($item);
+                    }
+                }
+
+                $condition->parentNode->removeChild($element);
+                $condition->parentNode->removeChild($condition);
+            }
+        }
+    }
+
+
     /**
      * Interpolate and escape XML strings.
+     *
+     * This creates an XML object.
      *
      * Specify {{etc}} or {{0}} in the template and provide the same
      * in the $args array. Values will be appropriately escaped.
      *
-     * Use <?condition></?> to create conditional sections.
+     * Perform conditional with the `<?if ?>` PI tag.
+     * ```xml
+     * <!-- Conditional blocks -->
+     * <?if conditional ?>
+     *    <item>
+     *       <block attr="value"/>
+     *    </item>
+     * <?endif ?>
      *
-     * Or <?conditional attr="hi"/> for a single element.
+     * <!-- Conditional element -->
+     * <?if element attr="value" ?>
+     * ```
      *
      * @param string $template
      * @param array $args
-     * @return string
+     * @return DOMDocument
      */
-    public static function format(string $template, array $args): string
+    public static function format(string $template, array $args): DOMDocument
     {
         if (empty($template)) return '';
 
@@ -140,27 +221,10 @@ abstract class XML {
 
         $xml = str_replace($subjects, $replace, $template);
 
-        if (strpos($xml, '<?') !== false) {
-            // Match any patterns that look like: "<?condition>body</?\>".
-            // Strip anything with a falsey condition arg.
-            // Replace it with just the body otherwise.
-            $xml = preg_replace_callback(
-                '/<\?([^>]+)>(.+?)<\/\?>/ms',
-                function ($matches) use ($args) {
-                    list($_, $condition, $body) = $matches;
-                    return $args[$condition] ? $body : '';
-            }, $xml);
-
-            // Match singular conditional elements.
-            $xml = preg_replace_callback(
-                '/<\?(([^\s]+)[^>]*)\/>/ms',
-                function ($matches) use ($args) {
-                    list($_, $body, $condition) = $matches;
-                    return $args[$condition] ? "<{$body}/>" : '';
-            }, $xml);
-        }
-
-        return $xml;
+        $doc = new DOMDocument();
+        $doc->loadXML($xml);
+        self::processConditionals($doc, $args);
+        return $doc;
     }
 
 
