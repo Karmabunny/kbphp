@@ -7,8 +7,12 @@
 namespace karmabunny\kb;
 
 use DOMDocument;
-use SimpleXMLElement;
-use Throwable;
+use DOMElement;
+use DOMNode;
+use DOMNodeList;
+use DOMProcessingInstruction;
+use DOMXPath;
+use Generator;
 
 // Just to be sure.
 if (PHP_VERSION_ID < 80000) {
@@ -42,8 +46,8 @@ abstract class XML {
      * @link https://www.php.net/manual/en/libxml.constants.php
      *
      * @param string $source
-     * @param array $config [options, filename, validate]
-     * @return SimpleXMLElement
+     * @param array $config
+     * @return DOMDocument
      * @throws XMLException
      */
     public static function parse(string $source, array $config = [])
@@ -73,7 +77,7 @@ abstract class XML {
             self::collectLibXmlErrors(XMLSchemaException::class, $doc->documentURI);
         }
 
-        return simplexml_import_dom($doc);
+        return $doc;
     }
 
 
@@ -163,54 +167,73 @@ abstract class XML {
     /**
      * Get a single value from an element and cast it correctly.
      *
-     * @param SimpleXMLElement $xml
+     * @param DOMNode $xml
      * @param string $path
-     * @param string $type
-     * @param mixed|null $not_found
-     * @return mixed
+     * @param string $type string|bool|int|float|element|list|nodes
+     * @return string|bool|int|float|DOMElement|DOMNode[]|Generator<DOMNode>
      */
-    public static function xpath(SimpleXMLElement $xml, string $path, string $type = 'string', $not_found = null)
+    public static function xpath(DOMNode $node, string $query, string $type = 'nodes')
     {
-        $element = $xml->xpath($path);
+        // Get the document.
+        $document = $node->ownerDocument ?? $node;
+        if ($node === $document) $node = null;
 
-        if (empty($element)) {
-            // Use the provided fallback.
-            if ($not_found !== null) {
-                return $not_found;
-            }
+        $path = new DOMXPath($document);
 
-            // Fallbacks if the fallback doesn't exist.
-            switch ($type) {
-                case 'string':
-                    return '';
-
-                case 'bool':
-                    return false;
-
-                case 'int':
-                case 'float':
-                    return 0;
-            }
-
-            return null;
+        // Sometimes there's a namespace.
+        if ($ns = $document->namespaceURI) {
+            $query = preg_replace('/\\[^:]+/', '\\' . $ns, $query);
         }
 
-        /** @var SimpleXMLElement|null */
-        $element = isset($element[0]) ? $element[0] : null;
+        // Do the search.
+        $results = $path->query($query, $node);
 
         switch ($type) {
-            default:
             case 'string':
-                return (string) $element;
+                if (empty($results[0])) return '';
+                return self::text($results[0]);
 
             case 'int':
-                return (int) $element;
+                if (empty($results[0])) return 0;
+                return (int) self::text($results[0]);
 
             case 'float':
-                return (double) $element;
+                if (empty($results[0])) return 0.0;
+                return (float) self::text($results[0]);
 
             case 'bool':
-                return self::parseBoolean($element);
+                if (empty($results[0])) return false;
+                return self::boolean($results[0]);
+
+            case 'element':
+                if (!$results) return null;
+                return self::getNodeIterator($results, true)->current();
+
+            case 'list':
+                if (!$results) return [];
+                return iterator_to_array(self::getNodeIterator($results, true));
+
+            case 'nodes':
+            default:
+                if (!$results) return null;
+                return self::getNodeIterator($results);
+        }
+    }
+
+
+    /**
+     *
+     * @param DOMNodeList $list
+     * @param bool $elements_only
+     * @return Generator<DOMNode>
+     */
+    private static function getNodeIterator(DOMNodeList $list, $elements_only = false)
+    {
+        for ($i = 0; $i < $list->length; $i++) {
+            $item = $list->item($i);
+            if ($elements_only and !($item instanceof DOMElement)) continue;
+
+            yield $i => $item;
         }
     }
 
@@ -232,14 +255,14 @@ abstract class XML {
      *   // => unknown/no-value is 'null'
      * ```
      *
-     * @param SimpleXMLElement $xml
+     * @param DOMNode $xml
      * @param string $path
      * @param array $params
      * @return mixed
      */
-    public static function enum(SimpleXMLElement $xml, string $path, array $params)
+    public static function enum(DOMNode $xml, string $path, array $params)
     {
-        $value = self::xpath($xml, $path, 'int', 0);
+        $value = self::xpath($xml, $path, 'int') ?: 0;
         $value = $params[$value] ?? null;
 
         if ($value === null) {
@@ -253,18 +276,16 @@ abstract class XML {
     /**
      * XML booleans are... unclear. This is an attempt.
      *
-     * @param SimpleXMLElement|null $thing
+     * @param DOMNode $thing
      * @return bool true/false and nothing else
      */
-    private static function parseBoolean(?SimpleXMLElement $thing = null)
+    public static function boolean(DOMNode $thing)
     {
         // No element.
-        if ($thing === null) {
-            return false;
-        }
+        $thing = self::text($thing);
 
         // It's a string? ooh.
-        switch (strtolower(trim($thing))) {
+        switch (strtolower($thing)) {
             case 'true':
             case 'yes':
             case 'good':
@@ -285,17 +306,17 @@ abstract class XML {
         }
 
         // Postgres + MySQL
-        if (trim($thing) === '\N') {
+        if ($thing === '\N') {
             return false;
         }
 
         // An empty element like: <This/> is true.
-        if ((string) $thing === '') {
+        if ($thing === '') {
             return true;
         }
 
         // Perhaps it's numerical.
-        if (preg_match('/^[+\-\.0-9]+$/', trim($thing)) and $thing == 0) {
+        if (preg_match('/^[+\-\.0-9]+$/', $thing) and $thing == 0) {
             return false;
         }
 
@@ -308,12 +329,12 @@ abstract class XML {
      * Requires that at least one element with the given tag exist and returns
      * the first found.
      *
-     * @param SimpleXMLElement $parent
+     * @param DOMNode $parent
      * @param string $tag_name
-     * @return SimpleXMLElement
+     * @return DOMElement
      * @throws XMLAssertException If there were no nodes with that tag
      */
-    public static function expectFirst(SimpleXMLElement $parent, string $tag_name)
+    public static function expectFirst(DOMNode $parent, string $tag_name)
     {
         $element = self::first($parent, $tag_name);
 
@@ -329,12 +350,12 @@ abstract class XML {
      * Requires that at least one element with the given tag exist, and
      * returns the text content of the first found.
      *
-     * @param SimpleXMLElement $parent
+     * @param DOMNode $parent
      * @param string $tag_name
      * @return string
      * @throws XMLAssertException If there were no nodes with that tag name
      */
-    public static function expectFirstText(SimpleXMLElement $parent, string $tag_name)
+    public static function expectFirstText(DOMNode $parent, string $tag_name)
     {
         return self::text(self::expectFirst($parent, $tag_name));
     }
@@ -343,13 +364,14 @@ abstract class XML {
     /**
      * Fetches the first element of a given tag name or null if none are found.
      *
-     * @param SimpleXMLElement $parent
+     * @param DOMNode $parent
      * @param string $tag_name
-     * @return SimpleXMLElement|null
+     * @return DOMElement|null
      */
-    public static function first(SimpleXMLElement $parent, string $tag_name)
+    public static function first(DOMNode $parent, string $tag_name)
     {
-        $element = $parent->xpath('./' . $tag_name)[0] ?? null;
+        /** @var DOMElement */
+        $element = self::xpath($parent, './' . $tag_name, 'element');
         if ($element === null) return null;
         return $element;
     }
@@ -359,11 +381,11 @@ abstract class XML {
      * Fetches the text of the first element of a given tag name, or null if
      * the element wasn't found.
      *
-     * @param SimpleXMLElement $parent
+     * @param DOMNode $parent
      * @param string $tag_name
      * @return string|null
      */
-    public static function firstText(SimpleXMLElement $parent, string $tag_name)
+    public static function firstText(DOMNode $parent, string $tag_name)
     {
         $element = self::first($parent, $tag_name);
         if ($element === null) return null;
@@ -380,20 +402,18 @@ abstract class XML {
      *
      * Output is indexed by the relevant tag name.
      *
-     * @param SimpleXMLElement $parent
+     * @param DOMNode $parent
      * @param string[] $wanted
-     * @return SimpleXMLElement An array of all the wanted children
+     * @return DOMElement[] [name => element]
      * @throws XMLAssertException If not all wanted tags are found
      */
-    public static function gatherChildren(SimpleXMLElement $parent, array $wanted)
+    public static function gatherChildren(DOMNode $parent, array $wanted)
     {
         $wanted = array_fill_keys($wanted, true);
         $fetched = [];
 
-        foreach ($parent->children() as $element) {
-            if (!$element) continue;
-
-            $name = $element->getName();
+        foreach (self::getNodeIterator($parent->childNodes, true) as $element) {
+            $name = $element->nodeName;
             if (!array_key_exists($name, $wanted)) continue;
 
             $fetched[$name] = $element;
@@ -412,24 +432,27 @@ abstract class XML {
     /**
      * Fetches the text content of a node and trims it.
      *
-     * @param SimpleXMLElement $node
+     * @param DOMNode $node
      * @return string
      */
-    public static function text(SimpleXMLElement $node)
+    public static function text(DOMNode $node)
     {
-        return trim((string) $node);
+        return trim($node->textContent);
     }
 
 
     /**
      * Fetches an attribute from an element and trims it.
      *
-     * @param SimpleXMLElement $elem
+     * @param DOMDocument|DOMElement $element
      * @param string $name
      * @return string
      */
-    public static function attr(SimpleXMLElement $elem, string $name)
+    public static function attr($element, string $name)
     {
-        return trim($elem->attributes()[$name] ?? '');
+        if ($element instanceof DOMDocument) {
+            $element = $element->documentElement;
+        }
+        return trim($element->getAttribute($name));
     }
 }
