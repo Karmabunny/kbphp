@@ -19,8 +19,8 @@ final class XMLTest extends TestCase {
     {
         $xml = XML::parse('<this><works okay="hurrah!"/>wow</this>');
 
-        $this->assertEquals('wow', (string) $xml);
-        $this->assertEquals('hurrah!', (string) $xml->works['okay']);
+        $this->assertEquals('wow', $xml->textContent);
+        $this->assertEquals('hurrah!', $xml->getElementsByTagName('works')[0]->getAttribute('okay'));
     }
 
 
@@ -64,8 +64,8 @@ final class XMLTest extends TestCase {
 
         $this->assertNotNull($doc);
 
-        // String (default)
-        $this->assertEquals('thing', XML::xpath($doc, '//one'));
+        // String
+        $this->assertEquals('thing', XML::xpath($doc, '//one', 'string'));
 
         // Numbers
         $this->assertEquals(1234, XML::xpath($doc, '//two', 'int'));
@@ -92,15 +92,14 @@ final class XMLTest extends TestCase {
         $this->assertEquals('\n', XML::xpath($doc, '//fakesql', 'string'));
 
         // Missing
-        $this->assertEquals('', XML::xpath($doc, '//missing'));
-        $this->assertEquals('oh no', XML::xpath($doc, '//missing', 'string', 'oh no'));
+        $this->assertNull(XML::xpath($doc, '//missing', 'element'));
+        $this->assertEquals('oh no', XML::xpath($doc, '//missing', 'string') ?: 'oh no');
 
-        // TODO I don't know if this is desirable.
-        $this->assertEquals('whaat', XML::xpath($doc, '//missing', 'int', 'whaat'));
+        $this->assertEquals('whaat', XML::xpath($doc, '//missing', 'int') ?: 'whaat');
         $this->assertEquals(0, XML::xpath($doc, '//missing', 'int'));
 
         // We've already tested default false, instead test a custom default.
-        $this->assertEquals(true, XML::xpath($doc, '//missing', 'bool', true));
+        $this->assertEquals(true, XML::xpath($doc, '//missing', 'bool') ?: true);
     }
 
 
@@ -109,23 +108,23 @@ final class XMLTest extends TestCase {
      */
     public function testFormat()
     {
-        $xml = XML::format("
+        $doc = XML::format("
             <test>
                 <one>{{one}}</one>
                 <two>{{two}}</two>
                 <another>{{two}}</another>
-                <?buuut>
-                    <thing attr=\"{{henlo}}\">
+                <?if buuut ?>
+                    <thing attr='{{henlo}}'>
                         cool
                     </thing>
-                </?>
-                <?yeees>
-                    <thing attr=\"{{bad}}\">
+                <?endif ?>
+                <?if yeees ?>
+                    <thing attr='{{bad}}'>
                         {{one}}{{two}}{{yeees}}
                     </thing>
-                </?>
-                <?ooh hello=\"{{henlo}}\"/>
-                <?ahh hello=\"{{henlo}}\"/>
+                <?endif ?>
+                <?if ooh hello='{{henlo}}' ?>
+                <?if ahh hello='{{henlo}}' ?>
             </test>
         ", [
             'one' => 123,
@@ -137,16 +136,16 @@ final class XMLTest extends TestCase {
             'ahh' => false,
         ]);
 
-        $doc = XML::parse($xml);
+        $expected = simplexml_import_dom($doc);
 
         $this->assertNotNull($doc);
-        $this->assertEquals('123', (string) $doc->xpath('//one')[0]);
-        $this->assertEquals('abc', (string) $doc->xpath('//two')[0]);
-        $this->assertEquals('abc', (string) $doc->xpath('//another')[0]);
-        $this->assertEquals('123abc999', trim($doc->xpath('//thing')[0]));
-        $this->assertEquals('{{bad}}', (string) $doc->xpath('//thing')[0]['attr']);
-        $this->assertEquals('darkness', (string) $doc->xpath('//ooh')[0]['hello']);
-        $this->assertEquals(0, count($doc->xpath('//ahh')));
+        $this->assertEquals('123', (string) $expected->xpath('//one')[0]);
+        $this->assertEquals('abc', (string) $expected->xpath('//two')[0]);
+        $this->assertEquals('abc', (string) $expected->xpath('//another')[0]);
+        $this->assertEquals('123abc999', trim($expected->xpath('//thing')[0]));
+        $this->assertEquals('{{bad}}', (string) $expected->xpath('//thing')[0]['attr']);
+        $this->assertEquals('darkness', (string) $expected->xpath('//ooh')[0]['hello']);
+        $this->assertEquals(0, count($expected->xpath('//ahh')));
     }
 
 
@@ -193,14 +192,15 @@ final class XMLTest extends TestCase {
             </test>
         ");
 
-        $this->assertEquals($xml->xpath('//test/same[1]')[0], XML::first($xml, 'same'));
-        $this->assertEquals($xml->xpath('//test/another[1]')[0], XML::first($xml, 'another'));
+        $this->assertInstanceOf(DOMElement::class, XML::first($xml, 'same'));
+        $this->assertInstanceOf(DOMElement::class, XML::first($xml, 'another'));
+        $this->assertNotEquals(XML::first($xml, 'same'), XML::first($xml, 'another'));
 
         $this->assertEquals('one', XML::firstText($xml, 'same'));
         $this->assertEquals('four', XML::firstText($xml, 'another'));
 
         $this->assertEquals('world', XML::attr($xml, 'hello'));
-        $this->assertEquals('seven', XML::text($xml));
+        $this->assertEquals(trim($xml->textContent), XML::text($xml));
     }
 
 
@@ -224,7 +224,10 @@ final class XMLTest extends TestCase {
             </test>
         ");
 
-        $this->assertEquals($xml->xpath('//test/same')[0], XML::expectFirst($xml, 'same'));
+        $expected = simplexml_import_dom($xml);
+
+        $this->assertInstanceOf(DOMElement::class, XML::expectFirst($xml, 'same'));
+        $this->assertEquals(dom_import_simplexml($expected->same[0]), XML::expectFirst($xml, 'same'));
         $this->assertEquals('one', XML::expectFirstText($xml, 'same'));
 
         try {
@@ -235,17 +238,17 @@ final class XMLTest extends TestCase {
             $this->assertStringContainsString('doesnt_exist', $exception->getMessage());
         }
 
-        $actual = XML::gatherChildren($xml->nested, ['same', 'two', 'four']);
+        $actual = XML::gatherChildren(XML::first($xml, 'nested'), ['same', 'two', 'four']);
         $expected = [
-            'same' => $xml->nested->same,
-            'two' => $xml->nested->two,
-            'four' => $xml->nested->four[0],
+            'same' => dom_import_simplexml($expected->nested->same[0]),
+            'two' => dom_import_simplexml($expected->nested->two[0]),
+            'four' => dom_import_simplexml($expected->nested->four[0]),
         ];
 
         $this->assertEquals($expected, $actual);
 
         try {
-            XML::gatherChildren($xml->nested, ['ohhh', 'nooo', 'two', 'four']);
+            XML::gatherChildren(XML::first($xml, 'nested'), ['ohhh', 'nooo', 'two', 'four']);
             $this->fail('Expected XMLAssertException');
         }
         catch (XMLAssertException $exception) {
