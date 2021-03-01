@@ -84,22 +84,20 @@ abstract class XML {
     /**
      * Convert libxml errors into an exception.
      *
-     * @param string $type
+     * @param string $class
      * @param string|null $filename
      * @return void
      * @throws XMLException
      */
-    private static function collectLibXmlErrors(string $type, $filename)
+    private static function collectLibXmlErrors(string $class, $filename)
     {
         $errors = libxml_get_errors();
         if (empty($errors)) return;
 
         // Get the last 'fatal' error on the stack.
         foreach ($errors as $error) {
-            switch ($error->level) {
-                case LIBXML_ERR_FATAL: break;
-                default: unset($error);
-            }
+            if ($error->level === LIBXML_ERR_FATAL) break;
+            unset($error);
         }
 
         libxml_clear_errors();
@@ -107,7 +105,7 @@ abstract class XML {
 
         if (isset($error)) {
             if ($filename) $error->file = $filename;
-            throw new $type($error);
+            throw new $class($error);
         }
     }
 
