@@ -249,22 +249,6 @@ abstract class Arrays
     /**
      * Query an array.
      *
-     * @see Arrays::value()
-     * @deprecated use Arrays::value()
-     *
-     * @param array|ArrayAccess $array
-     * @param string $query
-     * @return mixed
-     */
-    static function getValue($array, string $query)
-    {
-        return self::value($array, $query);
-    }
-
-
-    /**
-     * Query an array.
-     *
      * It's a funny concept, but quite powerful.
      *
      * For example, given an array like:
