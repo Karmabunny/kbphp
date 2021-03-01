@@ -112,40 +112,74 @@ abstract class XML {
     }
 
 
+    /**
+     * Process if/end PI tags.
+     *
+     * Given the matching condition, pass or remove the conditional PI tags.
+     *
+     * This will modify the $node parameter.
+     *
+     * @example
+     * ```xml
+     * <!-- Conditional blocks -->
+     * <?if conditional ?>
+     *    <item>
+     *       <block attr="value"/>
+     *    </item>
+     * <?endif ?>
+     *
+     * <!-- Conditional element -->
+     * <?if element attr="value" ?>
+     * ```
+     *
+     * @param DOMNode $node
+     * @param array $conditions
+     * @return void
+     * @throws XMLException
+     */
     public static function processConditionals(DOMNode &$node, array $conditions)
     {
-        $conditionals = self::xpath($node, '//processing-instruction("if")');
         /** @var DOMDocument */
         $document = $node->ownerDocument ?? $node;
+
+        // Fid all the 'if' PI tags.
+        $conditionals = self::xpath($node, '//processing-instruction("if")', 'nodes');
 
         foreach ($conditionals as $condition) {
             if (!($condition instanceof DOMProcessingInstruction)) continue;
             if (!$condition->parentNode) continue;
             if (!$condition->data) continue;
 
+            // Parse out the condition name.
             $matches = [];
-            if (!preg_match('/ *([^ ]+) */', $condition->data, $matches)) continue;
+            if (!preg_match('/ *([^ ]+) */', $condition->data, $matches)) {
+                throw new XMLException('Invalid condition: ' . $condition->data);
+            };
 
             $name = $matches[1];
 
             // Has attributes, it's an inline.
-            if (preg_match_all('/([^= ]+) *= *(([\'"])([^\'"]*)\3)/', $condition->data, $matches, PREG_SET_ORDER)) {
+            // regex: (1:name)="(3:value)"
+            if (preg_match_all('/([^= >]+) *= *([\'"])([^\'"]*)\2/', $condition->data, $matches, PREG_SET_ORDER)) {
 
+                // The condition is false, so remove this element and move on.
                 if (empty($conditions[$name])) {
                     $condition->parentNode->removeChild($condition);
                     continue;
                 }
 
+                // Otherwise, replace it with a real element.
                 $element = $document->createElement($name);
 
                 foreach ($matches as $match) {
                     $name = $match[1];
-                    $value = $match[4];
+                    $value = $match[3];
                     $element->setAttribute($name, $value);
                 }
 
                 $condition->parentNode->replaceChild($element, $condition);
             }
+
             // No attributes, it's a block.
             else {
                 $body = [];
@@ -153,6 +187,7 @@ abstract class XML {
                 /** @var DOMProcessingInstruction|null */
                 $element = $condition->nextSibling;
 
+                // Now find an endif tag.
                 while (
                     ($element = $element->nextSibling) and
                     ((!($element instanceof DOMProcessingInstruction) or
@@ -161,23 +196,32 @@ abstract class XML {
                     $body[] = $element;
                 }
 
+                // Not found, complain real hard.
                 if (
                     !$element or
                     !($element instanceof DOMProcessingInstruction) or
                     $element->target !== 'endif'
                 ) {
-                    throw new XMLException('Cannot find endif from line ' . $condition->getLineNo());
+                    throw new XMLException('Cannot find endif for condition, line ' . $condition->getLineNo());
                 }
 
+                // The conditional is false, so let's remove what's in-between.
                 if (empty($conditions[$name])) {
                     foreach ($body as $item) {
                         $condition->parentNode->removeChild($item);
                     }
                 }
 
+                // Also remove the IP tags.
                 $condition->parentNode->removeChild($element);
                 $condition->parentNode->removeChild($condition);
             }
+        }
+
+        // Find any endifs that weren't processed.
+        $conditionals = self::xpath($node, '//processing-instruction("endif")', 'nodes');
+        if ($first = $conditionals->current()) {
+            throw new XMLException('Unexpected dangling endif on line: ' . $first->getLineNo());
         }
     }
 
@@ -221,15 +265,26 @@ abstract class XML {
 
         $xml = str_replace($subjects, $replace, $template);
 
-        $doc = new DOMDocument();
-        $doc->loadXML($xml);
+        $doc = self::parse($xml);
         self::processConditionals($doc, $args);
         return $doc;
     }
 
 
     /**
-     * Get a single value from an element and cast it correctly.
+     * Perform an XPath query on the node.
+     *
+     * By default, this will return an iterator of `DOMNode`. You can ask this
+     * method to convert it to something more useful.
+     *
+     * Types:
+     * - string - via `::text()`
+     * - bool - via `::boolean()`
+     * - int
+     * - float
+     * - element - a `DOMElement` or `null`
+     * - list - `DOMElement[]`
+     * - nodes - `Generator<DOMNode>`
      *
      * @param DOMNode $xml
      * @param string $path
@@ -280,18 +335,21 @@ abstract class XML {
             case 'nodes':
             default:
                 if (!$results) return null;
-                return self::getNodeIterator($results);
+                return self::getNodeIterator($results, false);
         }
     }
 
 
     /**
+     * Get an iterator for a DOMNodeList. With optional element filtering.
+     *
+     * The builtin `getIterator()` was only introduced with php8.
      *
      * @param DOMNodeList $list
      * @param bool $elements_only
      * @return Generator<DOMNode>
      */
-    private static function getNodeIterator(DOMNodeList $list, $elements_only = false)
+    private static function getNodeIterator(DOMNodeList $list, bool $elements_only)
     {
         for ($i = 0; $i < $list->length; $i++) {
             $item = $list->item($i);
