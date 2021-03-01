@@ -37,6 +37,7 @@ abstract class XML {
      * - 'filename' include for prettier errors.
      * - 'options' are an bitwise OR of libxml options.
      * - 'validate' an XSD file for additional validation.
+     * - 'encoding'
      *
      * @link https://www.php.net/manual/en/libxml.constants.php
      *
@@ -50,15 +51,15 @@ abstract class XML {
 
         // I honestly don't care about anyone trying to load entities.
         // It's unsafe and in PHP8+ it's permanently disabled.
-        // So if they _really_ want it, they can enable it.
         if (PHP_VERSION_ID < 80000) {
             libxml_disable_entity_loader(true);
         }
 
         if (!isset($config['options'])) $config['options'] = 0;
         if (!isset($config['filename'])) $config['filename'] = '<anonymous>';
+        if (!isset($config['encoding'])) $config['encoding'] = 'UTF-8';
 
-        $doc = new DOMDocument();
+        $doc = new DOMDocument('1.0', $config['encoding']);
         $doc->documentURI = $config['filename'];
 
         libxml_use_internal_errors(true);
