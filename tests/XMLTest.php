@@ -258,4 +258,20 @@ final class XMLTest extends TestCase {
             $this->assertStringNotContainsString('four', $exception->getMessage());
         }
     }
+
+
+    public function testString()
+    {
+        $xml = XML::parse("
+            <hi>
+                <oh dear = 'true'>this</oh>
+                is
+            a
+        mess</hi>
+        ");
+
+        $actual = XML::toString(XML::xpath($xml, '//hi/oh', 'element'));
+        $expected = '<oh dear="true">this</oh>';
+        $this->assertEquals($expected, $actual);
+    }
 }

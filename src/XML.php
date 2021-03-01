@@ -575,4 +575,37 @@ abstract class XML {
         }
         return trim($element->getAttribute($name));
     }
+
+
+    /**
+     * Get the string of a node.
+     * @param DOMNode $node
+     * @return string
+     */
+    public static function toString(DOMNode $node): string
+    {
+        /** @var DOMDocument */
+        $document = $node->ownerDocument ?? $node;
+        return $document->saveXML($node);
+    }
+
+
+    /**
+     * Print a node to the standard output.
+     *
+     * @param DOMNode $node
+     * @return echos
+     */
+    public static function print(DOMNode $node)
+    {
+        /** @var DOMDocument */
+        $document = $node->ownerDocument ?? $node;
+
+        if ($node === $document) {
+            $document->save('php://output');
+        }
+        else {
+            echo $document->saveXML($node);
+        }
+    }
 }
