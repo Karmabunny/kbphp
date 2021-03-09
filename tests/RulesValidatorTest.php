@@ -132,6 +132,9 @@ final class RulesValidatorTest extends TestCase {
             // even, positive, 10-20
             'ten_twenty' => -13,
 
+            // range - 20-30
+            'twenty_thirty' => 16,
+
             // email + end in karmabunny.com.au
             'address' => 'a@b.com',
         ]);
@@ -147,10 +150,12 @@ final class RulesValidatorTest extends TestCase {
             // MORE errors. yay.
             $this->assertEquals(3, count($exception->errors['ten_twenty']));
             $this->assertEquals(1, count($exception->errors['address']));
+            $this->assertEquals(1, count($exception->errors['twenty_thirty']));
         }
 
         // Valid case.
         $thing->ten_twenty = 14;
+        $thing->twenty_thirty = 25;
         $thing->address = 'test@karmabunny.com.au';
         $thing->validate();
     }
@@ -186,6 +191,9 @@ class FieldThing extends Collection implements Validates
     /** @var int */
     public $ten_twenty;
 
+    /** @var int */
+    public $twenty_thirty;
+
     /** @var string */
     public $address;
 
@@ -213,6 +221,12 @@ class FieldThing extends Collection implements Validates
 
             // Non-keyed rules are a thing, but not recommended.
             $rules[] = ['address', 'func' => [self::class, 'matchDomain']];
+
+            // Per-field args.
+            $rules['range'] = [
+                ['ten_twenty', 'args' => [10, 20]],
+                ['twenty_thirty', 'args' => [20, 30]],
+            ];
         }
 
         return $rules;
