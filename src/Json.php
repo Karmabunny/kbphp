@@ -32,6 +32,7 @@ abstract class Json
         $flags |= JSON_THROW_ON_ERROR;
 
         if ($pretty) {
+            $flags |= JSON_UNESCAPED_SLASHES;
             $flags |= JSON_PRETTY_PRINT;
         }
 
