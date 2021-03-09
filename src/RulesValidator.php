@@ -236,37 +236,48 @@ class RulesValidator implements Validator
             unset($rules['validity']);
         }
 
-        foreach ($rules as $rule => $fields) {
+        foreach ($rules as $rule => $ruleset) {
             unset($func);
 
             // Required validations are a bit special.
             if ($rule === 'required') {
-                $this->required($fields);
+                $this->required($ruleset);
                 continue;
             }
 
             // Look for custom validators first.
-            if ($func = @$fields['func']) {
-                unset($fields['func']);
+            $func = $ruleset['func'] ?? null;
 
-                if (!is_callable($func)) {
-                    throw new Exception("Invalid custom rule: {$rule} - {$func}");
-                }
+            if ($func and !is_callable($func)) {
+                throw new Exception("Invalid rule: {$rule} - {$func}");
             }
-            // Then check built-in validators.
-            else if ($func = $this->expandNs($rule)) {
+
+            // Then check the builtin rules.
+            else if (!$func) {
                 $func = $this->expandNs($rule);
-                // Uh. nothing.
             }
-            else {
+
+            if (!$func) {
                 throw new Exception("Unknown rule: {$rule}");
             }
 
-            // Get args.
-            $args = $fields['args'] ?? [];
-            unset($fields['args']);
+            // Big old-loopy-do.
+            foreach ($ruleset as $key => $fieldset) {
+                if (!is_numeric($key)) continue;
+                if (empty($fieldset)) continue;
 
-            foreach ($fields as $field) {
+                $field = $fieldset;
+                $args = $ruleset['args'] ?? [];
+
+                // Field with args.
+                if (is_array($fieldset)) {
+                    $field = $fieldset[0];
+
+                    if (is_array(@$fieldset['args'])) {
+                        $args = $fieldset['args'];
+                    }
+                }
+
                 $value = $this->data[$field] ?? null;
 
                 // Empty field are valid - these are checked by required.
