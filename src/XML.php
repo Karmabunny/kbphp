@@ -41,7 +41,7 @@ abstract class XML {
      * Config:
      * - 'filename' include for prettier errors.
      * - 'options' are an bitwise OR of libxml options.
-     * - 'schema' or 'schema_filename' an XSD file for additional validation.
+     * - 'schema' an XSD file for additional validation.
      * - 'encoding' (default: UTF-8).
      * - 'recover' try to parse non-well formed documents.
      * - 'entities' an entity loading callback.
@@ -69,9 +69,6 @@ abstract class XML {
         if ($schema = $config['schema'] ?? null) {
             self::validate($doc, $schema);
         }
-        else if ($filename = $config['schema_filename'] ?? null) {
-            self::validateFile($doc, $filename);
-        }
 
         return $doc;
     }
@@ -90,7 +87,7 @@ abstract class XML {
      *
      * Config:
      * - 'options' are an bitwise OR of libxml options.
-     * - 'schema' or 'schema_filename' an XSD file for additional validation.
+     * - 'schema' an XSD file for additional validation.
      * - 'encoding' (default: UTF-8).
      * - 'recover' try to parse non-well formed documents.
      * - 'entities' an entity loading callback.
@@ -122,9 +119,6 @@ abstract class XML {
         if ($schema = $config['schema'] ?? null) {
             self::validate($doc, $schema);
         }
-        else if ($filename = $config['schema_filename'] ?? null) {
-            self::validateFile($doc, $filename);
-        }
 
         return $doc;
     }
@@ -142,22 +136,6 @@ abstract class XML {
     {
         libxml_use_internal_errors(true);
         @$doc->schemaValidateSource($source);
-        self::collectLibXmlErrors(XMLSchemaException::class, $doc->documentURI);
-    }
-
-
-    /**
-     * Validate the document against a schema file.
-     *
-     * @param DOMDocument $doc
-     * @param string $filename
-     * @return void
-     * @throws XMLException
-     */
-    public static function validateFile(DOMDocument $doc, string $filename)
-    {
-        libxml_use_internal_errors(true);
-        @$doc->schemaValidate($filename);
         self::collectLibXmlErrors(XMLSchemaException::class, $doc->documentURI);
     }
 
