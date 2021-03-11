@@ -195,7 +195,9 @@ abstract class XML {
 
         if (isset($error)) {
             if ($filename) $error->file = $filename;
-            throw new $class($error);
+            $error = new $class($error);
+            $error->errors = $errors;
+            throw $error;
         }
     }
 

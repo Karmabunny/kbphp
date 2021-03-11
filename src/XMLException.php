@@ -17,5 +17,5 @@ use LibXMLError;
 class XMLException extends Exception
 {
     /** @var LibXMLError[] */
-    public $errors;
+    public $errors = [];
 }
