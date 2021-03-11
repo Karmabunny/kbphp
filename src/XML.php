@@ -656,10 +656,11 @@ abstract class XML {
      */
     public static function first(DOMNode $parent, string $tag_name)
     {
-        /** @var DOMElement */
-        $element = self::xpath($parent, './' . $tag_name, 'element');
-        if ($element === null) return null;
-        return $element;
+        foreach (self::getNodeIterator($parent->childNodes, true) as $element) {
+            if ($element->nodeName === $tag_name) return $element;
+        }
+
+        return null;
     }
 
 
