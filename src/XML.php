@@ -126,7 +126,7 @@ abstract class XML {
     public static function validate(DOMDocument $doc, string $source)
     {
         libxml_use_internal_errors(true);
-        $doc->schemaValidateSource($source);
+        @$doc->schemaValidateSource($source);
         self::collectLibXmlErrors(XMLSchemaException::class, $doc->documentURI);
     }
 
@@ -142,7 +142,7 @@ abstract class XML {
     public static function validateFile(DOMDocument $doc, string $filename)
     {
         libxml_use_internal_errors(true);
-        $doc->schemaValidate($filename);
+        @$doc->schemaValidate($filename);
         self::collectLibXmlErrors(XMLSchemaException::class, $doc->documentURI);
     }
 
@@ -189,9 +189,10 @@ abstract class XML {
         $errors = libxml_get_errors();
         if (empty($errors)) return;
 
-        // Get the last 'fatal' error on the stack.
+        // Get the last 'fatal' or 'error' type error on the stack.
         foreach ($errors as $error) {
             if ($error->level === LIBXML_ERR_FATAL) break;
+            if ($error->level === LIBXML_ERR_ERROR) break;
             unset($error);
         }
 
