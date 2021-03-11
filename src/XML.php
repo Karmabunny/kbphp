@@ -463,8 +463,9 @@ abstract class XML {
         $path = new DOMXPath($document);
 
         // Sometimes there's a namespace.
-        if ($ns = $document->namespaceURI) {
-            $query = preg_replace('/\\[^:]+/', '\\' . $ns, $query);
+        if ($node->namespaceURI) {
+            $query = preg_replace('/\/([^\/@]+)/', "/ns:$1", $query);
+            $path->registerNamespace('ns', $node->namespaceURI);
         }
 
         // Do the search.
