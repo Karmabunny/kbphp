@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use Exception;
+use LibXMLError;
 
 /**
  * An error when processing XML.
@@ -15,4 +16,6 @@ use Exception;
  */
 class XMLException extends Exception
 {
+    /** @var LibXMLError[] */
+    public $errors;
 }

@@ -37,17 +37,20 @@ abstract class XML {
      *    'schema' => $xsd_source,
      * ]);
      * ```
+     *
      * Config:
      * - 'filename' include for prettier errors.
      * - 'options' are an bitwise OR of libxml options.
      * - 'schema' or 'schema_filename' an XSD file for additional validation.
      * - 'encoding' (default: UTF-8).
      * - 'recover' try to parse non-well formed documents.
+     * - 'entities' an entity loading callback.
      *
      * @link https://www.php.net/manual/en/libxml.constants.php
+     * @link https://www.php.net/manual/en/function.libxml-set-external-entity-loader.php
      *
      * @param string $source
-     * @param array $config
+     * @param array $config [filename, options, schema, encoding, recover, entities]
      * @return DOMDocument
      * @throws XMLException
      */
@@ -56,7 +59,10 @@ abstract class XML {
         $doc = self::createDocument($config);
 
         libxml_use_internal_errors(true);
+        libxml_set_external_entity_loader($config['entities'] ?? null);
+
         $doc->loadXML($source, $config['options']);
+
         self::collectLibXmlErrors(XMLParseException::class, $doc->documentURI);
 
         // Conditionally validate it.
@@ -81,13 +87,19 @@ abstract class XML {
      *    'schema_filename' => $xsd_source,
      * ]);
      * ```
+     *
      * Config:
      * - 'options' are an bitwise OR of libxml options.
      * - 'schema' or 'schema_filename' an XSD file for additional validation.
      * - 'encoding' (default: UTF-8).
      * - 'recover' try to parse non-well formed documents.
+     * - 'entities' an entity loading callback.
      *
      * @link https://www.php.net/manual/en/libxml.constants.php
+     * @link https://www.php.net/manual/en/function.libxml-set-external-entity-loader.php
+     *
+     * @param string $source
+     * @param array $config [options, schema, encoding, recover, entities]
      *
      * @param string $source
      * @param array $config
@@ -100,7 +112,10 @@ abstract class XML {
         $doc = self::createDocument($config);
 
         libxml_use_internal_errors(true);
+        libxml_set_external_entity_loader($config['entities'] ?? null);
+
         $doc->load($filename, $config['options']);
+
         self::collectLibXmlErrors(XMLParseException::class, $doc->documentURI);
 
         // Conditionally validate it.
@@ -179,7 +194,7 @@ abstract class XML {
     /**
      * Convert libxml errors into an exception.
      *
-     * @param string $class
+     * @param string $class _must_ be a XMLParseException type
      * @param string|null $filename
      * @return void
      * @throws XMLException
@@ -190,19 +205,32 @@ abstract class XML {
         if (empty($errors)) return;
 
         // Get the last 'fatal' or 'error' type error on the stack.
+        // Ignore warnings.
         foreach ($errors as $error) {
             if ($error->level === LIBXML_ERR_FATAL) break;
             if ($error->level === LIBXML_ERR_ERROR) break;
             unset($error);
         }
 
-        libxml_clear_errors();
-        libxml_use_internal_errors(false);
+        self::cleanLibXml();
 
         if (isset($error)) {
             if ($filename) $error->file = $filename;
             throw new $class($error);
         }
+    }
+
+
+    /**
+     * Tidy up after ourselves.
+     *
+     * @return void
+     */
+    private static function cleanLibXml()
+    {
+        libxml_clear_errors();
+        libxml_use_internal_errors(false);
+        libxml_set_external_entity_loader(null);
     }
 
 
