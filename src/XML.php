@@ -717,6 +717,26 @@ abstract class XML {
 
 
     /**
+     * Expect one of these nodes in the children.
+     *
+     * @param DOMNode $parent
+     * @param string[] $wanted
+     * @return DOMElement
+     * @throws XMLAssertException If no tag found
+     */
+    public static function expectOneOf(DOMNode $parent, array $wanted)
+    {
+        foreach (self::getNodeIterator($parent->childNodes, true) as $element) {
+            if (!in_array($element->nodeName, $wanted)) continue;
+            return $element;
+        }
+
+        $tags = implode(', ', array_keys($wanted));
+        throw new XMLAssertException('Missing element, one of: ' . $tags);
+    }
+
+
+    /**
      * Fetches the text content of a node and trims it.
      *
      * @param DOMNode $node
