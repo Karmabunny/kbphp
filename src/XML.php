@@ -148,8 +148,9 @@ abstract class XML {
      */
     private static function createDocument(array &$config)
     {
-        // I honestly don't care about anyone trying to load entities.
-        // It's unsafe and in PHP8+ it's permanently disabled.
+        // Automatic entity loading isn't a thing anymore. Although we still
+        // loading for loading schemas and such. Use the 'entities' callback
+        // and built-in loaders for this, or build you own.
         if (PHP_VERSION_ID < 80000) {
             libxml_disable_entity_loader(true);
         }
@@ -209,6 +210,66 @@ abstract class XML {
         libxml_clear_errors();
         libxml_use_internal_errors(false);
         libxml_set_external_entity_loader(null);
+    }
+
+
+    /**
+     * Create an entity loader that only loads from within a white list.
+     *
+     * E.g.
+     *
+     * ```
+     * XML::parse($blob, [
+     *   'entities' => XML::allowedEntities([
+     *     'http://www.w3.org/2001/xml.xsd',
+     *     'http://www.w3.org/2003/05/soap-envelope/',
+     *   ]),
+     * ]);
+     * ```
+     *
+     * @param array $entities
+     * @return closure [public_id, system_id, context]
+     */
+    public static function allowedEntities(array $entities)
+    {
+        return function ($public_id, $system_id, $context)
+            use ($entities)
+        {
+            if (!in_array($system_id, $entities)) return null;
+            return @fopen($system_id, 'r') ?? null;
+        };
+    }
+
+
+    /**
+     * Create an entity loader that only loads from a set of prefixes.
+     *
+     * E.g.
+     *
+     * ```
+     * XML::parse($blob, [
+     *   'entities' => XML::prefixEntities([
+     *     'http://www.w3.org',
+     *     'http://www.w3.org',
+     *   ]),
+     * ]);
+     * ```
+     *
+     * @param array $prefixes
+     * @return closure [public_id, system_id, context]
+     */
+    public static function prefixEntities(array $prefixes)
+    {
+        return function ($public_id, $system_id, $context)
+            use ($prefixes)
+        {
+            foreach ($prefixes as $prefix) {
+                if (strpos($system_id, $prefix) === 0) {
+                    return @fopen($system_id, 'r') ?? null;
+                }
+            }
+            return null;
+        };
     }
 
 
