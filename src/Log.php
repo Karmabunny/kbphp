@@ -39,6 +39,8 @@ abstract class Log {
      */
     public static function name(int $level): string
     {
+        if (!$level) return '';
+
         if ($level >= self::LEVEL_DEBUG) {
             return 'DEBUG';
         }
@@ -52,7 +54,7 @@ abstract class Log {
             return 'ERROR';
         }
 
-        return '';
+        return "LEVEL({$level})";
     }
 
 
@@ -104,7 +106,7 @@ abstract class Log {
 
         // Json'd for \n escapes and whatnot.
         if (is_scalar($value)) {
-            return json_encode($value);
+            return json_encode($value, JSON_UNESCAPED_SLASHES);
         }
 
         // Recurse into models, class names otherwise.
