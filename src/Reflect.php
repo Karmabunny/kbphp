@@ -114,6 +114,7 @@ abstract class Reflect
      * Get a list of method names and their parameters.
      *
      * @param string $class
+     * @param string|null $filter regex filter
      * @return array
      */
     public static function getMethods(string $class, string $filter = null): array
@@ -122,37 +123,54 @@ abstract class Reflect
         $methods = [];
 
         foreach ($names as $name) {
-            if ($filter and strpos($name, $filter) !== 0) continue;
+            if ($filter and preg_match($filter, $name)) continue;
 
             $method = new ReflectionMethod($class, $name);
-            $args = $method->getParameters();
 
-            $modifiers = Reflection::getModifierNames($method->getModifiers());
-            $arg_names = array_map(['self', 'getParameterDefinition'], $args);
-            $return = (string) @$method->getReturnType() ?: 'mixed';
+            $parameters = [];
+            foreach ($method->getParameters() as $param) {
+                $name = $param->getName();
+                $parameters[$name] = [
+                    'name' => $name,
+                    'definition' => self::getParameterDefinition($param),
+                    'type' => (string) @$param->getType() ?: 'mixed',
+                ];
+            }
 
-            $definition = '';
-            $definition .= implode(' ' , $modifiers);
-            $definition .= ' ' . $name;
-            $definition .= '(' . implode(', ', $arg_names) . ')';
-            $definition .= ': ' . $return;
-
+            $name = $method->getName();
             $methods[$name] = [
-                'definition' => $definition,
                 'name' => $name,
-                'modifiers' => $modifiers,
-                'return' => $return,
-                'parameter_names' => array_map(function($arg) {
-                    return $arg->getName();
-                }, $args),
-                'parameter_types' => array_map(function($arg) {
-                    return @$arg->getType() ?: 'mixed';
-                }, $args),
-                'parameters' => $arg_names,
+                'definition' => self::getMethodDefinition($method),
+                'parameters' => $parameters,
             ];
         }
 
         return $methods;
+    }
+
+
+    /**
+     * Get a php-ish string version of a method.
+     *
+     * @param ReflectionMethod $method
+     * @return string
+     */
+    public static function getMethodDefinition(ReflectionMethod $method): string
+    {
+        $modifiers = Reflection::getModifierNames($method->getModifiers());
+        $arg_names = array_map(
+            [self::class, 'getParameterDefinition'],
+            $method->getParameters()
+        );
+        $return = (string) @$method->getReturnType() ?: 'mixed';
+
+        $definition = '';
+        $definition .= implode(' ' , $modifiers);
+        $definition .= ' ' . $method->getName();
+        $definition .= '(' . implode(', ', $arg_names) . ')';
+        $definition .= ': ' . $return;
+
+        return $definition;
     }
 
 
