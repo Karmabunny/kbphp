@@ -8,6 +8,7 @@ namespace karmabunny\kb;
 
 use Generator;
 use Reflection;
+use ReflectionException;
 use ReflectionParameter;
 use ReflectionMethod;
 use ReflectionNamedType;
@@ -74,6 +75,37 @@ abstract class Reflect
                 if ($filter and !is_subclass_of($full_class, $filter)) continue;
                 yield $full_class;
             }
+        }
+    }
+
+
+    /**
+     * Is this callable in a static way?
+     *
+     * Provide an array like: `[self::class, 'methodName']`
+     * Or a string like: `ns\to\Class::methodName`
+     *
+     * @param array|string $callable
+     * @return bool
+     */
+    public static function isStaticCallable($callable)
+    {
+        if (is_string($callable)) {
+            $callable = explode('::', $callable, 2);
+        }
+
+        if (!is_array($callable)) return false;
+        if (!is_callable($callable)) return false;
+        if (count($callable) !== 2) return false;
+
+        try {
+            [$class, $method] = $callable;
+            $reflect = new ReflectionMethod($class, $method);
+
+            return $reflect->isStatic() and !$reflect->isAbstract();
+        }
+        catch (ReflectionException $exception) {
+            return false;
         }
     }
 
