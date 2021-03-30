@@ -95,11 +95,8 @@ abstract class XML {
      * @link https://www.php.net/manual/en/libxml.constants.php
      * @link https://www.php.net/manual/en/function.libxml-set-external-entity-loader.php
      *
-     * @param string $source
+     * @param string $filename
      * @param array $config [options, schema, encoding, recover, entities]
-     *
-     * @param string $source
-     * @param array $config
      * @return DOMDocument
      * @throws XMLException
      */
@@ -211,7 +208,7 @@ abstract class XML {
     {
         libxml_clear_errors();
         libxml_use_internal_errors(false);
-        libxml_set_external_entity_loader(null);
+        libxml_set_external_entity_loader(function() { return null; });
     }
 
 
@@ -230,7 +227,7 @@ abstract class XML {
      * ```
      *
      * @param array $entities
-     * @return closure [public_id, system_id, context]
+     * @return callable (public_id, system_id, context) => resource|null
      */
     public static function allowedEntities(array $entities)
     {
@@ -238,7 +235,7 @@ abstract class XML {
             use ($entities)
         {
             if (!in_array($system_id, $entities)) return null;
-            return @fopen($system_id, 'r') ?? null;
+            return @fopen($system_id, 'r') ?: null;
         };
     }
 
@@ -258,7 +255,7 @@ abstract class XML {
      * ```
      *
      * @param array $prefixes
-     * @return closure [public_id, system_id, context]
+     * @return callable (public_id, system_id, context) => resource|null
      */
     public static function prefixEntities(array $prefixes)
     {
@@ -267,7 +264,7 @@ abstract class XML {
         {
             foreach ($prefixes as $prefix) {
                 if (strpos($system_id, $prefix) === 0) {
-                    return @fopen($system_id, 'r') ?? null;
+                    return @fopen($system_id, 'r') ?: null;
                 }
             }
             return null;
@@ -383,6 +380,7 @@ abstract class XML {
 
         // Find any endifs that weren't processed.
         $conditionals = self::xpath($node, '//processing-instruction("endif")', 'nodes');
+        // @phpstan-ignore-next-line : current() can indeed be null.
         if ($first = $conditionals->current()) {
             throw new XMLException('Unexpected dangling endif on line: ' . $first->getLineNo());
         }
@@ -416,7 +414,7 @@ abstract class XML {
      */
     public static function format(string $template, array $args): DOMDocument
     {
-        if (empty($template)) return '';
+        if (empty($template)) return new DOMDocument();
 
         $replace = [];
         $subjects = [];
@@ -449,21 +447,22 @@ abstract class XML {
      * - list - `DOMElement[]`
      * - nodes - `Generator<DOMNode>`
      *
-     * @param DOMNode $xml
-     * @param string $path
+     * @param DOMNode $node
+     * @param string $query
      * @param string $type string|bool|int|float|element|list|nodes
-     * @return string|bool|int|float|DOMElement|DOMNode[]|Generator<DOMNode>
+     * @return string|bool|int|float|DOMElement|DOMNode[]|Generator<DOMNode>|null
      */
     public static function xpath(DOMNode $node, string $query, string $type = 'nodes')
     {
-        // Get the document.
+        // If 'ownerDocument' is null, then the node _is_ the document.
+        /** @var DOMDocument $document */
         $document = $node->ownerDocument ?? $node;
         if ($node === $document) $node = null;
 
         $path = new DOMXPath($document);
 
         // Sometimes there's a namespace.
-        if ($node->namespaceURI) {
+        if ($node and $node->namespaceURI) {
             $query = preg_replace('/\/([^\/@]+)/', "/ns:$1", $query);
             $path->registerNamespace('ns', $node->namespaceURI);
         }
@@ -490,10 +489,13 @@ abstract class XML {
 
             case 'element':
                 if (!$results) return null;
+                // @phpstan-ignore-next-line : $current is a DOMElement
                 return self::getNodeIterator($results, true)->current();
 
             case 'list':
+                // @phpstan-ignore-next-line : empty is ok, duh.
                 if (!$results) return [];
+                // @phpstan-ignore-next-line : generic array is a DOMElement[]
                 return iterator_to_array(self::getNodeIterator($results, true));
 
             case 'nodes':
@@ -657,6 +659,7 @@ abstract class XML {
     public static function first(DOMNode $parent, string $tag_name)
     {
         foreach (self::getNodeIterator($parent->childNodes, true) as $element) {
+            /** @var DOMElement $element */
             if ($element->nodeName === $tag_name) return $element;
         }
 
@@ -700,6 +703,8 @@ abstract class XML {
         $fetched = [];
 
         foreach (self::getNodeIterator($parent->childNodes, true) as $element) {
+            /** @var DOMElement $element */
+
             $name = $element->nodeName;
             if (!array_key_exists($name, $wanted)) continue;
 
@@ -727,6 +732,7 @@ abstract class XML {
     public static function expectOneOf(DOMNode $parent, array $wanted)
     {
         foreach (self::getNodeIterator($parent->childNodes, true) as $element) {
+            /** @var DOMElement $element */
             if (!in_array($element->nodeName, $wanted)) continue;
             return $element;
         }
@@ -781,7 +787,7 @@ abstract class XML {
      * Print a node to the standard output.
      *
      * @param DOMNode $node
-     * @return echos
+     * @return void echos
      */
     public static function print(DOMNode $node)
     {

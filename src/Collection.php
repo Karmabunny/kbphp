@@ -105,6 +105,7 @@ class Collection implements
     /** @inheritdoc */
     public function getIterator(): Traversable
     {
+        // @phpstan-ignore-next-line : docs say 'array or object'
         return new ArrayIterator($this);
     }
 

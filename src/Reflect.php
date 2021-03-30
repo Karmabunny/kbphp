@@ -72,6 +72,7 @@ abstract class Reflect
                 if (!class_exists($full_class, false)) continue;
 
                 // All classes must subtype the filter.
+                // @phpstan-ignore-next-line : phpstan doesn't like subclass checks.
                 if ($filter and !is_subclass_of($full_class, $filter)) continue;
                 yield $full_class;
             }

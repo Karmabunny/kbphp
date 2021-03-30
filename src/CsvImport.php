@@ -46,6 +46,9 @@ class CsvImport implements IteratorAggregate
     /** @var string */
     private $_escape_re;
 
+    /** @var resource|null */
+    private $handle;
+
     /**
      * Configure the CSV output format.
      * By default:

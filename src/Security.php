@@ -148,8 +148,9 @@ class Security
      *
      * @deprecated Use password_hash() instead.
      * @param string $password Plaintext password
-     * @param int $algorithmPassword algorithm. If not specified, the default is used.
+     * @param int|string $algorithm
      * @return array 0 => hash, 1 => algorithm, 2 => salt
+     * @throws InvalidArgumentException
      */
     public static function hashPassword($password, $algorithm = self::PASSWORD_DEFAULT)
     {
@@ -163,7 +164,6 @@ class Security
             case self::PASSWORD_PLAIN:
             case self::PASSWORD_SHA:
                 throw new InvalidArgumentException('Read-only password algorithm specified');
-                break;
 
             case self::PASSWORD_SHA_SALT:
                 $salt = Security::randStr(10);
@@ -193,7 +193,7 @@ class Security
                 break;
 
             default:
-                return null;
+                throw new InvalidArgumentException("Unknown hash algorithm: {$algorithm}");
         }
 
         return [$hash, $algorithm, $salt];

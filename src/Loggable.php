@@ -18,7 +18,7 @@ interface Loggable {
     /**
      * Log something.
      *
-     * @param string|\Exception $message
+     * @param mixed $message string, array, exception - whatever
      * @param int $level default: LEVEL_INFO
      * @return void
      */

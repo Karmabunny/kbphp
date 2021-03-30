@@ -15,4 +15,18 @@ use Exception;
  */
 class UrlDecodeException extends Exception
 {
+
+    /** @var string|null */
+    public $query;
+
+    /**
+     *
+     * @param string $query
+     * @return static
+     */
+    public function setQuery(string $query)
+    {
+        $this->query = $query;
+        return $this;
+    }
 }

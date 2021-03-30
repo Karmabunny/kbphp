@@ -84,7 +84,7 @@ abstract class Job implements Loggable
      * Shorthand for creating, validating and running a job.
      *
      * @param array $config
-     * @return static
+     * @return Job
      */
     public static function execute(array $config = [])
     {

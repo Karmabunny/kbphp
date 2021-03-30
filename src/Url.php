@@ -33,7 +33,8 @@ abstract class Url {
     {
         $result = [];
         if (!mb_parse_str($query, $result)) {
-            throw new UrlDecodeException('Failed to parse query', 0, null, $query);
+            throw (new UrlDecodeException('Failed to parse query'))
+                ->setQuery($query);
         }
         return $result;
     }

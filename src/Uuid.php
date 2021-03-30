@@ -97,7 +97,7 @@ abstract class Uuid
     public static function uuid1($options = 0): string
     {
         // 60-bit time in 100ths of nanoseconds
-        $timestamp = self::getSubNanoTime($options & self::V1_LAZY);
+        $timestamp = self::getSubNanoTime((bool) ($options & self::V1_LAZY));
 
 
         // Random mac addresses.
@@ -405,7 +405,7 @@ abstract class Uuid
      *
      * This doesn't validate. It doesn't do index checks.
      *
-     * @param string
+     * @param string $uuid
      * @return string
      */
     public static function format(string $uuid): string

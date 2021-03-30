@@ -46,7 +46,7 @@ trait LoggerTrait {
     /**
      * Log something.
      *
-     * @param string|\Exception $message
+     * @param mixed $message
      * @param int $level default: LEVEL_INFO
      * @return void
      */

@@ -101,7 +101,7 @@ class DocType extends Collection
      *
      * Returns an array of all type strings.
      *
-     * @param mixed $comment
+     * @param string $comment
      * @return string[]|null Null if missing/invalid.
      */
     public static function parseCommentTypes(string $comment)

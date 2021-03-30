@@ -49,7 +49,7 @@ abstract class Validity
      * @example
      *    $valid->check('email', 'email')
      *
-     * @param string email address
+     * @param string $val email address
      * @throws ValidationException
      */
     public static function email($val)
@@ -349,7 +349,7 @@ abstract class Validity
      *    $_POST['vowels'] = ['a', 'i']
      *    $valid->check('vowel', 'allInArray', ['a', 'e', 'i', 'o', 'u'])
      *
-     * @param string $val
+     * @param array $val
      * @param array $allowed
      * @throws ValidationException
      */

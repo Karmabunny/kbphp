@@ -29,7 +29,7 @@ class ValidationException extends Exception
      *
      * Whereas array_merge() will clobber messages within duplicate keys.
      *
-     * @param array ...$arrays
+     * @param array $errors
      * @return static
      */
     public function addErrors($errors)

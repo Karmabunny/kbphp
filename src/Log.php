@@ -90,7 +90,7 @@ abstract class Log {
     /**
      * An attempt to convert things into strings.
      *
-     * @param mixed $thing
+     * @param mixed $value
      * @return string
      */
     public static function stringify($value, $indent = 0): string
@@ -114,6 +114,7 @@ abstract class Log {
             $out = get_class($value) . PHP_EOL;
 
             if (!is_iterable($value)) {
+                // @phpstan-ignore-next-line : docs say 'array or object'
                 $value = new ArrayIterator($value);
             }
 

@@ -362,8 +362,8 @@ class RulesValidator implements Validator
     {
         $values = $this->data[$field_name] ?? null;
 
-        if ($values === null) return true;
-        if (self::isEmpty($values)) return true;
+        if ($values === null) return [];
+        if (self::isEmpty($values)) return [];
 
         if (!is_array($values)) {
             throw new InvalidArgumentException("Field <{$field_name}> is not an array");

@@ -158,7 +158,7 @@ abstract class Enc
     *   'mysql' - a mysql-formatted date in the form YYYY-MM-DD
     *   'array' - an array [ <day> , <month> , <year> ]
     *
-    * @param string $value The value to convert.
+    * @param string|array $value The value to convert.
     * @param string $from What format the date was in origanally.
     * @return string|null JavaScript snippet for the given date or NULL if the input value is invalid
     **/
@@ -180,7 +180,6 @@ abstract class Enc
 
             default:
                 return null;
-                break;
         }
 
         if (!$day or !$month or !$year) return null;

@@ -21,7 +21,7 @@ abstract class Json
     /**
      * Encode a json array as a string.
      *
-     * @param array|JsonSerializable $json
+     * @param mixed $json
      * @param bool $pretty
      * @return string
      * @throws JsonException Any parsing error

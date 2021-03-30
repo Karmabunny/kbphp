@@ -172,7 +172,7 @@ class CsvExport
      * Internal formatter function.
      *
      * @param string $attribute
-     * @return mixed
+     * @return string
      */
     private function _format(string $attribute, $value): string
     {

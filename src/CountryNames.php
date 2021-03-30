@@ -331,9 +331,9 @@ abstract class CountryNames
      *
      * @param string $country_code
      * @param string $language default 'en'
-     * @return string
+     * @return string|null
      */
-    public static function getCountryName(string $country_code, string $language = 'en'): string
+    public static function getCountryName(string $country_code, string $language = 'en')
     {
         if (strlen($language) != 2) return null;
         $language = strtoupper($language);
@@ -350,7 +350,7 @@ abstract class CountryNames
      */
     public static function getCountryNameList(string $language = 'en'): array
     {
-        if (strlen($language) != 2) return null;
+        if (strlen($language) != 2) return [];
         $language = strtoupper($language);
 
         $names = [];

@@ -6,7 +6,6 @@
 
 namespace karmabunny\kb;
 
-use ArrayAccess;
 use Generator;
 use Throwable;
 use Traversable;
@@ -369,6 +368,9 @@ abstract class Arrays
                 else if (is_array($item)) {
                     $index = $item[$key];
                     $value = $item[$name];
+                }
+                else {
+                    continue;
                 }
 
                 $index = (string) $index;
