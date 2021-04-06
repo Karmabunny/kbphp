@@ -14,6 +14,11 @@
             "karmabunny\\kb\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Test\\": "test/Test"
+        }
+    },
     "scripts": {
         "tests": "phpunit --testdox tests",
         "publish": "bash scripts/publish.sh",
