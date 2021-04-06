@@ -1,0 +1,273 @@
+<?php
+/**
+ * @link      https://github.com/Karmabunny
+ * @copyright Copyright (c) 2020 Karmabunny
+ */
+
+namespace karmabunny\kb;
+
+/**
+ * Environment configuration helper.
+ *
+ * Load environment configs from the system or a file.
+ *
+ * @package karmabunny\kb
+ */
+class Env
+{
+    /** Pattern for matching file env files. */
+    const RE = '/^([^=#]+)=([^#]*)/';
+
+    const DEV = 'dev';
+
+    const QA = 'qa';
+
+    const TEST = 'test';
+
+    const PROD = 'prod';
+
+    const ENV = [
+        self::DEV,
+        self::QA,
+        self::TEST,
+        self::PROD,
+    ];
+
+    /** The key name to determine the current environment mode. */
+    static $ENV_NAME = 'SITES_ENVIRONMENT';
+
+    /** The default environment, default 'DEV'. */
+    static $DEFAULT = self::DEV;
+
+    /** @var string[] */
+    public static $config;
+
+
+    /**
+     * Configure the config.
+     *
+     * - Set the default environment with 'DEFAULT'
+     * - Set the environment lookup name with 'ENV_NAME'
+     *
+     * @param array $config (ENV_NAME, DEFAULT)
+     * @return void
+     */
+    public static function config(array $config)
+    {
+        self::$ENV_NAME = $config['ENV_NAME'] ?? self::$ENV_NAME;
+        self::$DEFAULT = $config['DEFAULT'] ?? self::$DEFAULT;
+    }
+
+
+    /**
+     * Load the config from the system environment.
+     *
+     * @param bool $clean Remove variables once we've read them.
+     * @return string[] [name => value]
+     */
+    public static function loadFromSystem($clean = false): array
+    {
+        if (self::$config !== null) {
+            return self::$config;
+        }
+
+        self::$config = [];
+
+        foreach ($_SERVER as $key => $value) {
+            $value = getenv($key);
+            if ($value === false) continue;
+
+            static::$config[$key] = $value;
+
+            if ($clean) {
+                $_ENV[$key] = null;
+                $_SERVER[$key] = null;
+                putenv($key);
+            }
+        }
+
+        return self::$config;
+    }
+
+
+    /**
+     * Load the config from a file (Recommended).
+     *
+     * @param string $path
+     * @return string[] [name => value]
+     */
+    public static function loadFromFile(string $path): array
+    {
+        if (self::$config !== null) {
+            return self::$config;
+        }
+
+        self::$config = [];
+
+        $file = @fopen($path, 'r');
+
+        while ($file and !feof($file)) {
+            $line = fgets($file);
+
+            $matches = [];
+            if (!preg_match(self::RE, $line, $matches)) continue;
+
+            $key = trim($matches[1]);
+            $value = trim(trim($matches[2]), '\'"');
+            static::$config[$key] = $value;
+        }
+
+        fclose($file);
+        return self::$config;
+    }
+
+
+    /**
+     * Get the current config or load it from the system environment
+     * if not already.
+     *
+     * It's recommended to first load the environment from a file in your
+     * bootstrap.
+     *
+     * @return string[] [name => value]
+     */
+    public static function load(): array
+    {
+        if (self::$config !== null) return self::$config;
+        return self::loadFromSystem();
+    }
+
+
+    /**
+     * Get a variable.
+     *
+     * @param string $key
+     * @return string|null
+     */
+    public static function get(string $key)
+    {
+        $config = self::load();
+        return $config[$key] ?? null;
+    }
+
+
+    /**
+     *
+     * @param string[]|null $keys
+     * @return string[] [name => value]
+     */
+    public static function getConfig(array $keys = null): array
+    {
+        $config = self::load();
+        if ($keys === null) return $config;
+
+        $out = [];
+
+        foreach ($keys as $key => $target) {
+            $default = null;
+
+            if (is_array($target)) {
+                $default = $target[1] ?? null;
+                $target = $target[0];
+            }
+
+            if (is_numeric($key)) {
+                $key = $target;
+            }
+
+            if (!$target[0]) {
+                $out[$key] = $default;
+            }
+            else {
+                $out[$key] = $config[$target] ?? $default;
+            }
+        }
+
+        return $out;
+    }
+
+
+    /**
+     * Is this app inside a docker image?
+     *
+     * @return bool
+     */
+    public static function isDocker()
+    {
+        static $env;
+
+        if (!$env) {
+            $env = @file_get_contents('/proc/1/cgroup');
+        }
+
+        return $env and strpos($env, 'docker') !== false;
+    }
+
+
+    /**
+     * What is the current environment mode?
+     *
+     * @return string
+     */
+    public static function environment()
+    {
+        if (defined('PHPUNIT')) return self::TEST;
+
+        $actual = self::get(self::$ENV_NAME);
+        if (!$actual) return self::$DEFAULT;
+
+        // Loosely match the environment names.
+        foreach (self::ENV as $expected) {
+            if (strpos($actual, $expected) === 0) return $expected;
+        }
+
+        return self::$DEFAULT;
+    }
+
+
+    /**
+     * Is this app in production mode?
+     *
+     * @return bool
+     */
+    public static function isProduction()
+    {
+        $env = self::environment();
+        return strpos($env, self::PROD) === 0;
+    }
+
+
+    /**
+     * Is this app in QA (quality assurance) mode?
+     *
+     * @return bool
+     */
+    public static function isQA()
+    {
+        $env = self::environment();
+        return strpos($env, self::QA) === 0;
+    }
+
+
+    /**
+     * A shorthand method for returning the appropriate value for a config.
+     *
+     * For example:
+     * ```
+     * Env::env([
+     *     'prod' => 'secret',
+     *     'dev' => 'testing',
+     * ]);
+     * ```
+     *
+     * If the environment is not defined, the default is the first item.
+     *
+     * @param array $config
+     * @return string|null
+     */
+    public static function env(array $config)
+    {
+        $env = self::environment();
+        return $config[$env] ?? reset($config) ?? null;
+    }
+}
