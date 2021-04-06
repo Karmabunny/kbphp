@@ -16,7 +16,7 @@ namespace karmabunny\kb;
 class Env
 {
     /** Pattern for matching file env files. */
-    const RE = '/^([^=#]+)=([^#]*)/';
+    const RE = '/^([^=#]+)=(.*)/';
 
     const DEV = 'dev';
 
@@ -40,7 +40,7 @@ class Env
     static $DEFAULT = self::DEV;
 
     /** @var string[] */
-    public static $config;
+    static $config;
 
 
     /**
@@ -113,6 +113,8 @@ class Env
             if (!preg_match(self::RE, $line, $matches)) continue;
 
             $key = trim($matches[1]);
+            if (!$key) continue;
+
             $value = trim(trim($matches[2]), '\'"');
             static::$config[$key] = $value;
         }
@@ -131,7 +133,7 @@ class Env
      *
      * @return string[] [name => value]
      */
-    public static function load(): array
+    protected static function load(): array
     {
         if (self::$config !== null) return self::$config;
         return self::loadFromSystem();
@@ -140,6 +142,8 @@ class Env
 
     /**
      * Get a variable.
+     *
+     * Note, This will load variables from the system if not already populated.
      *
      * @param string $key
      * @return string|null
@@ -152,6 +156,34 @@ class Env
 
 
     /**
+     * Get the config object.
+     *
+     * They keys config can work 3 ways.
+     *
+     * ```
+     * // Provide a list of keys to get a subset config.
+     * Env::getConfig([
+     *    'DB_HOST',
+     *    'DB_USER',
+     * ]);
+     * // => [ 'DB_HOST' => 'abc', 'DB_USER' => 'def']
+     *
+     * // You can map the keys of the subset like this.
+     * Env::getConfig([
+     *    'host' => 'DB_HOST',
+     *    'user' => 'DB_USER',
+     * ]);
+     * // => [ 'host' => 'abc', 'user' => 'def']
+     *
+     * // You can specify defaults like this.
+     * Env::getConfig([
+     *    'host' => [null, 'localhost'],
+     *    'user' => ['DB_USER', 'test'],
+     * ]);
+     * // => [ 'host' => 'localhost', 'user' => 'def']
+     * ```
+     *
+     * Note, This will load variables from the system if not already populated.
      *
      * @param string[]|null $keys
      * @return string[] [name => value]
@@ -260,7 +292,10 @@ class Env
      * ]);
      * ```
      *
-     * If the environment is not defined, the default is the first item.
+     * If a matching environment key doesn't exist, it'll use the default
+     * environment (`Env::$DEFAULT`, typically 'dev').
+     *
+     * If the default env is also not present, it uses the first config item.
      *
      * @param array $config
      * @return string|null
@@ -268,6 +303,6 @@ class Env
     public static function env(array $config)
     {
         $env = self::environment();
-        return $config[$env] ?? reset($config) ?? null;
+        return $config[$env] ?? $config[self::$DEFAULT] ?? reset($config) ?? null;
     }
 }
