@@ -258,14 +258,26 @@ class Env
 
 
     /**
+     * Is this app in an expected environment?
+     *
+     * @param string $expected
+     * @return bool
+     */
+    public static function is(string $expected): bool
+    {
+        $env = self::environment();
+        return stripos($env, $expected) === 0;
+    }
+
+
+    /**
      * Is this app in production mode?
      *
      * @return bool
      */
-    public static function isProduction()
+    public static function isProduction(): bool
     {
-        $env = self::environment();
-        return strpos($env, self::PROD) === 0;
+        return self::is(self::PROD);
     }
 
 
@@ -274,10 +286,9 @@ class Env
      *
      * @return bool
      */
-    public static function isQA()
+    public static function isQA(): bool
     {
-        $env = self::environment();
-        return strpos($env, self::QA) === 0;
+        return self::is(self::QA);
     }
 
 
