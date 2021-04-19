@@ -156,26 +156,29 @@ class Env
 
 
     /**
-     * Get the config object.
+     * Create a config from a set of environment variables.
      *
-     * They keys config can work 3 ways.
+     * This is essential a shorthand mapping between environment variables
+     * and some esoteric config of your own.
+     *
+     * There are 3 methods.
      *
      * ```
-     * // Provide a list of keys to get a subset config.
+     * // 1. Provide a list of keys to get a subset config.
      * Env::getConfig([
      *    'DB_HOST',
      *    'DB_USER',
      * ]);
      * // => [ 'DB_HOST' => 'abc', 'DB_USER' => 'def']
      *
-     * // You can map the keys of the subset like this.
+     * // 2. You can rename the keys like this.
      * Env::getConfig([
      *    'host' => 'DB_HOST',
      *    'user' => 'DB_USER',
      * ]);
      * // => [ 'host' => 'abc', 'user' => 'def']
      *
-     * // You can specify defaults like this.
+     * // 3. You can specify defaults like this.
      * Env::getConfig([
      *    'host' => [null, 'localhost'],
      *    'user' => ['DB_USER', 'test'],
