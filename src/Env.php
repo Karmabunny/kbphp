@@ -224,7 +224,7 @@ class Env
      *
      * @return bool
      */
-    public static function isDocker()
+    public static function isDocker(): bool
     {
         static $env;
 
@@ -232,16 +232,19 @@ class Env
             $env = @file_get_contents('/proc/1/cgroup');
         }
 
-        return $env and strpos($env, 'docker') !== false;
+        return $env and stripos($env, 'docker') !== false;
     }
 
 
     /**
      * What is the current environment mode?
      *
+     * This will normalize the environment name so 1-to-1 comparisons between
+     * the `Env::ENV` variables will always work.
+     *
      * @return string
      */
-    public static function environment()
+    public static function environment(): string
     {
         if (defined('PHPUNIT')) return self::TEST;
 
@@ -250,7 +253,7 @@ class Env
 
         // Loosely match the environment names.
         foreach (self::ENV as $expected) {
-            if (strpos($actual, $expected) === 0) return $expected;
+            if (stripos($actual, $expected) === 0) return $expected;
         }
 
         return self::$DEFAULT;
