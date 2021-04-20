@@ -383,4 +383,44 @@ abstract class Arrays
         return $map;
     }
 
+
+    /**
+     * Load a php config file.
+     *
+     * Note, this will fail if the file doesn't exist.
+     *
+     * A config can be in one of two forms.
+     *
+     * 1. Create a `$config` variable:
+     * ```
+     * $config['key'] = 'value';
+     * // EOF
+     * ```
+     *
+     * 2. Or return an array:
+     * ```
+     * return [
+     *     'key' => 'value',
+     * ];
+     * ```
+     *
+     * @param string $path
+     * @return array|null `null` if the file is invalid or missing.
+     */
+    static function config(string $path)
+    {
+        static $cache = [];
+        $output = $cache[$path] ?? null;
+
+        if ($output === null) {
+            $output = (function($_path) {
+                $alt = @include $_path;
+                return $config ?? $alt;
+            })($path);
+        }
+
+        if (!is_array($output)) return null;
+        $cache[$path] = $output;
+        return $output;
+    }
 }

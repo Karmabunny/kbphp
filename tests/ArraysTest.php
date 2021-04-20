@@ -436,4 +436,37 @@ final class ArraysTest extends TestCase {
 
         $this->assertEquals($expected, $actual);
     }
+
+
+    public function testConfig()
+    {
+        $expected = [
+            'abc' => 123,
+            'def' => 456,
+        ];
+
+        // Traditional style
+        $actual = Arrays::config(__DIR__ .'/config/valid-1.php');
+        $this->assertEquals($expected, $actual);
+
+        // Load it again
+        $actual = Arrays::config(__DIR__ .'/config/valid-1.php');
+        $this->assertEquals($expected, $actual);
+
+        // Modern style
+        $actual = Arrays::config(__DIR__ .'/config/valid-2.php');
+        $this->assertEquals($expected, $actual);
+
+        // Invalid
+        $actual = Arrays::config(__DIR__ .'/config/invalid.php');
+        $this->assertNull($actual);
+
+        // Missing file
+        $actual = Arrays::config(__DIR__ .'/config/valid-3.php');
+        $this->assertNull($actual);
+
+        // Test for leaky symbols.
+        $this->assertFalse(isset($config));
+        $this->assertTrue(function_exists('sillyGlobalFn'));
+    }
 }
