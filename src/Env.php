@@ -188,7 +188,7 @@ class Env
      *
      * Note, This will load variables from the system if not already populated.
      *
-     * @param string[]|null $keys
+     * @param array|null $keys
      * @return string[] [name => value]
      */
     public static function getConfig(array $keys = null): array
