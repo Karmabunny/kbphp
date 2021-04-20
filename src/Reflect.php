@@ -124,7 +124,7 @@ abstract class Reflect
         $methods = [];
 
         foreach ($names as $name) {
-            if ($filter and preg_match($filter, $name)) continue;
+            if ($filter and !preg_match($filter, $name)) continue;
 
             $method = new ReflectionMethod($class, $name);
 
