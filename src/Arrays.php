@@ -217,6 +217,8 @@ abstract class Arrays
      *
      * Opposite of isAssociated().
      *
+     * Note, this exists in PHP 8.1 as `array_is_list()`.
+     *
      * @param mixed $array
      * @return bool
      */
@@ -344,6 +346,19 @@ abstract class Arrays
      * - string/int/null instead of array/object
      * - invalid key types (int/string only)
      * - missing keys/names
+     *
+     * Example:
+     * ```
+     * $users = getUsers();
+     *
+     * // Assuming users are sorted.
+     * $options = Arrays::createMap($users, 'id', 'name', 'Choose a user');
+     *
+     * // Hacky post-sort solution.
+     * $options = Arrays::createMap($users, 'id', 'name');
+     * asort($options);
+     * $options = ['' => 'Choose a user' ] + $options;
+     * ```
      *
      * @param array $items
      * @param string $key
