@@ -2,14 +2,16 @@
 
 namespace karmabunny\kb;
 
+use ArrayAccess;
+use Closure;
+
 /**
- * This is an abomination but it's very neat.
+ * Neater closures!
+ *
+ * This is now less of an abomination.
  *
  * In the interest of reducing the millions of closures about the place and
  * making code look kind of neater.
- *
- * It's only useful for limited use-cases. Arguments and scoping variables
- * are not a thing. It's literally what is says on the box.
  *
  * It's like this:
  *
@@ -23,16 +25,65 @@ namespace karmabunny\kb;
  * $arrays = array_map(fn($item) => $item->toArray(), $results);
  *
  * // This way
- * $arrays = array_map([Wrap::class, 'toArray'], $results);
+ * $arrays = array_map(Wrap::method('toArray'), $results);
+ *
+ * // And then maybe
+ * $filtered = array_map(Wrap::item('active'), $arrays);
+ *
+ * // Or even
+ * $filtered = array_filter($results, Wrap::property('active'));
  * ```
  *
  * @package karmabunny/kb
  */
 class Wrap
 {
-    public static function __callStatic($name, $arguments)
+    /**
+     * Create a wrapper that gets te property of an object.
+     *
+     * @param string $name
+     * @return callable (object) => mixed
+     */
+    public static function property(string $name)
     {
-        $item = array_shift($arguments);
-        return $item->$name($arguments);
+        return function ($item) use ($name) {
+            if (!is_object($item)) return null;
+            return $item->$name;
+        };
+    }
+
+
+    /**
+     * Create a wrapper that calls the method of an object.
+     *
+     * @param string $name
+     * @param array $args
+     * @return callable (object) => mixed
+     */
+    public static function method(string $name, ...$args)
+    {
+        return function ($item) use ($name, $args) {
+            if (!is_object($item)) return null;
+            return $item->$name(...$args);
+        };
+    }
+
+
+    /**
+     * Create a wrapper that gets the key of an array.
+     *
+     * @param string|int $key
+     * @return callable (array) => mixed
+     */
+    public static function item($key)
+    {
+        return function ($item) use ($key) {
+            if (!(
+                is_array($item) or
+                $item instanceof ArrayAccess
+            )) return null;
+
+            return $item[$key] ?? null;
+        };
     }
 }
