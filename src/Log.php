@@ -106,7 +106,7 @@ abstract class Log {
 
         // Json'd for \n escapes and whatnot.
         if (is_scalar($value)) {
-            return json_encode($value, JSON_UNESCAPED_SLASHES);
+            return trim(json_encode($value, JSON_UNESCAPED_SLASHES), '"\'');
         }
 
         // Recurse into models, class names otherwise.

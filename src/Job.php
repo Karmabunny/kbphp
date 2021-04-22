@@ -94,7 +94,7 @@ abstract class Job implements Loggable
         $job = new $class($config);
 
         $job->addLogger(function($message) {
-            echo $message, PHP_EOL;
+            echo Log::stringify($message), PHP_EOL;
         });
 
         $job->run();
