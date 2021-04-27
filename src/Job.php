@@ -73,8 +73,14 @@ abstract class Job implements Loggable
     public function stats(): array
     {
         $seconds = time() - $this->start;
+        $minutes = '';
+
+        if ($seconds > 60) {
+            $minutes = sprintf(' (%d minutes)', floor($seconds / 60));
+        }
+
         $stats = [];
-        $stats[] = "Time: {$seconds} seconds";
+        $stats[] = "Time: {$seconds} seconds" . $minutes;
         $stats[] = 'Started: ' . date('Y-m-d H:i:s', $this->start);
         return $stats;
     }
