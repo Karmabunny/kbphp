@@ -181,4 +181,45 @@ abstract class Log {
         header('content-type: text/plain');
         die(self::stringify($thing));
     }
+
+
+    /**
+     * Create a logger method that writes messages to a file.
+     *
+     * The messages are cached in a in-memory queue to reduce disk activity.
+     * Disable it with a `$cache_size = 1`.
+     *
+     * @param string $path Write the file here (append mode)
+     * @param int $cache_size Only write to disk every 'x' messages
+     * @return callable (message, level, category)
+     */
+    public static function createFileLogger(string $path, $cache_size = 5)
+    {
+        static $cache = [];
+
+        register_shutdown_function(function () use ($cache, $path) {
+            foreach ($cache as $message) {
+                @file_put_contents($path, $message . PHP_EOL, FILE_APPEND);
+            }
+        });
+
+        return function ($message, $level, $category)
+                use ($path, $cache, $cache_size) {
+
+            $line = '[' . date('c') . ']';
+            $line .= '[' . Log::name($level) . ']';
+            $line .= '[' . $category . ']';
+            $line .= ' ' . Log::stringify($message);
+
+            $cache[] = trim($line);
+
+            if (count($cache) >= $cache_size) {
+                foreach ($cache as $message) {
+                    @file_put_contents($path, $message . PHP_EOL, FILE_APPEND);
+                }
+                $cache = [];
+            }
+        };
+    }
+
 }
