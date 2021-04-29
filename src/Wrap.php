@@ -4,6 +4,7 @@ namespace karmabunny\kb;
 
 use ArrayAccess;
 use Closure;
+use InvalidArgumentException;
 
 /**
  * Neater closures!
@@ -32,12 +33,40 @@ use Closure;
  *
  * // Or even
  * $filtered = array_filter($results, Wrap::property('active'));
+ *
+ * // Lastly
+ * $mapped = array_map(Wrap::construct(Thing::class), $results);
  * ```
  *
  * @package karmabunny/kb
  */
 class Wrap
 {
+
+    /**
+     * Wrap a constructor.
+     *
+     * ```
+     * fn(...$args) => new $name(...$args);
+     * ```
+     *
+     * @param string $name a class name
+     * @return callable (...$args) => object
+     * @throws InvalidArgumentException
+     */
+    public static function construct(string $name)
+    {
+        // Validate, but also autoload things.
+        if (!class_exists($name, true)) {
+            throw new InvalidArgumentException("Class {$name} does not exist");
+        }
+
+        return function (...$args) use ($name) {
+            return new $name(...$args);
+        };
+    }
+
+
     /**
      * Create a wrapper that gets te property of an object.
      *
