@@ -68,6 +68,28 @@ class Wrap
 
 
     /**
+     * Wrap instanceof.
+     *
+     * ```
+     * fn($item) => $item instanceof $name;
+     * ```
+     *
+     * @param string $name a class name
+     * @return callable ($item) => bool
+     * @throws InvalidArgumentException
+     */
+    public static function instanceOf(string $name)
+    {
+        return function ($item) use ($name) {
+            return (
+                $name === get_class($item) or
+                is_subclass_of($item, $name, false)
+            );
+        };
+    }
+
+
+    /**
      * Create a wrapper that gets te property of an object.
      *
      * ```
