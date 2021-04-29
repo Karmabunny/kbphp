@@ -70,6 +70,10 @@ class Wrap
     /**
      * Create a wrapper that gets te property of an object.
      *
+     * ```
+     * fn($item) => $item->$name;
+     * ```
+     *
      * @param string $name
      * @return callable (object) => mixed
      */
@@ -84,6 +88,10 @@ class Wrap
 
     /**
      * Create a wrapper that calls the method of an object.
+     *
+     * ```
+     * fn($item) => $item->$name(...$args);
+     * ```
      *
      * @param string $name
      * @param array $args
@@ -100,6 +108,10 @@ class Wrap
 
     /**
      * Create a wrapper that gets the key of an array.
+     *
+     * ```
+     * fn($item) => $item[$key];
+     * ```
      *
      * @param string|int $key
      * @return callable (array) => mixed
