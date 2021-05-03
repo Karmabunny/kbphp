@@ -68,9 +68,10 @@ trait RulesValidatorTrait
      *
      * Refer to the {@see Validity} class for more about validator functions.
      *
+     * @param string|null $scenario
      * @return array
      */
-    public abstract function rules(string $scenario = null): array;
+    public abstract function rules(): array;
 
 
     /**
