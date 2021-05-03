@@ -22,6 +22,18 @@ use ReflectionType;
 abstract class Reflect
 {
 
+    /** Matching `@thing description` */
+    const RE_DOCTYPE = '/@([a-zA-Z]\w+)([^\n\*]+)/';
+
+    /** Matching `@return type description` */
+    const RE_RETURN = '/@return\s([a-zA-Z0-9_\|]+)\s*([^\n\*]+)/';
+
+    /** Matching `@param type $name description` */
+    const RE_PARAM = '/@param\s([a-zA-Z0-9_\|]+)\s+\$([a-zA-Z0-9_]+)\s*([^\n\*]*?)/';
+
+    /** Matching `@method return name(params)` */
+    const RE_METHOD = '/@method\s([a-zA-Z0-9_\|]+)\s+([a-zA-Z0-9_]+)\s*\([^)]+\)/';
+
 
     /**
      * Find all the classes in a list of directories.
@@ -128,21 +140,27 @@ abstract class Reflect
 
             $method = new ReflectionMethod($class, $name);
 
+            $comment = $method->getDocComment() ?: null;
+            $defs = self::getDocParameters($comment ?? '');
+
             $parameters = [];
             foreach ($method->getParameters() as $param) {
                 $name = $param->getName();
+                $def = $defs[$name] ?? null;
+
                 $parameters[$name] = [
                     'name' => $name,
-                    'definition' => self::getParameterDefinition($param),
-                    'type' => (string) @$param->getType() ?: 'mixed',
+                    'definition' => self::getParameterDefinition($param, $def),
+                    'type' => (string) @$param->getType() ?: ($def ?? 'mixed'),
                 ];
             }
 
             $name = $method->getName();
             $methods[$name] = [
                 'name' => $name,
-                'definition' => self::getMethodDefinition($method),
+                'definition' => self::getMethodDefinition($method, $defs),
                 'parameters' => $parameters,
+                'doc' => $comment,
             ];
         }
 
@@ -154,16 +172,27 @@ abstract class Reflect
      * Get a php-ish string version of a method.
      *
      * @param ReflectionMethod $method
+     * @param string[] $fallbacks [name => class_name]
      * @return string
      */
-    public static function getMethodDefinition(ReflectionMethod $method): string
+    public static function getMethodDefinition(ReflectionMethod $method, array $fallbacks = null): string
     {
         $modifiers = Reflection::getModifierNames($method->getModifiers());
-        $arg_names = array_map(
-            [self::class, 'getParameterDefinition'],
-            $method->getParameters()
-        );
+
+        if ($fallbacks === null) {
+            $fallbacks = self::getDocParameters($method->getDocComment() ?: '');
+        }
+
+        $arg_names = [];
+        foreach ($method->getParameters() as $param) {
+            $def = $fallbacks[$param->getName()] ?? null;
+            $arg_names[] = self::getParameterDefinition($param, $def);
+        }
+
         $return = (string) @$method->getReturnType() ?: 'mixed';
+        if ($return === 'mixed') {
+            $return = $fallbacks['__return'] ?? 'mixed';
+        }
 
         $definition = '';
         $definition .= implode(' ' , $modifiers);
@@ -179,9 +208,10 @@ abstract class Reflect
      * Get a php-ish string version of a parameter.
      *
      * @param ReflectionParameter $parameter
+     * @param string|null $fallback
      * @return string
      */
-    public static function getParameterDefinition(ReflectionParameter $parameter): string
+    public static function getParameterDefinition(ReflectionParameter $parameter, string $fallback = null): string
     {
         $value = '';
 
@@ -191,10 +221,16 @@ abstract class Reflect
 
         /** @var ReflectionType */
         $type = @$parameter->getType() ?: null;
-        $value .= $type instanceof ReflectionNamedType
-            ? $type->getName()
-            : 'mixed';
 
+        if ($type instanceof ReflectionNamedType) {
+            $type = $type->getName();
+        }
+
+        if (!$type or $type === 'mixed') {
+            $type = $fallback ?: 'mixed';
+        }
+
+        $value .= $type;
         $value .= ' ';
 
         if ($parameter->isVariadic()) {
@@ -212,5 +248,97 @@ abstract class Reflect
         }
 
         return $value;
+    }
+
+
+    /**
+     * Get a list of doc comment definitions.
+     *
+     * These can be anything you like.
+     *
+     * Special parsing for `@param` + and `@return` ids.
+     *
+     * TODO Parsing for `@method` ids.
+     *
+     * @param string $comment
+     * @return array  [id, type?, name?, description]
+     */
+    public static function getDocDefinitions(string $comment): array
+    {
+        $matches = [];
+        if (!preg_match_all(self::RE_DOCTYPE, $comment, $matches, PREG_SET_ORDER)) {
+            return [];
+        }
+
+        $output = [];
+
+        foreach ($matches as $match) {
+            [$line, $id, $description] = $match;
+
+            $type = 'mixed';
+            $name = '??';
+
+            if ($id === 'param') {
+                $sub = [];
+                if (preg_match(self::RE_PARAM, $line, $sub)) {
+                    [$_, $type, $name, $description] = $sub;
+                }
+
+                $output[$id] = [
+                    'id' => $id,
+                    'type' => $type,
+                    'name' => $name,
+                    'description' => $description,
+                ];
+            }
+            else if ($id === 'return') {
+                $sub = [];
+                if (preg_match(self::RE_RETURN, $line, $sub)) {
+                    [$_, $type, $description] = $sub;
+                }
+                $output[] = [
+                    'id' => $id,
+                    'type' => $type,
+                    'description' => $description,
+                ];
+            }
+            else {
+                $output[] = [
+                    'id' => $id,
+                    'description' => $description,
+                ];
+            }
+        }
+
+        return $output;
+    }
+
+
+    /**
+     * Get the params and return types from a doc comment.
+     *
+     * The special '__return' key will contain the return type.
+     *
+     * @param string $comment
+     * @return array [name => type]
+     */
+    public static function getDocParameters(string $comment): array
+    {
+        $defs = self::getDocDefinitions($comment);
+        $parameters = [];
+
+        foreach ($defs as $def) {
+            if ($def['id'] === 'return') {
+                $parameters['__return'] = $def['type'];
+                continue;
+            }
+
+            if ($def['id'] === 'param') {
+                $parameters[$def['name']] = $def['type'];
+                continue;
+            }
+        }
+
+        return $parameters;
     }
 }
