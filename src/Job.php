@@ -76,7 +76,7 @@ abstract class Job implements Loggable
         $minutes = '';
 
         if ($seconds > 60) {
-            $minutes = sprintf(' (%d minutes)', floor($seconds / 60));
+            $minutes = sprintf(' (%d minutes)', round($seconds / 60));
         }
 
         $stats = [];
