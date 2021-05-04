@@ -195,16 +195,24 @@ abstract class Log {
      */
     public static function createFileLogger(string $path, $cache_size = 5)
     {
-        static $cache = [];
+        // A happy little closure value.
+        $cache = [];
 
-        register_shutdown_function(function () use ($cache, $path) {
+        // Flush logs on shutdown.
+        register_shutdown_function(function () use (&$cache, $path) {
             foreach ($cache as $message) {
                 @file_put_contents($path, $message . PHP_EOL, FILE_APPEND);
             }
+
+            // Disable any more logging.
+            $cache = null;
         });
 
         return function ($message, $level, $category)
-                use ($path, $cache, $cache_size) {
+                use (&$cache, $path, $cache_size) {
+
+            // Disabled logging after shutdown.
+            if ($cache === null) return;
 
             $line = '[' . date('c') . ']';
             $line .= '[' . Log::name($level) . ']';
@@ -213,6 +221,7 @@ abstract class Log {
 
             $cache[] = trim($line);
 
+            // Chunk size reached, flush the cache.
             if (count($cache) >= $cache_size) {
                 foreach ($cache as $message) {
                     @file_put_contents($path, $message . PHP_EOL, FILE_APPEND);
