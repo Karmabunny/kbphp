@@ -65,12 +65,13 @@ class DocType extends Collection
     public static function parseValueType($value): string
     {
         if (is_array($value)) {
+            $value = Arrays::first($value);
+
             // Boring, can't tell.
-            if (empty($value)) return 'array';
+            if ($value === null) return 'array';
 
             // Recurse.
-            return self::parseValueType($value[0]) . '[]';
-
+            return self::parseValueType($value) . '[]';
         }
 
         // Consistent namespace prefix thingy.
