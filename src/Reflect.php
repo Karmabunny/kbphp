@@ -9,6 +9,8 @@ namespace karmabunny\kb;
 use Generator;
 use Reflection;
 use ReflectionException;
+use ReflectionFunction;
+use ReflectionFunctionAbstract;
 use ReflectionParameter;
 use ReflectionMethod;
 use ReflectionNamedType;
@@ -143,28 +145,55 @@ abstract class Reflect
             $comment = $method->getDocComment() ?: null;
             $defs = self::getDocParameters($comment ?? '');
 
-            $parameters = [];
-            foreach ($method->getParameters() as $param) {
-                $name = $param->getName();
-                $def = $defs[$name] ?? null;
-
-                $parameters[$name] = [
-                    'name' => $name,
-                    'definition' => self::getParameterDefinition($param, $def),
-                    'type' => (string) @$param->getType() ?: ($def ?? 'mixed'),
-                ];
-            }
-
             $name = $method->getName();
             $methods[$name] = [
                 'name' => $name,
                 'definition' => self::getMethodDefinition($method, $defs),
-                'parameters' => $parameters,
+                'parameters' => self::getParameters($method, $defs),
                 'doc' => $comment,
             ];
         }
 
         return $methods;
+    }
+
+
+    /**
+     *
+     * @param ReflectionFunctionAbstract|string[]|string $function
+     * @return array
+     */
+    public static function getParameters($function, array $fallbacks = null): array
+    {
+        if (is_array($function)) {
+            [$class, $method] = $function;
+            $function = new ReflectionMethod($class, $method);
+        }
+        else if (is_string($function)) {
+            $function = new ReflectionFunction($function);
+        }
+
+        if ($fallbacks === null) {
+            $comment = $function->getDocComment() ?: null;
+            $fallbacks = self::getDocParameters($comment ?? '');
+        }
+
+        $name = $function->getName();
+        $def = $fallbacks[$name] ?? null;
+
+        $parameters = [];
+        foreach ($function->getParameters() as $param) {
+            $name = $param->getName();
+            $def = $defs[$name] ?? null;
+
+            $parameters[$name] = [
+                'name' => $name,
+                'definition' => self::getParameterDefinition($param, $def),
+                'type' => (string) @$param->getType() ?: ($def ?? 'mixed'),
+            ];
+        }
+
+        return $parameters;
     }
 
 
