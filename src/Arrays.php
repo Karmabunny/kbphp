@@ -163,6 +163,32 @@ abstract class Arrays
 
 
     /**
+     * Array reduce - with keys.
+     *
+     * This literally identical to `array_reduce` except it also includes
+     * the key value as 3rd argument to the callable.
+     *
+     * Like this:
+     * ```
+     * Arrays::reduce($list, fn($sum, $item, $key) => $sum + $key, 0);
+     * ```
+     *
+     * @param array $array
+     * @param callable $fn
+     * @param mixed|null $initial
+     * @return mixed
+     */
+    static function reduce(array $array, callable $fn, $initial = null)
+    {
+        $carry = $initial;
+        foreach ($array as $key => $value) {
+            $carry = $fn($carry, $value, $key);
+        }
+        return $carry;
+    }
+
+
+    /**
      * Flat arrays, with optional key support.
      *
      * @param array $array
