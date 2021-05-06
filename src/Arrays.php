@@ -33,6 +33,7 @@ abstract class Arrays
 
     /**
      * Get the last key of an array.
+     *
      * @param array $array
      * @return int|string|null
      */
@@ -74,8 +75,8 @@ abstract class Arrays
     /**
      * Create a reversed iterator of an array.
      *
-     * Useful for _big_ arrays because array_reverse() creates a copy, whereas
-     * this one does not.
+     * Useful for _big_ arrays because `array_reverse()` creates a copy,
+     * whereas this one does not.
      *
      * @param array|Traversable $array
      * @return Generator
@@ -96,9 +97,9 @@ abstract class Arrays
      *
      * Each index is provided as an argument.
      *
-     * The $index arg is a reference and can be modified to alter the key.
+     * The `$index` arg is a reference and can be modified to alter the key.
      *
-     * For a more straight-forward API, see filledKeys().
+     * For a more straight-forward API, see `filledKeys()`.
      *
      * @param int $size
      * @param callable $fn (&$index) => $value
@@ -142,11 +143,13 @@ abstract class Arrays
      *
      * The callable is provided with the value FIRST and the key SECOND.
      *
-     * You can write:
-     *  Arrays::find($stuff, fn($item) => $item->id === 100);
+     * ```
+     * // You can write:
+     * Arrays::find($stuff, fn($item) => $item->id === 100);
      *
-     * Or maybe:
-     *  Array::find($stuff, fn($item, key) => $key === 12 and $item->name === 12);
+     * // Or maybe:
+     * Array::find($stuff, fn($item, key) => $key === 12 and $item->name === 12);
+     * ```
      *
      * @param array $array
      * @param callable $fn ($value, $key) => bool
