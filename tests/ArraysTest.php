@@ -112,6 +112,19 @@ final class ArraysTest extends TestCase {
     }
 
 
+    public function testReduce()
+    {
+        $array = [2 => false, 5 => true, 10 => false, 15 => true];
+
+        $actual = Arrays::reduce($array, function($sum, $item, $key) {
+            if ($item) return $sum + $key;
+            return $sum;
+        }, 100);
+
+        $this->assertEquals(120, $actual);
+    }
+
+
     public function testFlattenNoKeys()
     {
         $actual = Arrays::flatten([
