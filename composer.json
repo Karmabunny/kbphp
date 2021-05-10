@@ -4,7 +4,9 @@
     "description": "Common KB utilities",
     "type": "library",
     "license": "MIT",
-    "require": {},
+    "require": {
+        "symfony/polyfill-php73": "^1.22"
+    },
     "require-dev": {
         "phpunit/phpunit": "^9.3",
         "phpstan/phpstan": "^0.12.82"
