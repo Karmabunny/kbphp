@@ -29,14 +29,21 @@ abstract class Json
     public static function encode($json, bool $pretty = false): string
     {
         $flags = 0;
-        $flags |= JSON_THROW_ON_ERROR;
 
         if ($pretty) {
             $flags |= JSON_UNESCAPED_SLASHES;
             $flags |= JSON_PRETTY_PRINT;
         }
 
-        return json_encode($json, $flags);
+        $out = json_encode($json, $flags);
+
+        // PHP <= 7.2
+        $error = json_last_error();
+        if ($error !== JSON_ERROR_NONE) {
+            throw new JsonException(json_last_error_msg(), $error);
+        }
+
+        return $out;
     }
 
 
@@ -51,7 +58,6 @@ abstract class Json
     {
         $flags = 0;
         $flags |= JSON_INVALID_UTF8_SUBSTITUTE;
-        $flags |= JSON_THROW_ON_ERROR;
 
         $out = json_decode($str, true, self::RECURSIVE_DEPTH, $flags);
 
