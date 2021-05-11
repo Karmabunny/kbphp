@@ -132,11 +132,4 @@ class Collection implements
         $class = static::class;
         return new $class($this);
     }
-
-
-    /** @inheritdoc */
-    public function fields(): array
-    {
-        return [];
-    }
 }

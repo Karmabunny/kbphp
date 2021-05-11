@@ -32,7 +32,7 @@ trait ArrayableTrait
      */
     public function fields(): array
     {
-         return [];
+        return [];
     }
 
 
