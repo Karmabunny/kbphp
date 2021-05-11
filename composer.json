@@ -9,7 +9,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^9.3",
-        "phpstan/phpstan": "^0.12.82"
+        "phpstan/phpstan": "^0.12.82",
+        "phpcompatibility/php-compatibility": "^9.3"
     },
     "autoload": {
         "psr-4": {
@@ -22,9 +23,13 @@
         }
     },
     "scripts": {
+        "register-phpcs": "phpcs --config-set installed_paths vendor/phpcompatibility/php-compatibility",
+        "post-install-cmd": "@register-phpcs",
+        "post-update-cmd": "@register-phpcs",
         "tests": "phpunit --testdox tests",
         "publish": "bash scripts/publish.sh",
         "docs": "bash scripts/docs.sh",
-        "analyse": "phpstan analyse --level 5 src"
+        "analyse": "phpstan analyse --level 5 src",
+        "compat": "phpcs -p --standard=PHPCompatibility --colors --extensions=php --runtime-set testVersion 7.2 src"
     }
 }
