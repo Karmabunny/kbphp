@@ -57,7 +57,11 @@ abstract class Json
     public static function decode(string $str)
     {
         $flags = 0;
-        $flags |= JSON_INVALID_UTF8_SUBSTITUTE;
+
+        if (defined('JSON_INVALID_UTF8_SUBSTITUTE')) {
+            // phpcs:ignore
+            $flags |= JSON_INVALID_UTF8_SUBSTITUTE;
+        }
 
         $out = json_decode($str, true, self::RECURSIVE_DEPTH, $flags);
 

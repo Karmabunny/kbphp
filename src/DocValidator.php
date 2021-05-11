@@ -46,7 +46,7 @@ class DocValidator implements Validator {
      *
      * @param object $target Object to validate.
      */
-    public function __construct(object $target)
+    public function __construct($target)
     {
         $this->target = $target;
         $this->errors = [];

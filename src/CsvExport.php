@@ -20,7 +20,7 @@ class CsvExport
 {
 
     /** Identify dirty items. */
-    private const DIRTY_CHARS = ' "\r\n\t';
+    const DIRTY_CHARS = ' "\r\n\t';
 
     /** @var string */
     private $dirty_re;
