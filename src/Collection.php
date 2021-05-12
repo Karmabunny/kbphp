@@ -66,7 +66,7 @@ class Collection implements
 
 
     /** @inheritdoc */
-    public function serialize(): string
+    public function serialize()
     {
         $array = [];
 
