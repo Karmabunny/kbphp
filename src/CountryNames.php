@@ -16,6 +16,9 @@ use Locale;
 abstract class CountryNames
 {
 
+    /**
+     * alpha-2 => alpha-3
+     */
     public const COUNTRY_CODES = [
         'AF' => 'AFG',
         'AX' => 'ALA',
@@ -290,6 +293,39 @@ abstract class CountryNames
 
 
     /**
+     * Convert an alpha-2 to alpha-3.
+     *
+     * @param string $code alpha-2
+     * @return string|null alpha-3
+     */
+    public static function getAlpha3From2(string $code)
+    {
+        if (strlen(trim($code) == 3)) return $code;
+        return self::COUNTRY_CODES[$code] ?? null;
+    }
+
+
+    /**
+     * Convert an alpha-3 to alpha-2.
+     *
+     * @param string $code alpha-3
+     * @return string|null alpha-2
+     */
+    public static function getAlpha2From3(string $code)
+    {
+        if (strlen(trim($code) == 2)) return $code;
+
+        static $alpha3_codes;
+
+        if (!$alpha3_codes) {
+            $alpha3_codes = array_flip(self::COUNTRY_CODES);
+        }
+
+        return $alpha3_codes[$code] ?? null;
+    }
+
+
+    /**
      * Get the country code for a given country name.
      *
      * @param string $country_name
@@ -329,7 +365,7 @@ abstract class CountryNames
     /**
      * Get the country name for a given country code.
      *
-     * @param string $country_code
+     * @param string $country_code Alpha-2 or alpha-3
      * @param string $language default 'en'
      * @return string|null
      */
