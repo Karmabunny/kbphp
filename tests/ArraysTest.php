@@ -451,6 +451,54 @@ final class ArraysTest extends TestCase {
     }
 
 
+    public function testNormalize()
+    {
+        // Typical mixed value/associated scenario.
+        $options = [
+            'f1',
+            'f2' => 'DESC',
+            'f3',
+            'f4',
+            'f5' => null,
+        ];
+
+        $actual = Arrays::normalizeOptions($options, 'ASC');
+        $expected = [
+            'f1' => 'ASC',
+            'f2' => 'DESC',
+            'f3' => 'ASC',
+            'f4' => 'ASC',
+            'f5' => null,
+        ];
+        $this->assertEquals($expected, $actual);
+
+        // Just values.
+        $options = [
+            'f1',
+            'f2',
+            'f3',
+        ];
+
+        $actual = Arrays::normalizeOptions($options, 'DESC');
+        $expected = [
+            'f1' => 'DESC',
+            'f2' => 'DESC',
+            'f3' => 'DESC',
+        ];
+        $this->assertEquals($expected, $actual);
+
+        // Just keyed.
+        $options = [
+            'f1' => 'ASC',
+            'f2' => 'DESC',
+            'f5' => null,
+        ];
+
+        $actual = Arrays::normalizeOptions($options, 'blah');
+        $this->assertEquals($options, $actual);
+    }
+
+
     public function testConfig()
     {
         $expected = [
