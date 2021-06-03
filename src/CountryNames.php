@@ -300,7 +300,7 @@ abstract class CountryNames
      */
     public static function getAlpha3From2(string $code)
     {
-        if (strlen(trim($code) == 3)) return $code;
+        if (strlen(trim($code)) == 3) return $code;
         return self::COUNTRY_CODES[$code] ?? null;
     }
 
@@ -313,7 +313,7 @@ abstract class CountryNames
      */
     public static function getAlpha2From3(string $code)
     {
-        if (strlen(trim($code) == 2)) return $code;
+        if (strlen(trim($code)) == 2) return $code;
 
         static $alpha3_codes;
 
