@@ -8,6 +8,13 @@ namespace karmabunny\kb;
 
 use Traversable;
 
+/**
+ * Adds a `toArray()` method that returns an array copy of this object.
+ *
+ * - Nested 'Arrayable' objects are also converted to arrays.
+ * - Object can declare a `fields()` to include virtual fields.
+ * - This requires an iterable object (`IteratorAggregate` interface).
+ */
 trait ArrayableTrait
 {
 
@@ -84,5 +91,12 @@ trait ArrayableTrait
         }
 
         return $array;
+    }
+
+
+    /** @inheritdoc */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
     }
 }

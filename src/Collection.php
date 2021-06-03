@@ -10,8 +10,6 @@ use ArrayAccess;
 use ArrayIterator;
 use IteratorAggregate;
 use JsonSerializable;
-use ReflectionClass;
-use ReflectionProperty;
 use Serializable;
 use Traversable;
 
@@ -50,43 +48,7 @@ abstract class Collection extends DataObject implements
 
     use ArrayAccessTrait;
     use ArrayableTrait;
-
-
-    /** @inheritdoc */
-    public function serialize()
-    {
-        $array = [];
-
-        $reflect = new ReflectionClass($this);
-        $properties = $reflect->getProperties(ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC);
-
-        foreach ($properties as $property) {
-            if ($property->isStatic()) continue;
-
-            $key = $property->getName();
-
-            $value = $this->$key;
-            if (is_object($value) and $value instanceof NotSerializable) continue;
-
-            $array[$key] = $value;
-        }
-
-        return serialize($array);
-    }
-
-
-    /** @inheritdoc */
-    public function unserialize($serialized)
-    {
-        $this->update(unserialize($serialized));
-    }
-
-
-    /** @inheritdoc */
-    public function jsonSerialize()
-    {
-        return $this->toArray();
-    }
+    use SerializeTrait;
 
 
     /** @inheritdoc */
