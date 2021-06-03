@@ -39,7 +39,7 @@ use Traversable;
  *
  * @package karmabunny\kb
  */
-class Collection implements
+abstract class Collection extends DataObject implements
         ArrayAccess,
         IteratorAggregate,
         Serializable,
@@ -50,19 +50,6 @@ class Collection implements
 
     use ArrayAccessTrait;
     use ArrayableTrait;
-
-    /**
-     *
-     * @param iterable $config
-     */
-    function __construct($config = [])
-    {
-        // This makes things not break. Something about references.
-        if (!is_array($config)) {
-            $config = iterator_to_array($config);
-        }
-        $this->update($config);
-    }
 
 
     /** @inheritdoc */
@@ -107,19 +94,6 @@ class Collection implements
     {
         // @phpstan-ignore-next-line : docs say 'array or object'
         return new ArrayIterator($this);
-    }
-
-
-    /**
-     *
-     * @param iterable $config
-     * @return void
-     */
-    public function update($config)
-    {
-        foreach ($config as $key => $item) {
-            $this->$key = $item;
-        }
     }
 
 
