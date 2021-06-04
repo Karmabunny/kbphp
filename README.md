@@ -13,7 +13,7 @@ Everything lives the `karmabunny\kb` namespace.
 
 Currently hosted on our private packagist: https://packages.bunnysites.com/
 
-1. Add this to your `composer.json` file.
+### 1. Add this to your `composer.json` file.
 
 ```json
 {
@@ -29,12 +29,12 @@ Currently hosted on our private packagist: https://packages.bunnysites.com/
 }
 ```
 
-2. Add to your dependencies.
+### 2. Add to your dependencies.
 
-(Currently using dev-master until we stabilise the API).
+Pin it loosely the latest major version.
 
 ```sh
-composer require karmabunny/kb:dev-master
+composer require karmabunny/kb:^2
 ```
 
 
