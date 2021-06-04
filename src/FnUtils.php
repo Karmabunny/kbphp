@@ -3,7 +3,6 @@
 namespace karmabunny\kb;
 
 use ArrayAccess;
-use Closure;
 use InvalidArgumentException;
 
 /**
@@ -26,21 +25,21 @@ use InvalidArgumentException;
  * $arrays = array_map(fn($item) => $item->toArray(), $results);
  *
  * // This way
- * $arrays = array_map(Wrap::method('toArray'), $results);
+ * $arrays = array_map(FnUtils::method('toArray'), $results);
  *
  * // And then maybe
- * $filtered = array_map(Wrap::item('active'), $arrays);
+ * $filtered = array_map(FnUtils::item('active'), $arrays);
  *
  * // Or even
- * $filtered = array_filter($results, Wrap::property('active'));
+ * $filtered = array_filter($results, FnUtils::property('active'));
  *
  * // Lastly
- * $mapped = array_map(Wrap::construct(Thing::class), $results);
+ * $mapped = array_map(FnUtils::construct(Thing::class), $results);
  * ```
  *
  * @package karmabunny/kb
  */
-class Wrap
+class FnUtils
 {
 
     /**

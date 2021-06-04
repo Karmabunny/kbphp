@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use Exception;
+use karmabunny\kb\Errors\ValidationException;
 
 /**
  * Use '@var' comments to validate object properties.

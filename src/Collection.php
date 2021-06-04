@@ -42,8 +42,8 @@ abstract class Collection extends DataObject implements
         IteratorAggregate,
         Serializable,
         JsonSerializable,
-        Arrayable,
-        Copyable
+        ArrayableInterface,
+        CopyableInterface
 {
 
     use ArrayAccessTrait;

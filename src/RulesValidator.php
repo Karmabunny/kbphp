@@ -77,7 +77,7 @@ use InvalidArgumentException;
  *
  * @package karmabunny\kb
  */
-class RulesValidator implements Validator
+class RulesValidator implements ValidatorInterface
 {
     protected $labels;
     protected $data;

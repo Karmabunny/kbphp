@@ -11,7 +11,7 @@ namespace karmabunny\kb;
  *
  * @package karmabunny\kb
  */
-interface Arrayable
+interface ArrayableInterface
 {
     /**
      * Convert this object to an array.

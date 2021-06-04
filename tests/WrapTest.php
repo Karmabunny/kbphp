@@ -4,7 +4,7 @@
  * @copyright Copyright (c) 2021 Karmabunny
  */
 
-use karmabunny\kb\Wrap;
+use karmabunny\kb\FnUtils;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -30,7 +30,7 @@ final class WrapTest extends TestCase
         $items = $this->getData();
 
         $expected = ['one', 'two', 'three', 'four', null];
-        $actual = array_map(Wrap::property('name'), $items);
+        $actual = array_map(FnUtils::property('name'), $items);
 
         $this->assertEquals($expected, $actual);
     }
@@ -41,7 +41,7 @@ final class WrapTest extends TestCase
         $items = $this->getData();
 
         $expected = [1 => $items[1], 2 => $items[2]];
-        $actual = array_filter($items, Wrap::method('contains', 't'));
+        $actual = array_filter($items, FnUtils::method('contains', 't'));
 
         $this->assertEquals($expected, $actual);
         // print_r($actual);
@@ -51,10 +51,10 @@ final class WrapTest extends TestCase
     public function testItem()
     {
         $items = $this->getData();
-        $items = array_map(Wrap::method('toArray'), $items);
+        $items = array_map(FnUtils::method('toArray'), $items);
 
         $expected = [true, false, true, false, null];
-        $actual = array_map(Wrap::item('active'), $items);
+        $actual = array_map(FnUtils::item('active'), $items);
 
         $this->assertEquals($expected, $actual);
     }

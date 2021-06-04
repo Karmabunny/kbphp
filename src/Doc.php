@@ -13,6 +13,10 @@ use DOMNodeList;
 use DOMProcessingInstruction;
 use DOMXPath;
 use Generator;
+use karmabunny\kb\Errors\DocAssertException;
+use karmabunny\kb\Errors\DocException;
+use karmabunny\kb\Errors\DocParseException;
+use karmabunny\kb\Errors\DocSchemaException;
 
 // Just to be sure.
 if (PHP_VERSION_ID < 80000) {
@@ -24,7 +28,8 @@ if (PHP_VERSION_ID < 80000) {
  *
  * @package karmabunny\kb
  */
-abstract class XML {
+abstract class Doc
+{
 
     /**
      * Parse an XML document from a string.
@@ -52,7 +57,7 @@ abstract class XML {
      * @param string $source
      * @param array $config [filename, options, schema, encoding, recover, entities]
      * @return DOMDocument
-     * @throws XMLException
+     * @throws DocException
      */
     public static function parse(string $source, array $config = [])
     {
@@ -63,7 +68,7 @@ abstract class XML {
 
         $doc->loadXML($source, $config['options']);
 
-        self::collectLibXmlErrors(XMLParseException::class, $doc->documentURI);
+        self::collectLibXmlErrors(DocParseException::class, $doc->documentURI);
 
         // Conditionally validate it.
         if ($schema = $config['schema'] ?? null) {
@@ -98,7 +103,7 @@ abstract class XML {
      * @param string $filename
      * @param array $config [options, schema, encoding, recover, entities]
      * @return DOMDocument
-     * @throws XMLException
+     * @throws DocException
      */
     public static function parseFile(string $filename, array $config = [])
     {
@@ -110,7 +115,7 @@ abstract class XML {
 
         $doc->load($filename, $config['options']);
 
-        self::collectLibXmlErrors(XMLParseException::class, $doc->documentURI);
+        self::collectLibXmlErrors(DocParseException::class, $doc->documentURI);
 
         // Conditionally validate it.
         if ($schema = $config['schema'] ?? null) {
@@ -127,13 +132,13 @@ abstract class XML {
      * @param DOMDocument $doc
      * @param string $source
      * @return void
-     * @throws XMLException
+     * @throws DocException
      */
     public static function validate(DOMDocument $doc, string $source)
     {
         libxml_use_internal_errors(true);
         @$doc->schemaValidateSource($source);
-        self::collectLibXmlErrors(XMLSchemaException::class, $doc->documentURI);
+        self::collectLibXmlErrors(DocSchemaException::class, $doc->documentURI);
     }
 
 
@@ -173,7 +178,7 @@ abstract class XML {
      * @param string $class _must_ be a XMLParseException type
      * @param string|null $filename
      * @return void
-     * @throws XMLException
+     * @throws DocException
      */
     private static function collectLibXmlErrors(string $class, $filename)
     {
@@ -295,7 +300,7 @@ abstract class XML {
      * @param DOMNode $node
      * @param array $conditions
      * @return void
-     * @throws XMLException
+     * @throws DocException
      */
     public static function processConditionals(DOMNode &$node, array $conditions)
     {
@@ -313,7 +318,7 @@ abstract class XML {
             // Parse out the condition name.
             $matches = [];
             if (!preg_match('/ *([^ ]+) */', $condition->data, $matches)) {
-                throw new XMLException('Invalid condition: ' . $condition->data);
+                throw new DocException('Invalid condition: ' . $condition->data);
             };
 
             $name = $matches[1];
@@ -362,7 +367,7 @@ abstract class XML {
                     !($element instanceof DOMProcessingInstruction) or
                     $element->target !== 'endif'
                 ) {
-                    throw new XMLException('Cannot find endif for condition, line ' . $condition->getLineNo());
+                    throw new DocException('Cannot find endif for condition, line ' . $condition->getLineNo());
                 }
 
                 // The conditional is false, so let's remove what's in-between.
@@ -382,7 +387,7 @@ abstract class XML {
         $conditionals = self::xpath($node, '//processing-instruction("endif")', 'nodes');
         // @phpstan-ignore-next-line : current() can indeed be null.
         if ($first = $conditionals->current()) {
-            throw new XMLException('Unexpected dangling endif on line: ' . $first->getLineNo());
+            throw new DocException('Unexpected dangling endif on line: ' . $first->getLineNo());
         }
     }
 
@@ -620,14 +625,14 @@ abstract class XML {
      * @param DOMNode $parent
      * @param string $tag_name
      * @return DOMElement
-     * @throws XMLAssertException If there were no nodes with that tag
+     * @throws DocAssertException If there were no nodes with that tag
      */
     public static function expectFirst(DOMNode $parent, string $tag_name)
     {
         $element = self::first($parent, $tag_name);
 
         if ($element === null) {
-            throw new XMLAssertException("Missing element required '{$tag_name}''");
+            throw new DocAssertException("Missing element required '{$tag_name}''");
         }
 
         return $element;
@@ -641,7 +646,7 @@ abstract class XML {
      * @param DOMNode $parent
      * @param string $tag_name
      * @return string
-     * @throws XMLAssertException If there were no nodes with that tag name
+     * @throws DocAssertException If there were no nodes with that tag name
      */
     public static function expectFirstText(DOMNode $parent, string $tag_name)
     {
@@ -700,7 +705,7 @@ abstract class XML {
      * @param DOMNode $parent
      * @param string[] $wanted
      * @return DOMElement[] [name => element]
-     * @throws XMLAssertException If not all wanted tags are found
+     * @throws DocAssertException If not all wanted tags are found
      */
     public static function gatherChildren(DOMNode $parent, array $wanted)
     {
@@ -719,7 +724,7 @@ abstract class XML {
 
         if (!empty($wanted)) {
             $tags = implode(', ', array_keys($wanted));
-            throw new XMLAssertException('Missing wanted tags: ' . $tags);
+            throw new DocAssertException('Missing wanted tags: ' . $tags);
         }
 
         return $fetched;
@@ -732,7 +737,7 @@ abstract class XML {
      * @param DOMNode $parent
      * @param string[] $wanted
      * @return DOMElement
-     * @throws XMLAssertException If no tag found
+     * @throws DocAssertException If no tag found
      */
     public static function expectOneOf(DOMNode $parent, array $wanted)
     {
@@ -743,7 +748,7 @@ abstract class XML {
         }
 
         $tags = implode(', ', array_keys($wanted));
-        throw new XMLAssertException('Missing element, one of: ' . $tags);
+        throw new DocAssertException('Missing element, one of: ' . $tags);
     }
 
 

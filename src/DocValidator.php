@@ -29,7 +29,7 @@ use ReflectionProperty;
  * ```
  * @package karmabunny\kb
  */
-class DocValidator implements Validator {
+class DocValidator implements ValidatorInterface {
 
     /** @var object */
     protected $target;

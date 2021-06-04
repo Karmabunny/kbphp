@@ -5,7 +5,7 @@
  */
 
 use karmabunny\kb\Validity;
-use karmabunny\kb\ValidationException;
+use karmabunny\kb\Errors\ValidationException;
 use PHPUnit\Framework\TestCase;
 
 class ValidityTest extends TestCase

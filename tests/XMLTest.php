@@ -4,10 +4,10 @@
  * @copyright Copyright (c) 2020 Karmabunny
  */
 
-use karmabunny\kb\XML;
-use karmabunny\kb\XMLAssertException;
-use karmabunny\kb\XMLException;
-use karmabunny\kb\XMLParseException;
+use karmabunny\kb\Doc;
+use karmabunny\kb\Errors\DocAssertException;
+use karmabunny\kb\Errors\DocException;
+use karmabunny\kb\Errors\DocParseException;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -17,7 +17,7 @@ final class XMLTest extends TestCase {
 
     public function testParse()
     {
-        $xml = XML::parse('<this><works okay="hurrah!"/>wow</this>');
+        $xml = Doc::parse('<this><works okay="hurrah!"/>wow</this>');
 
         $this->assertEquals('wow', $xml->textContent);
         $this->assertEquals('hurrah!', $xml->getElementsByTagName('works')[0]->getAttribute('okay'));
@@ -27,19 +27,19 @@ final class XMLTest extends TestCase {
     public function testParseErrors()
     {
         try {
-            XML::parse('<no>this is clearly<br> broken</no>');
+            Doc::parse('<no>this is clearly<br> broken</no>');
             $this->fail('XML::parse() should throw.');
         }
         catch (Throwable $error) {
-            $this->assertInstanceOf(XMLException::class, $error);
-            $this->assertInstanceOf(XMLParseException::class, $error);
+            $this->assertInstanceOf(DocException::class, $error);
+            $this->assertInstanceOf(DocParseException::class, $error);
         }
     }
 
 
     public function testXpath()
     {
-        $doc = XML::parse("
+        $doc = Doc::parse("
             <test>
                 <one>thing</one>
                 <two>1234</two>
@@ -65,41 +65,41 @@ final class XMLTest extends TestCase {
         $this->assertNotNull($doc);
 
         // String
-        $this->assertEquals('thing', XML::xpath($doc, '//one', 'string'));
+        $this->assertEquals('thing', Doc::xpath($doc, '//one', 'string'));
 
         // Numbers
-        $this->assertEquals(1234, XML::xpath($doc, '//two', 'int'));
-        $this->assertEquals(12, XML::xpath($doc, '//three', 'int'));
-        $this->assertEquals(12.345, XML::xpath($doc, '//three', 'float'));
+        $this->assertEquals(1234, Doc::xpath($doc, '//two', 'int'));
+        $this->assertEquals(12, Doc::xpath($doc, '//three', 'int'));
+        $this->assertEquals(12.345, Doc::xpath($doc, '//three', 'float'));
 
         // Truthy
-        $this->assertEquals(true, XML::xpath($doc, '//true/this', 'bool'));
-        $this->assertEquals(true, XML::xpath($doc, '//true/attr', 'bool'));
-        $this->assertEquals(true, XML::xpath($doc, '//true/attr/@false', 'bool'));
-        $this->assertEquals(true, XML::xpath($doc, '//true/number', 'bool'));
-        $this->assertEquals(true, XML::xpath($doc, '//true/bool', 'bool'));
+        $this->assertEquals(true, Doc::xpath($doc, '//true/this', 'bool'));
+        $this->assertEquals(true, Doc::xpath($doc, '//true/attr', 'bool'));
+        $this->assertEquals(true, Doc::xpath($doc, '//true/attr/@false', 'bool'));
+        $this->assertEquals(true, Doc::xpath($doc, '//true/number', 'bool'));
+        $this->assertEquals(true, Doc::xpath($doc, '//true/bool', 'bool'));
 
         // Falsey
-        $this->assertEquals(false, XML::xpath($doc, '//false/attr/@true', 'bool', true));
-        $this->assertEquals(false, XML::xpath($doc, '//false/this', 'bool'));
-        $this->assertEquals(false, XML::xpath($doc, '//false/number', 'bool'));
-        $this->assertEquals(false, XML::xpath($doc, '//false/bool', 'bool'));
-        $this->assertEquals(false, XML::xpath($doc, '//false/human', 'bool'));
+        $this->assertEquals(false, Doc::xpath($doc, '//false/attr/@true', 'bool', true));
+        $this->assertEquals(false, Doc::xpath($doc, '//false/this', 'bool'));
+        $this->assertEquals(false, Doc::xpath($doc, '//false/number', 'bool'));
+        $this->assertEquals(false, Doc::xpath($doc, '//false/bool', 'bool'));
+        $this->assertEquals(false, Doc::xpath($doc, '//false/human', 'bool'));
 
         // Trisky SQL null looks like a line break.
-        $this->assertEquals(false, XML::xpath($doc, '//sql', 'bool'));
-        $this->assertEquals(true, XML::xpath($doc, '//fakesql', 'bool'));
-        $this->assertEquals('\n', XML::xpath($doc, '//fakesql', 'string'));
+        $this->assertEquals(false, Doc::xpath($doc, '//sql', 'bool'));
+        $this->assertEquals(true, Doc::xpath($doc, '//fakesql', 'bool'));
+        $this->assertEquals('\n', Doc::xpath($doc, '//fakesql', 'string'));
 
         // Missing
-        $this->assertNull(XML::xpath($doc, '//missing', 'element'));
-        $this->assertEquals('oh no', XML::xpath($doc, '//missing', 'string') ?: 'oh no');
+        $this->assertNull(Doc::xpath($doc, '//missing', 'element'));
+        $this->assertEquals('oh no', Doc::xpath($doc, '//missing', 'string') ?: 'oh no');
 
-        $this->assertEquals('whaat', XML::xpath($doc, '//missing', 'int') ?: 'whaat');
-        $this->assertEquals(0, XML::xpath($doc, '//missing', 'int'));
+        $this->assertEquals('whaat', Doc::xpath($doc, '//missing', 'int') ?: 'whaat');
+        $this->assertEquals(0, Doc::xpath($doc, '//missing', 'int'));
 
         // We've already tested default false, instead test a custom default.
-        $this->assertEquals(true, XML::xpath($doc, '//missing', 'bool') ?: true);
+        $this->assertEquals(true, Doc::xpath($doc, '//missing', 'bool') ?: true);
     }
 
 
@@ -108,7 +108,7 @@ final class XMLTest extends TestCase {
      */
     public function testFormat()
     {
-        $doc = XML::format("
+        $doc = Doc::format("
             <test>
                 <one>{{one}}</one>
                 <two>{{two}}</two>
@@ -151,7 +151,7 @@ final class XMLTest extends TestCase {
 
     public function testEnum()
     {
-        $xml = XML::parse("
+        $xml = Doc::parse("
             <path>
                 <to>
                     <value>1</value>
@@ -168,16 +168,16 @@ final class XMLTest extends TestCase {
             3 => [3, 3, 3],
         ];
 
-        $this->assertEquals('one', XML::enum($xml, '/path/to/value[1]', $map));
-        $this->assertEquals('default', XML::enum($xml, '/path/to/value[2]', $map));
-        $this->assertEquals([3, 3, 3], XML::enum($xml, '/path/to/value[3]', $map));
-        $this->assertEquals('default', XML::enum($xml, '/path/to/value[4]', $map));
+        $this->assertEquals('one', Doc::enum($xml, '/path/to/value[1]', $map));
+        $this->assertEquals('default', Doc::enum($xml, '/path/to/value[2]', $map));
+        $this->assertEquals([3, 3, 3], Doc::enum($xml, '/path/to/value[3]', $map));
+        $this->assertEquals('default', Doc::enum($xml, '/path/to/value[4]', $map));
     }
 
 
     public function testHelpers()
     {
-        $xml = XML::parse("
+        $xml = Doc::parse("
             <test hello='world' goodmorning='sunshine'>
                 <nested>
                     <same>zero</same>
@@ -192,21 +192,21 @@ final class XMLTest extends TestCase {
             </test>
         ");
 
-        $this->assertInstanceOf(DOMElement::class, XML::first($xml, 'same'));
-        $this->assertInstanceOf(DOMElement::class, XML::first($xml, 'another'));
-        $this->assertNotEquals(XML::first($xml, 'same'), XML::first($xml, 'another'));
+        $this->assertInstanceOf(DOMElement::class, Doc::first($xml, 'same'));
+        $this->assertInstanceOf(DOMElement::class, Doc::first($xml, 'another'));
+        $this->assertNotEquals(Doc::first($xml, 'same'), Doc::first($xml, 'another'));
 
-        $this->assertEquals('one', XML::firstText($xml, 'same'));
-        $this->assertEquals('four', XML::firstText($xml, 'another'));
+        $this->assertEquals('one', Doc::firstText($xml, 'same'));
+        $this->assertEquals('four', Doc::firstText($xml, 'another'));
 
-        $this->assertEquals('world', XML::attr($xml, 'hello'));
-        $this->assertEquals(trim($xml->textContent), XML::text($xml));
+        $this->assertEquals('world', Doc::attr($xml, 'hello'));
+        $this->assertEquals(trim($xml->textContent), Doc::text($xml));
     }
 
 
     public function testExpected()
     {
-        $xml = XML::parse("
+        $xml = Doc::parse("
             <test hello='world'>
                 <nested>
                     <same>zero</same>
@@ -226,19 +226,19 @@ final class XMLTest extends TestCase {
 
         $expected = simplexml_import_dom($xml);
 
-        $this->assertInstanceOf(DOMElement::class, XML::expectFirst($xml, 'same'));
-        $this->assertEquals(dom_import_simplexml($expected->same[0]), XML::expectFirst($xml, 'same'));
-        $this->assertEquals('one', XML::expectFirstText($xml, 'same'));
+        $this->assertInstanceOf(DOMElement::class, Doc::expectFirst($xml, 'same'));
+        $this->assertEquals(dom_import_simplexml($expected->same[0]), Doc::expectFirst($xml, 'same'));
+        $this->assertEquals('one', Doc::expectFirstText($xml, 'same'));
 
         try {
-            XML::expectFirst($xml, 'doesnt_exist');
+            Doc::expectFirst($xml, 'doesnt_exist');
             $this->fail('Expected XMLAssertException');
         }
-        catch (XMLAssertException $exception) {
+        catch (DocAssertException $exception) {
             $this->assertStringContainsString('doesnt_exist', $exception->getMessage());
         }
 
-        $actual = XML::gatherChildren(XML::first($xml, 'nested'), ['same', 'two', 'four']);
+        $actual = Doc::gatherChildren(Doc::first($xml, 'nested'), ['same', 'two', 'four']);
         $expected = [
             'same' => dom_import_simplexml($expected->nested->same[0]),
             'two' => dom_import_simplexml($expected->nested->two[0]),
@@ -248,10 +248,10 @@ final class XMLTest extends TestCase {
         $this->assertEquals($expected, $actual);
 
         try {
-            XML::gatherChildren(XML::first($xml, 'nested'), ['ohhh', 'nooo', 'two', 'four']);
+            Doc::gatherChildren(Doc::first($xml, 'nested'), ['ohhh', 'nooo', 'two', 'four']);
             $this->fail('Expected XMLAssertException');
         }
-        catch (XMLAssertException $exception) {
+        catch (DocAssertException $exception) {
             $this->assertStringContainsString('ohhh', $exception->getMessage());
             $this->assertStringContainsString('nooo', $exception->getMessage());
             $this->assertStringNotContainsString('two', $exception->getMessage());
@@ -262,7 +262,7 @@ final class XMLTest extends TestCase {
 
     public function testString()
     {
-        $xml = XML::parse("
+        $xml = Doc::parse("
             <hi>
                 <oh dear = 'true'>this</oh>
                 is
@@ -270,7 +270,7 @@ final class XMLTest extends TestCase {
         mess</hi>
         ");
 
-        $actual = XML::toString(XML::xpath($xml, '//hi/oh', 'element'));
+        $actual = Doc::toString(Doc::xpath($xml, '//hi/oh', 'element'));
         $expected = '<oh dear="true">this</oh>';
         $this->assertEquals($expected, $actual);
     }

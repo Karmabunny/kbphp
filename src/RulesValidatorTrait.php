@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use Exception;
+use karmabunny\kb\Errors\ValidationException;
 
 /**
  * Use validator functions to validate properties.

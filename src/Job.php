@@ -6,6 +6,8 @@
 
 namespace karmabunny\kb;
 
+use karmabunny\kb\Errors\ValidationException;
+
 /**
  * A job. Could be a cron or a worker. You decide.
  *
@@ -13,7 +15,7 @@ namespace karmabunny\kb;
  *
  * @package karmabunny\kb
  */
-abstract class Job implements Loggable
+abstract class Job implements LoggableInterface
 {
     use LoggerTrait;
 

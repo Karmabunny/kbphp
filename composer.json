@@ -14,7 +14,7 @@
     },
     "autoload": {
         "psr-4": {
-            "karmabunny\\kb\\": "src/"
+            "karmabunny\\kb\\": ["src/", "compat/"]
         }
     },
     "autoload-dev": {

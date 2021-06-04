@@ -7,7 +7,7 @@
 namespace karmabunny\kb;
 
 use InvalidArgumentException;
-
+use karmabunny\kb\Errors\ValidationException;
 
 /**
  * Validation class.

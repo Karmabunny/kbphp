@@ -7,10 +7,15 @@
 namespace karmabunny\kb;
 
 /**
- * Assertion errors are useful for validation XML structure.
  *
  * @package karmabunny\kb
  */
-class XMLAssertException extends XMLException
+interface ValidatorInterface
 {
+
+    public function validate(): bool;
+
+    public function hasErrors(): bool;
+
+    public function getErrors(): array;
 }

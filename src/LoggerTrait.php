@@ -34,10 +34,10 @@ trait LoggerTrait {
     /**
      * Forward any logs from this loggable to a parent loggable.
      *
-     * @param Loggable $parent
+     * @param LoggableInterface $parent
      * @return void
      */
-    public function attach(Loggable $parent)
+    public function attach(LoggableInterface $parent)
     {
         $this->addLogger([$parent, 'log']);
     }

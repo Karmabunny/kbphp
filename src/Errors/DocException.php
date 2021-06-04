@@ -4,7 +4,7 @@
  * @copyright Copyright (c) 2020 Karmabunny
  */
 
-namespace karmabunny\kb;
+namespace karmabunny\kb\Errors;
 
 use Exception;
 use LibXMLError;
@@ -14,7 +14,7 @@ use LibXMLError;
  *
  * @package karmabunny\kb
  */
-class XMLException extends Exception
+class DocException extends Exception
 {
     /** @var LibXMLError[] */
     public $errors = [];

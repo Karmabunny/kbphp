@@ -223,17 +223,17 @@ abstract class Arrays
      *
      * This converts any nested arrayables to arrays.
      *
-     * @param Arrayable|array $array
+     * @param ArrayableInterface|array $array
      * @return array
      */
     static function toArray($array): array
     {
-        if ($array instanceof Arrayable) {
+        if ($array instanceof ArrayableInterface) {
             return $array->toArray();
         }
 
         foreach ($array as &$item) {
-            if ($item instanceof Arrayable) {
+            if ($item instanceof ArrayableInterface) {
                 $item = $item->toArray();
             }
         }

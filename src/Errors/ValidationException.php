@@ -4,7 +4,7 @@
  * @copyright Copyright (c) 2020 Karmabunny
  */
 
-namespace karmabunny\kb;
+namespace karmabunny\kb\Errors;
 
 use Exception;
 

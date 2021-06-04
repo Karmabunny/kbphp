@@ -15,7 +15,7 @@ namespace karmabunny\kb;
  * @deprecated Just use clone.
  * @package karmabunny\kb
  */
-interface Copyable
+interface CopyableInterface
 {
     /**
      * @deprecated

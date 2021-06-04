@@ -6,8 +6,8 @@
 
 use karmabunny\kb\Collection;
 use karmabunny\kb\RulesValidatorTrait;
-use karmabunny\kb\Validates;
-use karmabunny\kb\ValidationException;
+use karmabunny\kb\ValidatesInterface;
+use karmabunny\kb\Errors\ValidationException;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -171,7 +171,7 @@ final class RulesValidatorTest extends TestCase {
 }
 
 
-class FieldThing extends Collection implements Validates
+class FieldThing extends Collection implements ValidatesInterface
 {
     use RulesValidatorTrait;
 

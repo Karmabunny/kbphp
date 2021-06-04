@@ -63,7 +63,7 @@ trait ArrayableTrait
             }
 
             // Recursively convert arrayables.
-            if (is_array($item) or $item instanceof Arrayable) {
+            if (is_array($item) or $item instanceof ArrayableInterface) {
                 $item = Arrays::toArray($item);
             }
 
@@ -83,7 +83,7 @@ trait ArrayableTrait
             }
 
             // Recursively convert arrayables.
-            if (is_array($item) or $item instanceof Arrayable) {
+            if (is_array($item) or $item instanceof ArrayableInterface) {
                 $item = Arrays::toArray($item);
             }
 

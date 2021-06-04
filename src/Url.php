@@ -6,6 +6,8 @@
 
 namespace karmabunny\kb;
 
+use karmabunny\kb\Errors\UrlDecodeException;
+
 /**
  * URL helper methods.
  *

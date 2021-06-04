@@ -6,6 +6,8 @@
 
 namespace karmabunny\kb;
 
+use karmabunny\kb\Errors\ValidationException;
+
 /**
  * This class can validate.
  *
@@ -35,7 +37,8 @@ namespace karmabunny\kb;
  *
  * @package karmabunny\kb
  */
-interface Validates {
+interface ValidatesInterface
+{
 
     /**
      * Perform validation.

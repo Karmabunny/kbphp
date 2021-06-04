@@ -13,7 +13,8 @@ namespace karmabunny\kb;
  *
  * @package karmabunny\kb
  */
-interface Loggable {
+interface LoggableInterface
+{
 
     /**
      * Log something.
