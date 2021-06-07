@@ -30,6 +30,6 @@
         "publish": "bash scripts/publish.sh",
         "docs": "bash scripts/docs.sh",
         "analyse": "phpstan analyse --level 5 src",
-        "compat": "phpcs -p --standard=PHPCompatibility --colors --extensions=php --runtime-set testVersion 7.1 src"
+        "compat": "phpcs -p --standard=PHPCompatibility --colors --extensions=php --runtime-set testVersion 7.0 src"
     }
 }

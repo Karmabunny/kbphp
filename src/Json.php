@@ -16,7 +16,7 @@ use JsonException;
 abstract class Json
 {
 
-    public const RECURSIVE_DEPTH = 512;
+    const RECURSIVE_DEPTH = 512;
 
     /**
      * Encode a json array as a string.

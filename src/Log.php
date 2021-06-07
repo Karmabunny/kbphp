@@ -113,7 +113,7 @@ abstract class Log {
         if (is_object($value)) {
             $out = get_class($value) . PHP_EOL;
 
-            if (!is_iterable($value)) {
+            if (!($value instanceof \Traversable)) {
                 // @phpstan-ignore-next-line : docs say 'array or object'
                 $value = new ArrayIterator($value);
             }

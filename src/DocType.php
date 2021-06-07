@@ -82,7 +82,7 @@ class DocType extends Collection
         // Split on spaces:
         // - 'unknown type' becomes 'unknown'
         // - 'resources (closed)' becomes 'resource'
-        [$type] = explode(' ', strtolower(gettype($value)), 1);
+        list($type) = explode(' ', strtolower(gettype($value)), 1);
 
         switch ($type) {
             case 'double': return 'float';

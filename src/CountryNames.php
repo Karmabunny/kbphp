@@ -19,7 +19,7 @@ abstract class CountryNames
     /**
      * alpha-2 => alpha-3
      */
-    public const COUNTRY_CODES = [
+    const COUNTRY_CODES = [
         'AF' => 'AFG',
         'AX' => 'ALA',
         'AL' => 'ALB',
