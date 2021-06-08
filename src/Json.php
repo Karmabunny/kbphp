@@ -18,19 +18,19 @@ abstract class Json
 
     const RECURSIVE_DEPTH = 512;
 
+
     /**
      * Encode a json array as a string.
      *
      * @param mixed $json
-     * @param bool $pretty
+     * @param bool|int $flags Applies pretty flags if `true`.
      * @return string
      * @throws JsonException Any parsing error
      */
-    public static function encode($json, bool $pretty = false): string
+    public static function encode($json, $flags = 0): string
     {
-        $flags = 0;
-
-        if ($pretty) {
+        if ($flags === true) {
+            $flags = 0;
             $flags |= JSON_UNESCAPED_SLASHES;
             $flags |= JSON_PRETTY_PRINT;
         }
@@ -52,13 +52,12 @@ abstract class Json
      *
      * @throws JsonException Any parsing error
      * @param string $str A JSON string. As per the spec, this should be UTF-8 encoded
+     * @param int $flags Default JSON_INVALID_UTF8_SUBSTITUTE (if available)
      * @return mixed The decoded value
      */
-    public static function decode(string $str)
+    public static function decode(string $str, $flags = 0)
     {
-        $flags = 0;
-
-        if (defined('JSON_INVALID_UTF8_SUBSTITUTE')) {
+        if ($flags == 0 and defined('JSON_INVALID_UTF8_SUBSTITUTE')) {
             // phpcs:ignore
             $flags |= JSON_INVALID_UTF8_SUBSTITUTE;
         }
