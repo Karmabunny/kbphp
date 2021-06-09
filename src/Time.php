@@ -55,6 +55,7 @@ abstract class Time
     public static function utime($hrtime = true): int
     {
         if ($hrtime and function_exists('hrtime')) {
+            // phpcs:ignore
             return intdiv(hrtime(true), 1000);
         }
         else {

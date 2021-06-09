@@ -13,7 +13,7 @@ Everything lives the `karmabunny\kb` namespace.
 
 Currently hosted on our private packagist: https://packages.bunnysites.com/
 
-1. Add this to your `composer.json` file.
+### 1. Add this to your `composer.json` file.
 
 ```json
 {
@@ -29,12 +29,12 @@ Currently hosted on our private packagist: https://packages.bunnysites.com/
 }
 ```
 
-2. Add to your dependencies.
+### 2. Add to your dependencies.
 
-(Currently using dev-master until we stabilise the API).
+Pin it loosely the latest major version.
 
 ```sh
-composer require karmabunny/kb:dev-master
+composer require karmabunny/kb:^2
 ```
 
 
@@ -55,6 +55,27 @@ Like, even just the happy-cases.
 Create tests whenever you can.
 
 Run them like this: `composer test`.
+
+
+## Deprecation path
+
+Mistakes happen (like Copyable) and sometimes you realise that your naming convention is terrible.
+
+So when removing things, first mark them as `@deprecated` this should signal to anyone using the code that it'll disappear in the next _major_ version.
+
+When _renaming_ things, we can be a little more relaxed.
+
+1. Deprecating
+   - Create an alias in `compat/`
+   - Mark the intellisense hack (you'll see it) as `@deprecated`
+2. Major version bump
+   - Remove the intellisense hack
+3. Next major version bump
+   - Remove the alias entirely
+
+I understand that our intellisense hack may not last forever, that is, whenever they fix `class_alias()`. So I guess just alias + deprecated, remove next major is also ok.
+
+As always, when deprecating + removing things always annotate your release tag. Imagine your life depends on getting it all in there. Is that a threat? Maybe.
 
 
 ### Collections
@@ -118,5 +139,54 @@ Non-standard or weakly supported things.
 - fill w/ callback
 - find w/ callback
 - flatten!
+- queries (aka `value()`)
+- create map
+- normalise keys
+- config loader!
+
+The config loader is particular pleasant. It supports both traditional `$config` and modern `return [];` style configs. Combined with `value()` you can recreate `Kohana::config()` with ease.
+
+
+### Consts
+
+- HttpStatus
+- CountryNames
+
+
+### UUID
+
+for v1, v4, v5 (the good ones)
+
+
+### Env
+
+Environment loading from system or a config file.
+
+Also `isDocker()` - super handy.
+
+
+### FnUtils
+
+Mostly related to `array_map()` and `array_filter()`.
+
+
+### CSV
+
+- Importer
+- Exporter
+
+
+### XML/Dom utils
+
+- Parsing
+- Validating
+- XPath!
+- 'expects'
+
+
+### URL
+
+- Encode + decode
+- URL builder
 
 

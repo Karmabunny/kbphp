@@ -10,8 +10,6 @@ use ArrayAccess;
 use ArrayIterator;
 use IteratorAggregate;
 use JsonSerializable;
-use ReflectionClass;
-use ReflectionProperty;
 use Serializable;
 use Traversable;
 
@@ -39,7 +37,7 @@ use Traversable;
  *
  * @package karmabunny\kb
  */
-class Collection implements
+abstract class Collection extends DataObject implements
         ArrayAccess,
         IteratorAggregate,
         Serializable,
@@ -50,56 +48,7 @@ class Collection implements
 
     use ArrayAccessTrait;
     use ArrayableTrait;
-
-    /**
-     *
-     * @param iterable $config
-     */
-    function __construct($config = [])
-    {
-        // This makes things not break. Something about references.
-        if (!is_array($config)) {
-            $config = iterator_to_array($config);
-        }
-        $this->update($config);
-    }
-
-
-    /** @inheritdoc */
-    public function serialize(): string
-    {
-        $array = [];
-
-        $reflect = new ReflectionClass($this);
-        $properties = $reflect->getProperties(ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC);
-
-        foreach ($properties as $property) {
-            if ($property->isStatic()) continue;
-
-            $key = $property->getName();
-
-            $value = $this->$key;
-            if (is_object($value) and $value instanceof NotSerializable) continue;
-
-            $array[$key] = $value;
-        }
-
-        return serialize($array);
-    }
-
-
-    /** @inheritdoc */
-    public function unserialize($serialized)
-    {
-        $this->update(unserialize($serialized));
-    }
-
-
-    /** @inheritdoc */
-    public function jsonSerialize()
-    {
-        return $this->toArray();
-    }
+    use SerializeTrait;
 
 
     /** @inheritdoc */
@@ -107,19 +56,6 @@ class Collection implements
     {
         // @phpstan-ignore-next-line : docs say 'array or object'
         return new ArrayIterator($this);
-    }
-
-
-    /**
-     *
-     * @param iterable $config
-     * @return void
-     */
-    public function update($config)
-    {
-        foreach ($config as $key => $item) {
-            $this->$key = $item;
-        }
     }
 
 
@@ -135,8 +71,8 @@ class Collection implements
 
 
     /** @inheritdoc */
-    public function fields(): array
+    public function jsonSerialize()
     {
-        return [];
+        return $this->toArray();
     }
 }

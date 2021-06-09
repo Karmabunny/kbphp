@@ -23,7 +23,7 @@ final class DocValidatorTest extends TestCase {
             'integer' => 5,
             'generic' => '777',
             'list' => [],
-            'object' => new Collection([]),
+            'object' => new DumbThing(),
         ]);
     }
 
@@ -117,8 +117,8 @@ final class DocValidatorTest extends TestCase {
     {
         try {
             $thing = self::createThing();
-            $thing->object = new \stdClass();
-            $thing->local = new \stdClass();
+            $thing->object = (object)[];
+            $thing->local = (object)[];
             $thing->validate();
         }
         catch (ValidationException $exception) {
@@ -175,6 +175,8 @@ final class DocValidatorTest extends TestCase {
         }
     }
 }
+
+class DumbThing extends Collection {}
 
 
 class DocThing extends Collection implements Validates {

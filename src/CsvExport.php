@@ -20,7 +20,7 @@ class CsvExport
 {
 
     /** Identify dirty items. */
-    private const DIRTY_CHARS = ' "\r\n\t';
+    const DIRTY_CHARS = ' "\r\n\t';
 
     /** @var string */
     private $dirty_re;
@@ -102,7 +102,7 @@ class CsvExport
     /**
      * Add a row.
      *
-     * @param array|Traversable $model
+     * @param iterable $model
      * @return void
      */
     public function add($model)
@@ -136,7 +136,7 @@ class CsvExport
     public function addAll($models)
     {
         foreach ($models as $model) {
-            if (!is_iterable($model)) continue;
+            if (!is_array($model) and !($model instanceof \Traversable)) continue;
             $this->add($model);
         }
     }

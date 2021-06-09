@@ -10,6 +10,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Test log stringify
+ *
+ * @requires PHP >= 7.3
  **/
 class LogTest extends TestCase
 {
@@ -36,26 +38,26 @@ class LogTest extends TestCase
         $actual = Log::stringify($thing);
         $expected = trim(<<<'EOF'
         [0]: Test1
-          thing: "abc"
+          thing: abc
           array:
             [0]: Test1
-              thing: "one"
+              thing: one
               array: []
               object: NULL
               float: 1.234
-              virtual: "count - 1"
+              virtual: count - 1
             [1]: Test1
-              thing: "two"
+              thing: two
               array: []
               object: NULL
               float: 1.234
-              virtual: "count - 2"
+              virtual: count - 2
           object: stdClass
-            thing: "three"
+            thing: three
           float: 1.234
-          virtual: "count - 3"
+          virtual: count - 3
         [1]: Test1
-          thing: "four"
+          thing: four
           array:
             [0]: 1
             [1]: 2
@@ -65,7 +67,7 @@ class LogTest extends TestCase
               [2]: 6
           object: NULL
           float: 1.234
-          virtual: "count - 4"
+          virtual: count - 4
         EOF);
 
         $this->assertEquals($expected, $actual);

@@ -114,7 +114,7 @@ abstract class Reflect
         if (count($callable) !== 2) return false;
 
         try {
-            [$class, $method] = $callable;
+            list($class, $method) = $callable;
             $reflect = new ReflectionMethod($class, $method);
 
             return $reflect->isStatic() and !$reflect->isAbstract();
@@ -166,7 +166,7 @@ abstract class Reflect
     public static function getParameters($function, array $fallbacks = null): array
     {
         if (is_array($function)) {
-            [$class, $method] = $function;
+            list($class, $method) = $function;
             $function = new ReflectionMethod($class, $method);
         }
         else if (is_string($function)) {
@@ -302,7 +302,7 @@ abstract class Reflect
         $output = [];
 
         foreach ($matches as $match) {
-            [$line, $id, $description] = $match;
+            list($line, $id, $description) = $match;
 
             $type = 'mixed';
             $name = '??';
@@ -310,7 +310,7 @@ abstract class Reflect
             if ($id === 'param') {
                 $sub = [];
                 if (preg_match(self::RE_PARAM, $line, $sub)) {
-                    [$_, $type, $name, $description] = $sub;
+                    list($_, $type, $name, $description) = $sub;
                 }
 
                 $output[$id] = [
@@ -323,7 +323,7 @@ abstract class Reflect
             else if ($id === 'return') {
                 $sub = [];
                 if (preg_match(self::RE_RETURN, $line, $sub)) {
-                    [$_, $type, $description] = $sub;
+                    list($_, $type, $description) = $sub;
                 }
                 $output[] = [
                     'id' => $id,

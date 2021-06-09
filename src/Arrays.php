@@ -429,6 +429,48 @@ abstract class Arrays
 
 
     /**
+     * Normalise a list of options with mixed associated / values.
+     *
+     * E.g.
+     * ```
+     * $options = [
+     *     'field-1',
+     *     'field-2' => 'DESC',
+     *     'field-3',
+     *     'field-4' => 'DESC',
+     * ];
+     * $options = Arrays::normalizeOptions($options, 'ASC');
+     * // Returns:
+     * [
+     *     'field-1' => 'ASC',
+     *     'field-2' => 'DESC',
+     *     'field-3' => 'ASC',
+     *     'field-4' => 'DESC',
+     * ];
+     * ```
+     *
+     * @param array $items
+     * @param mixed $default
+     * @return array
+     */
+    static function normalizeOptions(array $items, $default): array
+    {
+        $output = [];
+
+        foreach ($items as $key => $value) {
+            if (is_numeric($key)) {
+                $output[$value] = $default;
+            }
+            else {
+                $output[$key] = $value;
+            }
+        }
+
+        return $output;
+    }
+
+
+    /**
      * Load a php config file.
      *
      * Note, this will fail if the file doesn't exist.

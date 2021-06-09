@@ -658,6 +658,11 @@ abstract class XML {
      */
     public static function first(DOMNode $parent, string $tag_name)
     {
+        // Get the root element of a document first.
+        if ($parent instanceof DOMDocument) {
+            $parent = $parent->firstChild;
+        }
+
         foreach (self::getNodeIterator($parent->childNodes, true) as $element) {
             /** @var DOMElement $element */
             if ($element->nodeName === $tag_name) return $element;
