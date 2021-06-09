@@ -68,4 +68,11 @@ abstract class Collection extends DataObject implements
         $class = static::class;
         return new $class($this);
     }
+
+
+    /** @inheritdoc */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
 }
