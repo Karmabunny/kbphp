@@ -779,13 +779,18 @@ abstract class XML {
      *
      * @param DOMDocument|DOMElement $element
      * @param string $name
-     * @return string
+     * @return string|null
      */
     public static function attr($element, string $name)
     {
         if ($element instanceof DOMDocument) {
             $element = $element->documentElement;
         }
+
+        if (!$element->hasAttribute($name)) {
+            return null;
+        }
+
         return trim($element->getAttribute($name));
     }
 
