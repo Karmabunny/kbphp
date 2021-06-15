@@ -727,6 +727,21 @@ abstract class XML {
 
 
     /**
+     * Get a list of strings from the target child element.
+     *
+     * @param DOMElement $node
+     * @param string $tag
+     * @return string[]
+     */
+    public static function getChildrenText(DOMElement $node, string $tag): array
+    {
+        /** @var DOMElement[] $items */
+        $items = self::xpath($node, './' . $tag, 'list');
+        return array_map([XML::class, 'text'], $items);
+    }
+
+
+    /**
      * Expect one of these nodes in the children.
      *
      * @param DOMNode $parent
