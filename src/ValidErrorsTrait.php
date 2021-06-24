@@ -14,7 +14,7 @@ trait ValidErrorsTrait
     /**
      * This is a collection of error sets.
      *
-     * @var array [ scenario => [ item => [errors] ] ]
+     * @var array [ scenario => [ item => [messages] ] ]
      */
     private $_errors = [];
 
@@ -56,7 +56,7 @@ trait ValidErrorsTrait
     /**
      * Get validation errors.
      *
-     * This is a nested array of errors.
+     * This is a nested array of messages.
      *
      * Like this:
      * ```
@@ -71,7 +71,7 @@ trait ValidErrorsTrait
      * ]
      * ```
      *
-     * @return array [ scenario => [ item => [errors] ] ]
+     * @return array [ scenario => [ item => [messages] ] ]
      */
     public function getErrors(): array
     {
@@ -99,7 +99,7 @@ trait ValidErrorsTrait
     /**
      * Get the latest error set.
      *
-     * @return string[]
+     * @return array [ item => [messages] ]
      */
     public function getLastErrors(): array
     {
