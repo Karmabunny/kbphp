@@ -19,9 +19,20 @@ class ValidationException extends Exception
     /**
      * Keyed string => string[].
      *
-     * @var array
+     * @var array [ item => [errors] ]
      */
     public $errors = [];
+
+
+    /**
+     * Get the validation errors.
+     *
+     * @return array [ item => [errors] ]
+     */
+    public function getErrors(): array
+    {
+        return $this->errors;
+    }
 
 
     /**
@@ -32,7 +43,7 @@ class ValidationException extends Exception
      * @param array $errors
      * @return static
      */
-    public function addErrors($errors)
+    public function addErrors(array $errors)
     {
         foreach ($errors as $name => $messages) {
             if (isset($this->errors[$name])) {
@@ -43,12 +54,27 @@ class ValidationException extends Exception
             }
         }
 
-        $names = array_map(function($name) {
-            return "'{$name}'";
-        }, array_keys($this->errors));
-
-        $this->message = 'Validation failed for ' . implode(', ', $names);
+        $this->message = self::getSummary($this->errors);
 
         return $this;
+    }
+
+
+    /**
+     * Create a summary messages from an error set.
+     *
+     * @param array $errors
+     * @return string
+     */
+    public static function getSummary(array $errors): string
+    {
+        if (empty($errors)) return '';
+
+        $names = [];
+        foreach ($errors as $name => $_) {
+            $names[] = "'{$name}'";
+        }
+
+        return 'Validation failed for ' . implode(', ', $names);
     }
 }
