@@ -147,7 +147,7 @@ class ShellOutput
                     $buf_out .= fgets($this->pipes[1], 1024);
 
                     if (self::eol($buf_out)) {
-                        yield substr($buf_out, 0, -1);
+                        if ($buf_out) yield $buf_out;
                         $buf_out = '';
                     }
                 }
@@ -161,7 +161,7 @@ class ShellOutput
                     $buf_err .= fgets($this->pipes[2], 1024);
 
                     if (self::eol($buf_err)) {
-                        yield substr($buf_err, 0, -1);
+                        if ($buf_err) yield $buf_err;
                         $buf_err = '';
                     }
                 }
