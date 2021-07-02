@@ -27,13 +27,13 @@ class ShellOutput
     public $handle;
 
     /** @var int */
-    public $pid;
+    public $pid = -1;
 
     /** @var bool */
-    public $running;
+    public $running = false;
 
     /** @var int|false */
-    public $exit;
+    public $exit = false;
 
     /** @var array */
     private $pipes;
@@ -55,9 +55,14 @@ class ShellOutput
         $this->pipes = $pipes;
 
         $status = proc_get_status($handle);
-        $this->pid = $status['pid'];
-        $this->running = $status['running'];
-        $this->exit = $status['exitcode'];
+        if ($status) {
+            $this->pid = $status['pid'];
+            $this->running = $status['running'];
+
+            if (!$this->running) {
+                $this->exit = $status['exitcode'];
+            }
+        }
 
         $this->descriptors = $config->getDescriptors();
 
@@ -69,7 +74,9 @@ class ShellOutput
             stream_set_blocking($pipes[2], false);
         }
 
-        register_shutdown_function('proc_close', $this->handle);
+        if ($status) {
+            register_shutdown_function('proc_close', $this->handle);
+        }
     }
 
 
@@ -207,7 +214,15 @@ class ShellOutput
             return $this->exit;
         }
 
-        $this->exit = proc_close($this->handle);
+        $status = proc_get_status($this->handle);
+
+        if ($status and !$status['running']) {
+            $this->exit = $status['exitcode'];
+        }
+        else {
+            $this->exit = proc_close($this->handle);
+        }
+
         return $this->exit;
     }
 
