@@ -72,7 +72,7 @@ class ShellOptions extends Collection
      */
     public function getCommand(): string
     {
-        return Shell::escape($this->cwd, $this->args);
+        return Shell::escape($this->cmd, $this->args);
     }
 
 
