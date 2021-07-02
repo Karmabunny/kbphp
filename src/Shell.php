@@ -93,8 +93,26 @@ class Shell
 
 
     /**
+     * Create a command object.
+     *
+     * This _begins_ executing a shell command, but then it's your
+     * responsibility to process the output (with read/readAll) and close the
+     * handle.
+     *
+     * Note, `proc_close()` is automatically called on shutdown.
+     *
+     * Use this for increased flexibility:
+     * - pipe stdout/stderr directly to files or sockets
+     * - pipe or wrote to the stdin
+     * - read the output line by line and stream it somewhere
+     * - read the exit code
+     * - terminate a command
      *
      * @param string|array|ShellOptions $config
+     *   - cmd  - `string`
+     *   - args - `string[]`
+     *   - cwd  - `string`
+     *   - env  - `string[]`
      * @return ShellOutput
      */
     public static function run($config)
