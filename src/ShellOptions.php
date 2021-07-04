@@ -24,6 +24,9 @@ class ShellOptions extends Collection
     public $env = [];
 
     /** @var string|array|resource */
+    public $stdin = 'pipe';
+
+    /** @var string|array|resource */
     public $stdout = 'pipe';
 
     /** @var string|array|resource */
@@ -59,9 +62,9 @@ class ShellOptions extends Collection
     public function getDescriptors(): array
     {
         return [
-            0 => ['pipe', 'r'],
-            1 => self::parseDescriptor($this->stdout),
-            2 => self::parseDescriptor($this->stderr),
+            0 => self::parseDescriptor('r', $this->stdout),
+            1 => self::parseDescriptor('w', $this->stdout),
+            2 => self::parseDescriptor('w', $this->stderr),
         ];
     }
 
@@ -76,25 +79,40 @@ class ShellOptions extends Collection
     }
 
 
-    private static function parseDescriptor($descriptor)
+    /**
+     *
+     * @param string $type
+     * @param mixed $descriptor
+     * @return resource|array
+     */
+    private static function parseDescriptor(string $type, $descriptor)
     {
+        // Resource, cool.
         if (is_resource($descriptor)) {
             return $descriptor;
         }
 
+        // Custom pipe config, cool.
         if (is_array($descriptor)) {
             return $descriptor;
         }
 
+        // Shorthand pipe, ok.
         if ($descriptor === 'pipe') {
-            return ['pipe', 'w'];
+            return ['pipe', $type];
         }
 
+        // String is a filename.
         if (is_string($descriptor)) {
-            return ['file', $descriptor, 'a'];
+            $pipe = ['file', $descriptor];
+
+            // Out type will 'append' by default. Dunno about that.
+            if ($type == 'w') $pipe[] = 'a';
+            return $pipe;
         }
 
-        return ['pipe', 'w'];
+        // Dunno, just use the default.
+        return ['pipe', $type];
     }
 
 }
