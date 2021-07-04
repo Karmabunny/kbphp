@@ -204,6 +204,19 @@ class ShellOutput
 
 
     /**
+     * Wait until the process has finished.
+     *
+     * @return string The last line of output.
+     */
+    public function wait(): string
+    {
+        $stream = $this->read();
+        foreach ($stream as $line);
+        return $line;
+    }
+
+
+    /**
      * Close the process handle.
      *
      * @return int exit code
