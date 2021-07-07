@@ -9,6 +9,10 @@ function puts($value) {
     echo json_encode($value), PHP_EOL;
 }
 
+echo "readline + tty\n";
+puts(Cli::hasReadline());
+puts(Cli::hasTTY());
+
 puts(Cli::options('uhhh', ['one', 'two', 'three']));
 
 puts(Cli::masked('masked'));

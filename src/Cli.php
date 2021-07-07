@@ -28,11 +28,28 @@ class Cli
      *
      * @return bool
      */
-    protected static function hasReadline(): bool
+    public static function hasReadline(): bool
     {
         static $yes;
         if ($yes === null) {
             $yes = extension_loaded('readline');
+        }
+        return $yes;
+    }
+
+
+    /**
+     * Is the host terminal a TTY.
+     *
+     * This is required for interactive input.
+     *
+     * @return bool
+     */
+    public static function hasTTY(): bool
+    {
+        static $yes;
+        if ($yes === null) {
+            $yes = posix_isatty(STDIN) and posix_isatty(STDOUT);
         }
         return $yes;
     }
