@@ -189,10 +189,14 @@ class Cli
             $last = Arrays::lastKey($options);
             $current = key($options);
 
+            $total = count($options);
+            $keys = array_flip(array_keys($options));
+
             while (true) {
                 // Clear and prompt.
                 self::clearLine();
-                echo $prompt . ': ' . $options[$current];
+                $index = $keys[$current] + 1;
+                echo "{$prompt} ({$index}/{$total}): " . $options[$current];
 
                 $char = fread(STDIN, 4);
 
@@ -251,6 +255,14 @@ class Cli
                 if ($char == chr(10)) {
                     return $buffer;
                 }
+
+                // Skip these.
+                if (
+                    $char == self::KEY_UP or
+                    $char == self::KEY_DOWN or
+                    $char == self::KEY_LEFT or
+                    $char == self::KEY_RIGHT
+                ) continue;
 
                 // Backspaces.
                 if ($char == chr(127)) {
