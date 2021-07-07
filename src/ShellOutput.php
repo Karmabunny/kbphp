@@ -99,6 +99,7 @@ class ShellOutput
      *
      * @param string $data
      * @return int|false
+     * @throws ShellException
      */
     public function write(string $data)
     {
@@ -139,10 +140,16 @@ class ShellOutput
      *
      * @return Generator<string>
      */
-    public function read(): Generator
+    public function read($stream = self::STREAM_ALL): Generator
     {
-        $target_out = $this->getTarget(self::STREAM_STDOUT) === 'pipe';
-        $target_err = $this->getTarget(self::STREAM_STDERR) === 'pipe';
+        $target_out = (
+            ($stream & self::STREAM_STDOUT) and
+            $this->getTarget(self::STREAM_STDOUT) === 'pipe'
+        );
+        $target_err = (
+            ($stream & self::STREAM_STDERR) and
+            $this->getTarget(self::STREAM_STDERR) === 'pipe'
+        );
 
         if (!$target_out and !$target_err) return;
 
