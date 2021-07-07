@@ -23,13 +23,13 @@ class ShellOptions extends Collection
     /** @var string[] */
     public $env = [];
 
-    /** @var string|array|resource */
+    /** @var string|array|resource|false */
     public $stdin = 'pipe';
 
-    /** @var string|array|resource */
+    /** @var string|array|resource|false */
     public $stdout = 'pipe';
 
-    /** @var string|array|resource */
+    /** @var string|array|resource|false */
     public $stderr = 'pipe';
 
     /** @var int Limit for fgets() in bytes. */
@@ -61,11 +61,19 @@ class ShellOptions extends Collection
      */
     public function getDescriptors(): array
     {
-        return [
-            0 => self::parseDescriptor('r', $this->stdout),
-            1 => self::parseDescriptor('w', $this->stdout),
-            2 => self::parseDescriptor('w', $this->stderr),
-        ];
+        $descriptors = [];
+
+        if ($this->stdin) {
+            $descriptors[0] = self::parseDescriptor('r', $this->stdin);
+        }
+        if ($this->stdout) {
+            $descriptors[1] = self::parseDescriptor('w', $this->stdout);
+        }
+        if ($this->stderr) {
+            $descriptors[2] = self::parseDescriptor('w', $this->stderr);
+        }
+
+        return $descriptors;
     }
 
 
