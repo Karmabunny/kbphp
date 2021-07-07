@@ -54,15 +54,7 @@ class ShellOutput
         $this->handle = $handle;
         $this->pipes = $pipes;
 
-        $status = proc_get_status($handle);
-        if ($status) {
-            $this->pid = $status['pid'];
-            $this->running = $status['running'];
-
-            if (!$this->running) {
-                $this->exit = $status['exitcode'];
-            }
-        }
+        $this->isRunning();
 
         $this->descriptors = $config->getDescriptors();
 
@@ -118,6 +110,27 @@ class ShellOutput
         }
 
         return fwrite($this->pipes[0], $data);
+    }
+
+
+    /**
+     *
+     * @return bool
+     */
+    public function isRunning(): bool
+    {
+        $status = @proc_get_status($this->handle);
+
+        if ($status) {
+            $this->pid = $status['pid'];
+            $this->running = $status['running'];
+
+            if (!$this->running) {
+                $this->exit = $status['exitcode'];
+            }
+        }
+
+        return $this->running;
     }
 
 
@@ -227,13 +240,15 @@ class ShellOutput
             return $this->exit;
         }
 
-        $status = proc_get_status($this->handle);
+        $status = @proc_get_status($this->handle);
 
         if ($status and !$status['running']) {
+            $this->running = false;
             $this->exit = $status['exitcode'];
         }
         else {
-            $this->exit = proc_close($this->handle);
+            $this->exit = @proc_close($this->handle);
+            $this->running = false;
         }
 
         return $this->exit;
