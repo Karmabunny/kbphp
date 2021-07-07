@@ -66,9 +66,7 @@ class ShellOutput
             stream_set_blocking($pipes[2], false);
         }
 
-        if ($status) {
-            register_shutdown_function('proc_close', $this->handle);
-        }
+        register_shutdown_function($this->shutdown());
     }
 
 
@@ -296,5 +294,17 @@ class ShellOutput
         else {
             return false;
         }
+    }
+
+
+    /**
+     * @return callable
+     */
+    private function shutdown()
+    {
+        return function() {
+            if ($this->isRunning()) return;
+            $this->close();
+        };
     }
 }
