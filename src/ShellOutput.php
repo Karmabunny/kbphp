@@ -207,6 +207,23 @@ class ShellOutput
 
 
     /**
+     *
+     * @param int $chunk
+     * @return null|string
+     */
+    public function readRaw(int $chunk = 1024): ?string
+    {
+        $target = $this->getTarget(self::STREAM_STDOUT);
+        if ($target !== 'pipe') {
+            throw new ShellException('Standard output is not a pipe');
+        }
+
+        if(feof($this->pipes[1])) return null;
+        return fread($this->pipes[1], $chunk);
+    }
+
+
+    /**
      * Read everything all at once.
      *
      * @return string
