@@ -39,6 +39,51 @@ class Cli
 
 
     /**
+     *
+     * @return void
+     */
+    protected static function registerExits()
+    {
+        static $registered = false;
+        if ($registered) return;
+        $registered = true;
+
+        $reset = function(int $signal) {
+            system('stty -cbreak');
+            system('stty echo');
+
+            switch ($signal) {
+                case SIGINT:
+                    echo "\nInterrupted\n";
+                    exit(2);
+
+                case SIGTERM:
+                    echo "\nTerminated\n";
+                    exit(2);
+
+                case SIGQUIT:
+                    echo "\nQuit\n";
+                    exit(2);
+
+                case SIGHUP:
+                    echo "\nHangup\n";
+                    exit(2);
+
+                default:
+                    echo "\nCaught: {$signal}\n";
+                    exit(2);
+            }
+        };
+
+        pcntl_async_signals(true);
+        pcntl_signal(SIGINT, $reset);
+        pcntl_signal(SIGTERM, $reset);
+        pcntl_signal(SIGQUIT, $reset);
+        pcntl_signal(SIGHUP, $reset);
+    }
+
+
+    /**
      * Clear the screen.
      *
      * @return void
@@ -117,6 +162,8 @@ class Cli
      */
     public static function options(string $prompt, array $options)
     {
+        self::registerExits();
+
         try {
             system('stty cbreak');
             system('stty -echo');
@@ -168,6 +215,8 @@ class Cli
      */
     public static function masked(string $prompt = null): string
     {
+        self::registerExits();
+
         if ($prompt) {
             echo $prompt . ': ';
         }
@@ -218,6 +267,8 @@ class Cli
      */
     public static function invisible(string $prompt = null): string
     {
+        self::registerExits();
+
         if ($prompt) {
             echo $prompt . ': ';
         }
