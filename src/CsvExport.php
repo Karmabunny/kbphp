@@ -6,6 +6,8 @@
 
 namespace karmabunny\kb;
 
+use Exception;
+use Throwable;
 use Traversable;
 
 /**
@@ -18,15 +20,14 @@ use Traversable;
  */
 class CsvExport
 {
+    /** Store blob csvs in memory if under 5mb, otherwise use a temp file. */
+    const MAX_MEMORY = 5 * 1024 * 1024;
 
     /** Identify dirty items. */
     const DIRTY_CHARS = ' "\r\n\t';
 
-    /** @var string */
-    private $dirty_re;
-
-    /** @var array */
-    public $rows = [];
+    /** @var resource */
+    public $handle;
 
     /** @var array */
     public $formatters = [];
@@ -48,6 +49,12 @@ class CsvExport
 
     /** @var array|null */
     public $headers = null;
+
+    /** @var string */
+    private $dirty_re;
+
+    /** @var bool */
+    private $_own_handles = false;
 
     /**
      * Configure the CSV output format.
@@ -73,13 +80,33 @@ class CsvExport
      *
      * If headers is null it will produce headers from the first row.
      *
+     * @param resource|array|null $handle
      * @param array $config [break, delimiter, null, enclosure, escape, headers]
+     * @throws Exception
      */
-    public function __construct($config = [])
+    public function __construct($handle = null, $config = [])
     {
+        // Backwards compat.
+        if (is_array($handle)) {
+            $config = $handle;
+            $handle = null;
+        }
+
         foreach ($config as $key => $val) {
             $this->$key = $val;
         }
+
+        // Null handle means string export.
+        if ($handle === null) {
+            $this->_own_handles = true;
+            $handle = @fopen('php://temp/maxmemory:' . self::MAX_MEMORY, 'r+');
+
+            if ($handle === null) {
+                throw new Exception('Failed to open temporary memory.');
+            }
+        }
+
+        $this->handle = $handle;
 
         $dirty = [
             $this->break,
@@ -96,6 +123,10 @@ class CsvExport
         }
 
         $this->dirty_re = "/[{$dirty_chars}]/";
+
+        if ($this->headers) {
+            $this->_write($this->headers);
+        }
     }
 
 
@@ -116,12 +147,10 @@ class CsvExport
         if ($this->headers === null) {
             $keys = array_keys($model);
             $this->headers = array_combine($keys, $keys);
+            $this->_write($this->headers);
         }
 
-        // Only add items that match the header set.
-        $this->rows[] = array_map(function($attribute) use ($model) {
-            return $model[$attribute] ?? null;
-        }, array_keys($this->headers));
+        $this->_write($model);
     }
 
 
@@ -190,7 +219,7 @@ class CsvExport
         try {
             $value = @(string) $value;
         }
-        catch (\Throwable $exception) {
+        catch (Throwable $exception) {
             $value = 'ERR';
         }
 
@@ -208,15 +237,38 @@ class CsvExport
      */
     public function build(): string
     {
-        $csv = [];
+        $ok = rewind($this->handle);
+        if (!$ok) throw new Exception('Cannot read handle.');
 
-        // Mush the headers and clean them.
-        if ($this->headers) {
-            $headers = array_map([$this, 'clean'], array_values($this->headers));
-            $csv[] = implode($this->delimiter, $headers);
+        $buffer = '';
+        while ($chunk = fread($this->handle, 1024)) {
+            $buffer .= $chunk;
         }
 
-        $headers = array_keys($this->headers);
+        if ($this->_own_handles) {
+            fclose($this->handle);
+        }
+
+        return $buffer;
+
+
+        // No data!
+        if (empty($this->rows)) return '';
+
+        // Use the first model as the key names.
+        // This creates a keyed array: 'attr' => 'attr'.
+        if ($this->headers === null) {
+            $keys = array_keys(Arrays::first($this->rows));
+            $headers = array_combine($keys, $keys);
+        }
+
+        $csv = [];
+
+        // Write the headers, but clean them first.
+        if ($headers) {
+            $titles = array_map([$this, 'clean'], array_values($headers));
+            $csv[] = implode($this->delimiter, $titles);
+        }
 
         foreach ($this->rows as $row) {
             $items = [];
@@ -249,5 +301,28 @@ class CsvExport
         else {
             return $dirty;
         }
+    }
+
+
+    /**
+     *
+     * @param array $rows
+     * @return void
+     */
+    protected function _write(array $rows)
+    {
+        $first = true;
+
+        // Only add items that match the header set.
+        // If the model is missing a header item - it's null.
+        foreach ($this->headers as $key => $name) {
+            $value = $rows[$key] ?? null;
+
+            if (!$first) fwrite($this->handle, $this->delimiter);
+            fwrite($this->handle, $this->_format($name, $value));
+            $first = false;
+        }
+
+        fwrite($this->handle, $this->break);
     }
 }
