@@ -8,6 +8,7 @@ namespace karmabunny\kb;
 
 use DateTimeImmutable;
 use DateTimeInterface;
+use Traversable;
 
 /**
  * Some handy cache bits.
@@ -54,6 +55,37 @@ trait CachedHelperTrait
         return $this->getCachedValue($property, function() use ($property) {
             return new DateTimeImmutable($this->$property);
         });
+    }
+
+
+    /**
+     * Cache an iterable result as an array.
+     *
+     * More useful than you might think. This takes anything you yield and
+     * dumps it in a cached array, and also returns it.
+     *
+     * Example:
+     * ```
+     * function getItems(): array
+     * {
+     *     return $this->getCachedIterable('items', function() {
+     *         yield 'key1' => 'one';
+     *         yield 'key2' => 'two';
+     *     });
+     * }
+     * ```
+     *
+     * @param string $id
+     * @param callable|iterable $fn () => iterable
+     * @return array
+     */
+    protected function getCachedIterable(string $id, $fn): array
+    {
+        if (!isset($this->_cache[$id])) {
+            $result = ($fn instanceof Traversable) ? $fn : $fn();
+            $this->_cache[$id] = iterator_to_array($result);
+        }
+        return $this->_cache[$id];
     }
 
 
