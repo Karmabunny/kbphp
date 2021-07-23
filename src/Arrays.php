@@ -192,6 +192,27 @@ abstract class Arrays
 
 
     /**
+     * Reduce the array to a subset, as defined by the keys parameter.
+     *
+     * @param array $array
+     * @param string[] $keys
+     * @param bool $fill Replace missing keys with null.
+     * @return array
+     */
+    static function filterKeys(array $array, array $keys, $fill = false): array
+    {
+        $items = [];
+
+        foreach ($keys as $key) {
+            if (!$fill and !array_key_exists($key, $array)) continue;
+            $items[$key] = $array[$key] ?? null;
+        }
+
+        return $items;
+    }
+
+
+    /**
      * Flat arrays, with optional key support.
      *
      * @param array $array

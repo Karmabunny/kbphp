@@ -125,6 +125,36 @@ final class ArraysTest extends TestCase {
     }
 
 
+    public function testFilterKeys()
+    {
+        $array = [
+            'aaa' => 123,
+            'xxx' => 567,
+            'zzz' => 789,
+            '111' => null,
+        ];
+
+        // Standard filter.
+        $expected = [
+            'aaa' => 123,
+            'zzz' => 789,
+        ];
+        $actual = Arrays::filterKeys($array, ['aaa', 'zzz', 'bbb']);
+        $this->assertEquals($expected, $actual);
+
+        // Fill keys.
+        // This also tests that the '111' doesn't come through just because it's null.
+        // It's _not_ in the filter but PHP sometimes has trouble telling the difference.
+        $expected = [
+            'aaa' => 123,
+            'zzz' => 789,
+            'bbb' => null,
+        ];
+        $actual = Arrays::filterKeys($array, ['aaa', 'zzz', 'bbb'], true);
+        $this->assertEquals($expected, $actual);
+    }
+
+
     public function testFlattenNoKeys()
     {
         $actual = Arrays::flatten([
