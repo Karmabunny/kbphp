@@ -81,7 +81,7 @@ trait CachedHelperTrait
      */
     protected function getCachedIterable(string $id, $fn): array
     {
-        if (!isset($this->_cache[$id])) {
+        if (!array_key_exists($id, $this->_cache)) {
             $result = ($fn instanceof Traversable) ? $fn : $fn();
             $this->_cache[$id] = iterator_to_array($result);
         }
@@ -100,7 +100,7 @@ trait CachedHelperTrait
      */
     protected function getCachedValue(string $id, $fn)
     {
-        if (!isset($this->_cache[$id])) {
+        if (!array_key_exists($id, $this->_cache)) {
             $this->_cache[$id] = $fn();
         }
         return $this->_cache[$id];
@@ -122,7 +122,7 @@ trait CachedHelperTrait
     {
         $key = sha1(serialize($inputs));
 
-        if (!isset($this->_cache[$key])) {
+        if (!array_key_exists($key, $this->_cache)) {
             $this->_cache[$key] = $fn(...$inputs);
         }
         return $this->_cache[$key];
