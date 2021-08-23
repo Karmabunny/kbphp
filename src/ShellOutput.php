@@ -247,7 +247,7 @@ class ShellOutput
     {
         $stream = $this->read();
         foreach ($stream as $line);
-        return $line;
+        return $line ?? '';
     }
 
 

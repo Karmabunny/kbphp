@@ -132,7 +132,7 @@ class Cli
     public static function input(string $prompt = null): string
     {
         if (self::hasReadline()) {
-            return readline($prompt . ': ');
+            return readline($prompt ? $prompt . ': ' : null);
         }
 
         if ($prompt) {
@@ -146,15 +146,15 @@ class Cli
     /**
      * Ask a yes/no question. Accept nothing else.
      *
-     * @param string $text
-     * @return string
+     * @param string $prompt
+     * @return bool
      */
-    public static function question(string $text): bool
+    public static function question(string $prompt): bool
     {
         $matches = [];
 
         while (true) {
-            $out = self::input(trim($text . ' (yes/no)'));
+            $out = self::input(trim($prompt . ' (yes/no)'));
 
             if (!preg_match('/^(no?|ye?s?)/i', $out, $matches)) {
                 echo "Invalid input, please specify 'yes' or 'no'.", PHP_EOL;
@@ -173,7 +173,7 @@ class Cli
      *
      * Use the up/down keys to choose an option.
      *
-     * @param string|null $prompt
+     * @param string $prompt
      * @param string[] $options
      * @return string
      */
@@ -253,7 +253,7 @@ class Cli
 
                 // Done!
                 if ($char == chr(10)) {
-                    return $buffer;
+                    break;
                 }
 
                 // Skip these.
