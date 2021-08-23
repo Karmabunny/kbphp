@@ -101,7 +101,7 @@ class CsvExport
             $this->_own_handles = true;
             $handle = @fopen('php://temp/maxmemory:' . self::MAX_MEMORY, 'r+');
 
-            if ($handle === null) {
+            if (!$handle) {
                 throw new Exception('Failed to open temporary memory.');
             }
         }
@@ -250,40 +250,6 @@ class CsvExport
         }
 
         return $buffer;
-
-
-        // No data!
-        if (empty($this->rows)) return '';
-
-        // Use the first model as the key names.
-        // This creates a keyed array: 'attr' => 'attr'.
-        if ($this->headers === null) {
-            $keys = array_keys(Arrays::first($this->rows));
-            $headers = array_combine($keys, $keys);
-        }
-
-        $csv = [];
-
-        // Write the headers, but clean them first.
-        if ($headers) {
-            $titles = array_map([$this, 'clean'], array_values($headers));
-            $csv[] = implode($this->delimiter, $titles);
-        }
-
-        foreach ($this->rows as $row) {
-            $items = [];
-
-            // Format/clean the things.
-            for ($i = 0; $i < count($headers); $i++) {
-                $items[] = $this->_format($headers[$i], $row[$i]);
-            }
-
-            // Mush them.
-            $csv[] = implode($this->delimiter, $items);
-        }
-
-        // Mush them one more time.
-        return implode($this->break, $csv);
     }
 
 
