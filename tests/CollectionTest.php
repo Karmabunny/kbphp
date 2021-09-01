@@ -5,6 +5,8 @@
  */
 
 use karmabunny\kb\Collection;
+use karmabunny\kb\UpdateStrictTrait;
+use karmabunny\kb\UpdateTidyTrait;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -139,7 +141,50 @@ final class CollectionTest extends TestCase {
         $this->assertEquals($thingo->parent_id, $other->parent_id);
         $this->assertEquals($thingo->empty, $other->empty);
     }
+
+
+    public function testUpdateModifiers()
+    {
+        // Standard behaviour.
+        $thingo = new Thingo([
+            'name' => 'good',
+            'bad_thing' => 'bad',
+        ]);
+
+        $this->assertEquals('good', $thingo->name);
+        $this->assertEquals('bad', $thingo->bad_thing);
+
+        // Tidy mode - no unknown properties, but you, quietly.
+        $other = new ThingoTidy([
+            'name' => 'good',
+            'bad_thing' => 'bad',
+        ]);
+
+        $this->assertEquals('good', $other->name);
+
+        // Errors occur here instead.
+        $value = @$other->bad_thing;
+        $error = error_get_last();
+
+        $this->assertNull($value);
+        $this->assertStringContainsString('bad_thing', $error['message']);
+
+        // Strict mode - errors are immediate.
+        try {
+            $another = new ThingoStrict([
+                'name' => 'good',
+                'bad_thing' => 'bad',
+                'more_bad' => 'ah geez',
+            ]);
+            $this->fail('Constructor should throw.');
+        }
+        catch (InvalidArgumentException $exception) {
+            $this->assertStringContainsString('bad_thing', $exception->getMessage());
+            $this->assertStringContainsString('more_bad', $exception->getMessage());
+        }
+    }
 }
+
 
 class Thingo extends Collection {
 
@@ -187,4 +232,17 @@ class Thingo extends Collection {
         $this->_shh = $value;
         $this->_quiet = $value;
     }
+}
+
+
+class ThingoTidy extends Collection {
+    use UpdateTidyTrait;
+
+    public $name;
+}
+
+class ThingoStrict extends Collection {
+    use UpdateStrictTrait;
+
+    public $name;
 }
