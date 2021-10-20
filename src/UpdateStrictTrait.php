@@ -7,8 +7,6 @@
 namespace karmabunny\kb;
 
 use InvalidArgumentException;
-use ReflectionClass;
-use ReflectionProperty;
 
 /**
  * This modifies the behaviour of a DataObject/Collection so that only
@@ -21,6 +19,7 @@ use ReflectionProperty;
  */
 trait UpdateStrictTrait
 {
+    use PropertiesTrait;
 
     /**
      *
@@ -32,14 +31,7 @@ trait UpdateStrictTrait
         static $fields;
 
         if ($fields === null) {
-            $reflect = new ReflectionClass(static::class);
-            $properties = $reflect->getProperties(ReflectionProperty::IS_PUBLIC ^ ReflectionProperty::IS_STATIC);
-
-            $fields = [];
-            foreach ($properties as $property) {
-                $field = $property->getName();
-                $fields[$field] = true;
-            }
+            $fields = array_fill_keys(static::getProperties(), true);
         }
 
         $errors = [];
