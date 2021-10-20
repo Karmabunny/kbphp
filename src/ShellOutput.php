@@ -211,7 +211,7 @@ class ShellOutput
      * @param int $chunk
      * @return null|string
      */
-    public function readRaw(int $chunk = 1024): ?string
+    public function readRaw(int $chunk = 1024)
     {
         $target = $this->getTarget(self::STREAM_STDOUT);
         if ($target !== 'pipe') {
