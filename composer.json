@@ -2,8 +2,15 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "karmabunny/kb",
     "description": "Common KB utilities",
+    "keywords": ["utilities", "karmabunny", "kb", "collections"],
     "type": "library",
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Karmabunny",
+            "email": "info@karmabunny.com.au"
+        }
+    ],
     "require": {
         "symfony/polyfill-php73": "*"
     },
