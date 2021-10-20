@@ -57,5 +57,9 @@ trait UpdateStrictTrait
 
             throw new InvalidArgumentException("Unknown fields ({$count}): {$errors}");
         }
+
+        if (method_exists($this, 'applyVirtual')) {
+            call_user_func([$this, 'applyVirtual']);
+        }
     }
 }

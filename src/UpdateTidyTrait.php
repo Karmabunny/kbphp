@@ -39,5 +39,9 @@ trait UpdateTidyTrait
             if (!array_key_exists($key, $fields)) continue;
             $this->$key = $value;
         }
+
+        if (method_exists($this, 'applyVirtual')) {
+            call_user_func([$this, 'applyVirtual']);
+        }
     }
 }

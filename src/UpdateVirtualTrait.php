@@ -35,25 +35,21 @@ trait UpdateVirtualTrait
 
 
     /**
+     * Apply the virtual converters to the all properties.
      *
-     * @param iterable $config
+     * Recommended placements:
+     *  - `__clone()`
+     *  - `update()`
+     *
      * @return void
      */
-    public function update($config)
+    protected function applyVirtual()
     {
-        // TODO Should probably just let this throw an error here.
-        if (!method_exists(parent::class, 'update')) return;
-
-        // Run the regular update first.
-        parent::update($config);
-
         // Now run through the virtual stuff.
         $virtual = $this->virtual();
 
-        foreach ($config as $key => $item) {
-            $setter = $virtual[$key] ?? null;
-            if (!$setter) continue;
-            $setter($item);
+        foreach ($virtual as $key => $fn) {
+            $fn($this->$key);
         }
     }
 }

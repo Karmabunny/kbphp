@@ -7,6 +7,7 @@
 use karmabunny\kb\Collection;
 use karmabunny\kb\UpdateStrictTrait;
 use karmabunny\kb\UpdateTidyTrait;
+use karmabunny\kb\UpdateVirtualTrait;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -76,6 +77,7 @@ final class CollectionTest extends TestCase {
             'empty' => null,
         ]);
 
+        /** @var Iterator */
         $iterator = $thingo->getIterator();
 
         $this->assertEquals(true, $iterator->valid());
@@ -183,6 +185,31 @@ final class CollectionTest extends TestCase {
             $this->assertStringContainsString('more_bad', $exception->getMessage());
         }
     }
+
+
+    public function testVirtualSetters()
+    {
+        $thing = new ThingoVirtual([
+            'name' => 'good',
+            'thing' => 'here',
+        ]);
+
+        $this->assertEquals('OH LOOK - here', $thing->thing);
+
+        $thing = new ThingoTidy([
+            'name' => 'good',
+            'thing' => 'here',
+        ]);
+
+        $this->assertEquals('HEY - here', $thing->thing);
+
+        $thing = new ThingoStrict([
+            'name' => 'good',
+            'thing' => 'here',
+        ]);
+
+        $this->assertEquals('NEAT - here', $thing->thing);
+    }
 }
 
 
@@ -237,12 +264,66 @@ class Thingo extends Collection {
 
 class ThingoTidy extends Collection {
     use UpdateTidyTrait;
+    use UpdateVirtualTrait;
 
     public $name;
+
+    public $thing;
+
+    public function virtual(): array
+    {
+        return [
+            'thing' => [$this, 'setThing'],
+        ];
+    }
+
+    public function setThing($thing)
+    {
+        if ($thing === null) return;
+        $this->thing = 'HEY - ' . $thing;
+    }
 }
 
 class ThingoStrict extends Collection {
     use UpdateStrictTrait;
+    use UpdateVirtualTrait;
 
     public $name;
+
+    public $thing;
+
+    public function virtual(): array
+    {
+        return [
+            'thing' => [$this, 'setThing'],
+        ];
+    }
+
+    public function setThing($thing)
+    {
+        if ($thing === null) return;
+        $this->thing = 'NEAT - ' . $thing;
+    }
+}
+
+
+class ThingoVirtual extends Collection {
+    use UpdateVirtualTrait;
+
+    public $name;
+
+    public $thing;
+
+    public function virtual(): array
+    {
+        return [
+            'thing' => [$this, 'setThing'],
+        ];
+    }
+
+    public function setThing($thing)
+    {
+        if ($thing === null) return;
+        $this->thing = 'OH LOOK - ' . $thing;
+    }
 }
