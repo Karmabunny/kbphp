@@ -92,7 +92,11 @@ class Cli
             }
         };
 
-        pcntl_async_signals(true);
+        if (function_exists('pcntl_async_signals')) {
+            // phpcs:ignore
+            pcntl_async_signals(true);
+        }
+
         pcntl_signal(SIGINT, $reset);
         pcntl_signal(SIGTERM, $reset);
         pcntl_signal(SIGQUIT, $reset);
