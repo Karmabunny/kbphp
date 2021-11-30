@@ -67,6 +67,9 @@ abstract class Uuid
     /** ITU X.500 DN (in DER text output format) */
     const NS_X500 = '6ba7b814-9dad-11d1-80b4-00c04fd430c8';
 
+    /** Nothing, nil, zero. */
+    const NIL = '00000000-0000-0000-0000-000000000000';
+
 
     /**
      * Get a nil UUID string.
@@ -75,7 +78,7 @@ abstract class Uuid
      */
     public static function nil(): string
     {
-        return '00000000-0000-0000-0000-000000000000';
+        return self::NIL;
     }
 
 
