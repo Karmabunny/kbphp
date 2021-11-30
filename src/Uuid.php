@@ -314,10 +314,11 @@ abstract class Uuid
     private static function getSubNanoTime($lazy = false)
     {
         // Unix timestamp of the epoch (negative int).
-        static $epoch;
-        if (!$epoch) {
-            $epoch = (int) (strtotime(date('1582-10-15')) * 1000 * 1000 * 10);
-        }
+        static $epoch = -122193260600000000;
+
+        // if (!$epoch) {
+        //     $epoch = (int) (strtotime(date('1582-10-15')) * 1000 * 1000 * 10);
+        // }
 
         // Linux nanoseconds, or microtime fallback.
         $time = 0;
