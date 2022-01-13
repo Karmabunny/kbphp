@@ -28,6 +28,7 @@ abstract class Url {
      *
      * @param string $query
      * @return array [key => value]
+     * @throws UrlDecodeException
      */
     public static function decode(string $query): array
     {
