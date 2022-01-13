@@ -7,6 +7,8 @@
 namespace karmabunny\kb;
 
 use JsonException;
+use JsonSerializable;
+use Throwable;
 
 /**
  * Methods for handling JSON.
@@ -71,5 +73,37 @@ abstract class Json
         }
 
         return $out;
+    }
+
+
+    /**
+     * Convert an error/exception into a JSON body.
+     *
+     * @param Throwable $error
+     * @param bool $serialized use JsonSerializable if available.
+     * @return array
+     */
+    public static function error(Throwable $error, $serialized = true): array
+    {
+        // Use the serializable interface.
+        // This may not be desirable if you're using _this helper_ to implement
+        // the error serializable.
+        if ($serialized and $error instanceof JsonSerializable) {
+            return $error->jsonSerialize();
+        }
+
+        return [
+            'message' => $error->getMessage(),
+            'code' => $error->getCode(),
+            'file' => $error->getFile(),
+            'line' => $error->getLine(),
+            'name' => get_class($error),
+            'previous' => (
+                ($previous = $error->getPrevious())
+                ? self::error($previous)
+                : null
+            ),
+            'stack' => $error->getTrace(),
+        ];
     }
 }
