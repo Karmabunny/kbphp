@@ -57,4 +57,18 @@ final class UrlHelperTest extends TestCase {
 
         $this->assertEquals($expected, $actual);
     }
+
+
+    public function testNullParams()
+    {
+        $expected = '/test/ok?param2=0&param3=1';
+        $actual = Url::build([
+            'test', 'ok',
+            'param1' => null,
+            'param2' => false,
+            'param3' => true,
+        ]);
+
+        $this->assertEquals($expected, $actual);
+    }
 }
