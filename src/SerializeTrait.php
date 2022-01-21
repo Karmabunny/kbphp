@@ -23,13 +23,27 @@ trait SerializeTrait
     /**
      * Binary-OR of property types for serialisation.
      *
+     * @deprecated use getSerializedProperties()
+     *
      * @var int
      */
     protected static $SERIALIZE = ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC;
 
 
-    /** @inheritdoc */
-    public function serialize()
+    /**
+     * Get an array of properties to serialize.
+     *
+     * Override this to modify the behaviour of the serializer.
+     *
+     * By default, this returns properties that are:
+     * - public or protected
+     * - not private
+     * - not static
+     * - not implementing `NotSerializable`
+     *
+     * @return mixed[] [string => value]
+     */
+    protected function getSerializedProperties()
     {
         $array = [];
 
@@ -40,14 +54,21 @@ trait SerializeTrait
             if ($property->isStatic()) continue;
 
             $key = $property->getName();
+            $value = $property->getValue($this);
 
-            $value = $this->$key;
             if (is_object($value) and $value instanceof NotSerializable) continue;
 
             $array[$key] = $value;
         }
 
-        return serialize($array);
+        return $array;
+    }
+
+
+    /** @inheritdoc */
+    public function serialize()
+    {
+        return serialize($this->getSerializedProperties());
     }
 
 
