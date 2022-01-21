@@ -154,7 +154,7 @@ abstract class Time
      * @param DateTimeInterface $start
      * @param DateTimeInterface $end
      * @param string $period A date modifier, like '+2 days'
-     * @return Generator<DateTimeInterface[]>
+     * @return Generator<DateTimeInterface[]> [start, end]
      */
     public static function periods(DateTimeInterface $start, DateTimeInterface $end, string $period)
     {
@@ -175,6 +175,20 @@ abstract class Time
 
             $start = $cursor;
         }
+    }
+
+
+    /**
+     * Get a series of dates between these two dates.
+     *
+     * @param DateTimeInterface $start
+     * @param DateTimeInterface $end
+     * @return Generator<DateTimeInterface>
+     */
+    public static function between(DateTimeInterface $start, DateTimeInterface $end)
+    {
+        $periods = self::periods($start, $end, '+1 day');
+        foreach ($periods as [$day]) yield $day;
     }
 
 
