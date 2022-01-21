@@ -24,9 +24,10 @@ trait PropertiesTrait
             $fields = [];
 
             $reflect = new ReflectionClass(static::class);
-            $properties = $reflect->getProperties(ReflectionProperty::IS_PUBLIC ^ ReflectionProperty::IS_STATIC);
+            $properties = $reflect->getProperties(ReflectionProperty::IS_PUBLIC);
 
             foreach ($properties as $property) {
+                if ($property->isStatic()) continue;
                 $fields[] = $property->getName();
             }
         }
