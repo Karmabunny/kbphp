@@ -53,6 +53,10 @@ trait SerializeTrait
         foreach ($properties as $property) {
             if ($property->isStatic()) continue;
 
+            // Fix private/protected access.
+            $property->setAccessible(true);
+
+            // We need to use getValue() so to bypass any __get() magic.
             $key = $property->getName();
             $value = $property->getValue($this);
 
