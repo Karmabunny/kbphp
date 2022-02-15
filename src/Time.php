@@ -102,6 +102,60 @@ abstract class Time
 
 
     /**
+     * Validate + normalize a time string component.
+     *
+     * Is a time-ish looking number and either;
+     *
+     *  - starts with T (24-hour)
+     *  - ends with am/pm (12-hour)
+     *
+     * This should always return a whole time component. So all units will be
+     * updated (hour, minute, second, sub-second) if used in `$date->modify()`.
+     *
+     * That is;
+     * - `T12` will be 12:00:00.000
+     * - `12am` naturally strips minutes/seconds/etc
+     *
+     * @param string|int $time
+     * @return string|null
+     */
+    public static function parseTimeString($time)
+    {
+        // 24 hour time.
+        if (is_int($time)) {
+            return 'T' . str_pad($time, 6, '0', STR_PAD_RIGHT);
+        }
+
+        if (is_string($time)) {
+            // 12-hour time.
+            if (preg_match('/^[0-9:\.]+\s*([ap]\.?m\.?)$/i', $time)) {
+                return $time;
+            }
+
+            $matches = [];
+
+            // 24-hour time.
+            if (preg_match('/^T(\d{1,2})[:\.]?(\d{0,2})[:\.]?(\d{0,2})\.?(\d*)$/', $time, $matches)) {
+
+                [$_, $hour, $minute, $second, $subsecond] = $matches;
+                // We gotta tear up and reconstruct this one.
+                // I want it so a 'T12' will be '12:00:00.000'.
+                $time = 'T';
+                $time .= str_pad(min(24, $hour ?: '0'), 2, '0', STR_PAD_LEFT);
+                $time .= ':' . str_pad(min(60, $minute ?: '0'), 2, '0', STR_PAD_LEFT);
+                $time .= ':' . str_pad(min(60, $second ?: '0'), 2, '0', STR_PAD_LEFT);
+                $time .= '.' . str_pad($subsecond ?: '0', 3, '0', STR_PAD_RIGHT);
+
+                return $time;
+            }
+        }
+
+        // No good.
+        return null;
+    }
+
+
+    /**
      *
      * Any date interface into a datetime.
      *

@@ -161,4 +161,43 @@ final class TimeTest extends TestCase {
         ];
         $this->assertEquals($expected, $actual);
     }
+
+
+    public function testTimeParse()
+    {
+        $actual = Time::parseTimeString('1am');
+        $expected = '1am';
+
+        $this->assertEquals($expected, $actual);
+
+        $date = (new DateTime('2020-10-10'))->modify($actual);
+        $this->assertEquals('2020-10-10 01:00:00', $date->format('Y-m-d H:i:s'));
+
+
+        $actual = Time::parseTimeString('03:31:45 pm');
+        $expected = '03:31:45 pm';
+
+        $this->assertEquals($expected, $actual);
+
+        $date = (new DateTime('2020-10-10'))->modify($actual);
+        $this->assertEquals('2020-10-10 15:31:45', $date->format('Y-m-d H:i:s'));
+
+
+        $actual = Time::parseTimeString('T1345');
+        $expected = 'T13:45:00.000';
+
+        $this->assertEquals($expected, $actual);
+
+        $date = (new DateTime('2020-10-10'))->modify($actual);
+        $this->assertEquals('2020-10-10 13:45:00', $date->format('Y-m-d H:i:s'));
+
+
+        $actual = Time::parseTimeString('T1.45.57.123123');
+        $expected = 'T01:45:57.123123';
+
+        $this->assertEquals($expected, $actual);
+
+        $date = (new DateTime('2020-10-10'))->modify($actual);
+        $this->assertEquals('2020-10-10 01:45:57.123123', $date->format('Y-m-d H:i:s.u'));
+    }
 }
