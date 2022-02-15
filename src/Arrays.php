@@ -101,6 +101,14 @@ abstract class Arrays
      *
      * For a more straight-forward API, see `filledKeys()`.
      *
+     * ```
+     * Arrays::fill(5, function(&$index) {
+     *     $index = 4 - $index;
+     *     return $index;
+     * });
+     * // => [4 => 0, 3 => 1, 2 => 2, 1 => 3, 0 => 4]
+     * ```
+     *
      * @param int $size
      * @param callable $fn (&$index) => $value
      * @return array
@@ -122,6 +130,11 @@ abstract class Arrays
      *
      * Each index is provided as an argument.
      * The callable is expected to return an array pair [key, value].
+     *
+     * ```
+     * Arrays::fillKeyed(5, fn($index) => [4 - $index, $index]);
+     * // => [4 => 0, 3 => 1, 2 => 2, 1 => 3, 0 => 4]
+     * ```
      *
      * @param int $size
      * @param callable $fn ($index) => [$key, $value]
@@ -148,7 +161,7 @@ abstract class Arrays
      * Arrays::find($stuff, fn($item) => $item->id === 100);
      *
      * // Or maybe:
-     * Array::find($stuff, fn($item, key) => $key === 12 and $item->name === 12);
+     * Arrays::find($stuff, fn($item, key) => $key === 12 and $item->name === 12);
      * ```
      *
      * @param array $array
@@ -177,7 +190,7 @@ abstract class Arrays
      * ```
      *
      * @param array $array
-     * @param callable $fn
+     * @param callable $fn (sum, item, key) => array
      * @param mixed|null $initial
      * @return mixed
      */
@@ -494,8 +507,6 @@ abstract class Arrays
     /**
      * Load a php config file.
      *
-     * Note, this will fail if the file doesn't exist.
-     *
      * A config can be in one of two forms.
      *
      * 1. Create a `$config` variable:
@@ -510,6 +521,9 @@ abstract class Arrays
      *     'key' => 'value',
      * ];
      * ```
+     *
+     * Note, a missing file is indistinguishable from an invalid file. Be sure
+     * to use file_exists() first, if you care about that sort of thing.
      *
      * @param string $path
      * @return array|null `null` if the file is invalid or missing.
