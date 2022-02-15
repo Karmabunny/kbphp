@@ -226,6 +226,32 @@ abstract class Arrays
 
 
     /**
+     * Like `array_map` but includes a 'key' argument.
+     *
+     * ```
+     * Arrays::mapKeys($list, fn($item, $key) => [$key, $item]);
+     * ```
+     *
+     * No, this cannot perform a zip.
+     *
+     * @param array $array
+     * @param callable $fn (item, key) => [key, item]
+     * @return array
+     */
+    static function mapKeys(array $array, $fn): array
+    {
+        $items = [];
+
+        foreach ($array as $key => $item) {
+            [$key, $item] = $fn($item, $key);
+            $items[$key] = $item;
+        }
+
+        return $items;
+    }
+
+
+    /**
      * Flat arrays, with optional key support.
      *
      * @param array $array

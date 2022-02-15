@@ -155,6 +155,28 @@ final class ArraysTest extends TestCase {
     }
 
 
+    public function testMapKeys()
+    {
+        $array = [
+            'aaa' => 123,
+            'xxx' => 567,
+            'zzz' => 789,
+        ];
+
+        $expected = [
+            'prefix_aaa' => 'aaa123',
+            'prefix_xxx' => 'xxx567',
+            'prefix_zzz' => 'zzz789',
+        ];
+
+        $actual = Arrays::mapKeys($array, function($item, $key) {
+            return ['prefix_' . $key, $key . $item];
+        });
+
+        $this->assertEquals($expected, $actual);
+    }
+
+
     public function testFlattenNoKeys()
     {
         $actual = Arrays::flatten([
