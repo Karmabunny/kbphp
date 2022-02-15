@@ -19,6 +19,9 @@ use Traversable;
  * it somewhere without it getting in the way. It just lives within the model
  * as it travels through your code.
  *
+ * Provided you're using the typical serialization provided by SerializeTrait,
+ * the internal cache array should not be stored at any point.
+ *
  * @package karmabunny\kb
  */
 trait CachedHelperTrait
@@ -32,15 +35,23 @@ trait CachedHelperTrait
      *
      * Maybe you've mutated something. Go on. Trash it.
      *
+     * Provide the `key` parameter to selectively delete a cached item.
+     *
      * Recommended placements:
      * - `__clone()`
-     * - `Collection::update()`
+     * - `DataObject::update()`
      *
+     * @param string|null $key
      * @return void
      */
-    protected function clearCache()
+    protected function clearCache(string $key = null)
     {
-        $this->_cache = [];
+        if ($key) {
+            unset($this->_cache[$key]);
+        }
+        else {
+            $this->_cache = [];
+        }
     }
 
 
