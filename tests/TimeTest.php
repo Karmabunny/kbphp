@@ -165,39 +165,57 @@ final class TimeTest extends TestCase {
 
     public function testTimeParse()
     {
+        // Natural short time.
         $actual = Time::parseTimeString('1am');
         $expected = '1am';
 
-        $this->assertEquals($expected, $actual);
-
         $date = (new DateTime('2020-10-10'))->modify($actual);
+        $this->assertEquals($expected, $actual);
         $this->assertEquals('2020-10-10 01:00:00', $date->format('Y-m-d H:i:s'));
 
-
+        // Natural long time.
         $actual = Time::parseTimeString('03:31:45 pm');
         $expected = '03:31:45 pm';
 
+        $date = (new DateTime('2020-10-10'))->modify($actual);
         $this->assertEquals($expected, $actual);
+        $this->assertEquals('2020-10-10 15:31:45', $date->format('Y-m-d H:i:s'));
+
+        // Floats that looks like integers are ok.
+        $actual = Time::parseTimeString(1300.0);
+        $expected = 'T130000';
 
         $date = (new DateTime('2020-10-10'))->modify($actual);
-        $this->assertEquals('2020-10-10 15:31:45', $date->format('Y-m-d H:i:s'));
+        $this->assertEquals($expected, $actual);
+        $this->assertEquals('2020-10-10 13:00:00', $date->format('Y-m-d H:i:s'));
 
 
         $actual = Time::parseTimeString('T1345');
-        $expected = 'T13:45:00.000';
+        $expected = 'T13:45:00';
 
-        $this->assertEquals($expected, $actual);
+        // Number looking strings are ok.
+        // Single digits are padded left before they're padded right.
+        $actual = Time::parseTimeString('1');
+        $expected = 'T010000';
 
         $date = (new DateTime('2020-10-10'))->modify($actual);
+        $this->assertEquals($expected, $actual);
+        $this->assertEquals('2020-10-10 01:00:00', $date->format('Y-m-d H:i:s'));
+
+        // 'T' prefixes are recommended.
+        $actual = Time::parseTimeString('T1345');
+        $expected = 'T13:45:00';
+
+        $date = (new DateTime('2020-10-10'))->modify($actual);
+        $this->assertEquals($expected, $actual);
         $this->assertEquals('2020-10-10 13:45:00', $date->format('Y-m-d H:i:s'));
 
-
+        // Subseconds are good too.
         $actual = Time::parseTimeString('T1.45.57.123123');
         $expected = 'T01:45:57.123123';
 
-        $this->assertEquals($expected, $actual);
-
         $date = (new DateTime('2020-10-10'))->modify($actual);
+        $this->assertEquals($expected, $actual);
         $this->assertEquals('2020-10-10 01:45:57.123123', $date->format('Y-m-d H:i:s.u'));
     }
 }

@@ -104,8 +104,9 @@ abstract class Time
     /**
      * Validate + normalize a time string component.
      *
-     * Is a time-ish looking number and either;
+     * A time-ish string is one of:
      *
+     *  - an integer (24-hour)
      *  - starts with T (24-hour)
      *  - ends with am/pm (12-hour)
      *
@@ -113,7 +114,8 @@ abstract class Time
      * updated (hour, minute, second, sub-second) if used in `$date->modify()`.
      *
      * That is;
-     * - `T12` will be 12:00:00.000
+     * - `14` will be 'T14:00:00'
+     * - `T12:34:56.789` will be 'T12:34:56'
      * - `12am` naturally strips minutes/seconds/etc
      *
      * @param string|int $time
@@ -122,12 +124,21 @@ abstract class Time
     public static function parseTimeString($time)
     {
         // 24 hour time.
-        if (is_int($time)) {
+        // hours: 10 -> T100000 (10 am)
+        // minutes: 1020 -> T102000 (10:20 am)
+        // seconds: 102030 -> T102030 (10:20:30 am)
+        if (is_numeric($time) and (int) $time == (float) $time) {
+
+            // One would naturally expect '1' to make '1am' not '10am'.
+            if ($time < 10) {
+                $time = '0' . $time;
+            }
+
             return 'T' . str_pad($time, 6, '0', STR_PAD_RIGHT);
         }
 
         if (is_string($time)) {
-            // 12-hour time.
+            // 12-hour time, like: 12 pm, 12:00pm, 1:30am.
             if (preg_match('/^[0-9:\.]+\s*([ap]\.?m\.?)$/i', $time)) {
                 return $time;
             }
@@ -138,13 +149,16 @@ abstract class Time
             if (preg_match('/^T(\d{1,2})[:\.]?(\d{0,2})[:\.]?(\d{0,2})\.?(\d*)$/', $time, $matches)) {
 
                 [$_, $hour, $minute, $second, $subsecond] = $matches;
-                // We gotta tear up and reconstruct this one.
-                // I want it so a 'T12' will be '12:00:00.000'.
+                // We gotta tear up and reconstruct this one. I want it so
+                // a 'T12' will be '12:00:00' with an optional subsecond.
                 $time = 'T';
                 $time .= str_pad(min(24, $hour ?: '0'), 2, '0', STR_PAD_LEFT);
                 $time .= ':' . str_pad(min(60, $minute ?: '0'), 2, '0', STR_PAD_LEFT);
                 $time .= ':' . str_pad(min(60, $second ?: '0'), 2, '0', STR_PAD_LEFT);
-                $time .= '.' . str_pad($subsecond ?: '0', 3, '0', STR_PAD_RIGHT);
+
+                if ($subsecond) {
+                    $time .= '.' . str_pad($subsecond ?: '0', 3, '0', STR_PAD_RIGHT);
+                }
 
                 return $time;
             }
