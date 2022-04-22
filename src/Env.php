@@ -235,7 +235,19 @@ class Env
             $env = @file_get_contents('/proc/1/cgroup');
         }
 
-        return $env and stripos($env, 'docker') !== false;
+        if ($env and stripos($env, 'docker') !== false) {
+            return true;
+        }
+
+        if (file_exists('/.dockerenv')) {
+            return true;
+        }
+
+        if (file_exists('/.dockerinit')) {
+            return true;
+        }
+
+        return false;
     }
 
 
