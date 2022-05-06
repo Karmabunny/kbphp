@@ -154,10 +154,12 @@ class Text {
      */
     public static function similarity(string $str1, string $str2, $flags = self::NORMALIZE_ALL)
     {
-        self::$_map = [];
-        $str1 = self::normalize($str1, $flags);
-        $str2 = self::normalize($str2, $flags);
-        self::$_map = null;
+        if ($flags) {
+            self::$_map = [];
+            $str1 = self::normalize($str1, $flags);
+            $str2 = self::normalize($str2, $flags);
+            self::$_map = null;
+        }
 
         $percent = 0;
         similar_text($str1, $str2, $percent);
@@ -175,10 +177,12 @@ class Text {
      */
     public static function compare(string $str1, string $str2, $flags = self::NORMALIZE_ALL)
     {
-        self::$_map = [];
-        $str1 = self::normalize($str1, $flags);
-        $str2 = self::normalize($str2, $flags);
-        self::$_map = null;
+        if ($flags) {
+            self::$_map = [];
+            $str1 = self::normalize($str1, $flags);
+            $str2 = self::normalize($str2, $flags);
+            self::$_map = null;
+        }
 
         // This function should do the -1 response automatically
         // But it appears to be throwing an exception instead
@@ -199,10 +203,12 @@ class Text {
      */
     public static function similar(string $str1, string $str2, $flags = self::NORMALIZE_ALL)
     {
-        self::$_map = [];
-        $str1 = self::normalize($str1, $flags);
-        $str2 = self::normalize($str2, $flags);
-        self::$_map = null;
+        if ($flags) {
+            self::$_map = [];
+            $str1 = self::normalize($str1, $flags);
+            $str2 = self::normalize($str2, $flags);
+            self::$_map = null;
+        }
 
         $distance = self::compare($str1, $str2, 0);
 
