@@ -57,7 +57,13 @@ class Text {
     /**
      * Normalize a string with a set of rules.
      *
+     * Flags:
+     * - NORMALIZE_CASE
+     * - NORMALIZE_ALPHA
+     * - NORMALIZE_MULTIBYTE
      *
+     * Note the output of this function isn't useful for much else but the
+     * similarity/compare functions.
      *
      * @param string $str
      * @param int $flags
