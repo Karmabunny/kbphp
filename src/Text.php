@@ -241,4 +241,64 @@ class Text {
         // Not similar enough.
         return false;
     }
+
+
+    /**
+     * Find something similar from a list of options.
+     *
+     * Great for a 'did you mean?' type of thing.
+     *
+     * @param string $needle a fuzzy string
+     * @param string[] $haystack set of possible options
+     * @param int $max limit results
+     * @param int $flags one of the normalisation flags
+     * @return string[] subset of 'options' in order of closeness
+     */
+    public static function find(string $needle, array $haystack, $max = 5, $flags = self::NORMALIZE_ALL): array
+    {
+        self::$_map = [];
+
+        $norm_needle = self::normalize($needle, $flags);
+        $results = [];
+
+        foreach ($haystack as $item) {
+            // Exact match! Dump everything else!
+            if ($needle === $item) {
+                $results = [];
+                $results[0] = $item;
+                break;
+            }
+
+            $norm_item = self::normalize($item, $flags);
+            $distance = self::compare($norm_needle, $norm_item, 0);
+
+            // Skip on error.
+            if ($distance < 0) continue;
+
+            // Check for big-ness.
+            $len = (strlen($norm_needle) + strlen($item)) / 2;
+            $max_lev = ceil($len / self::$DISTANCE_FACTOR);
+            if ($distance > $max_lev) continue;
+
+            // Prevent overrides.
+            while (isset($results[$distance])) {
+                $distance++;
+            }
+
+            // Store it.
+            $results[$distance] = $item;
+        }
+
+        self::$_map = null;
+
+        // Trim first for a faster sort.
+        $results = array_slice($results, 0, $max, true);
+
+        ksort($results, SORT_NUMERIC);
+
+        // Strip keys.
+        $results = array_values($results);
+
+        return $results;
+    }
 }

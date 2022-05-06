@@ -76,4 +76,51 @@ final class TextTest extends TestCase
             $this->assertEquals($expected, $actual, "'{$str1}' like '{$str2}'");
         }
     }
+
+
+    public function testFind()
+    {
+        $options = [
+            'db/migrate',
+            'modules/cron/update-logs',
+            'modules/cron/delete-files',
+            'modules/cron/delete-logs',
+            'db/seed',
+            'db/feed',
+        ];
+
+        // Exact match.
+        $actual = Text::find('db/seed', $options);
+        $expected = [ 'db/seed'];
+        $this->assertEquals($expected, $actual);
+
+        // Too many characters?
+        $actual = Text::find('db/seeed', $options);
+        $expected = [ 'db/seed' ];
+
+        $this->assertEquals($expected, $actual);
+
+        // Short string only get a max 1 or 2 distance.
+        $actual = Text::find('db/deed', $options);
+        $expected = [
+            'db/seed',
+            'db/feed',
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        // Longer strings get more leeway.
+        $actual = Text::find('modules/cron/uppete-logs', $options);
+        $expected = [
+            'modules/cron/update-logs',
+            'modules/cron/delete-logs',
+        ];
+        $this->assertEquals($expected, $actual);
+
+        // But not _too_ much leeway.
+        $actual = Text::find('modules/cron/update-files', $options);
+        $expected = [ 'modules/cron/update-logs' ];
+
+        $this->assertEquals($expected, $actual);
+    }
 }
