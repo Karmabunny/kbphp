@@ -303,7 +303,9 @@ class Text {
         self::$_map = null;
 
         // Trim first for a faster sort.
-        $results = array_slice($results, 0, $max, true);
+        if ($max) {
+            $results = array_slice($results, 0, $max, true);
+        }
 
         ksort($results, SORT_NUMERIC);
 
