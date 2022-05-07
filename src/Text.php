@@ -33,6 +33,11 @@ class Text {
      */
     const NORMALIZE_ALL = 0x1 | 0x2 | 0x4;
 
+    /**
+     * Perform finds only against the needle length.
+     */
+    const FIND_STARTS_WITH = 0x1000;
+
 
     /** @var string */
     static $ENCODING = 'UTF-8';
@@ -258,6 +263,7 @@ class Text {
     {
         self::$_map = [];
 
+        $needle_length = strlen($needle);
         $norm_needle = self::normalize($needle, $flags);
         $results = [];
 
@@ -270,13 +276,18 @@ class Text {
             }
 
             $norm_item = self::normalize($item, $flags);
+
+            if ($flags & self::FIND_STARTS_WITH) {
+                $norm_item = substr($norm_item, 0, $needle_length);
+            }
+
             $distance = self::compare($norm_needle, $norm_item, 0);
 
             // Skip on error.
             if ($distance < 0) continue;
 
             // Check for big-ness.
-            $len = (strlen($norm_needle) + strlen($item)) / 2;
+            $len = ($needle_length + strlen($item)) / 2;
             $max_lev = ceil($len / self::$DISTANCE_FACTOR);
             if ($distance > $max_lev) continue;
 
@@ -300,5 +311,20 @@ class Text {
         $results = array_values($results);
 
         return $results;
+    }
+
+
+    /**
+     *
+     * @param string $needle
+     * @param array $haystack
+     * @param int $max
+     * @param int $flags
+     * @return array
+     */
+    public static function startsWith(string $needle, array $haystack, $max = 5, $flags = self::NORMALIZE_ALL): array
+    {
+        $flags |= self::FIND_STARTS_WITH;
+        return self::find($needle, $haystack, $max, $flags);
     }
 }

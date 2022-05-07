@@ -122,5 +122,28 @@ final class TextTest extends TestCase
         $expected = [ 'modules/cron/update-logs' ];
 
         $this->assertEquals($expected, $actual);
+
+        // Can also add a flag for 'starts with'.
+        $flags = Text::NORMALIZE_ALL;
+        $flags |= Text::FIND_STARTS_WITH;
+
+        $actual = Text::find('modules', $options, 5, $flags);
+        $expected = [
+            'modules/cron/update-logs',
+            'modules/cron/delete-files',
+            'modules/cron/delete-logs',
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        // It can handle typos too.
+        // Also has a shorthand.
+        $actual = Text::startsWith('moodles/cron', $options);
+        $expected = [
+            'modules/cron/update-logs',
+            'modules/cron/delete-files',
+            'modules/cron/delete-logs',
+        ];
+        $this->assertEquals($expected, $actual);
     }
 }
