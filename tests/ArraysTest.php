@@ -254,6 +254,33 @@ final class ArraysTest extends TestCase {
     }
 
 
+    public function testFlattenKeys()
+    {
+        $nested = [
+            'root' => [
+                'key1' => [
+                    'deep' => 'value',
+                    'hello' => 'world',
+                ],
+                'key2' => 'ok',
+            ],
+            'second' => 'neat',
+            'third' => [ 'key1' => ['deep' => 'last'] ],
+        ];
+
+        $expected = [
+            'root.key1.deep' => 'value',
+            'root.key1.hello' => 'world',
+            'root.key2' => 'ok',
+            'second' => 'neat',
+            'third.key1.deep' => 'last',
+        ];
+
+        $actual = Arrays::flattenKeys($nested);
+        $this->assertEquals($expected, $actual);
+    }
+
+
     public function testIsNumeric()
     {
         $this->assertTrue(Arrays::isNumeric([

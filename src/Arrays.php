@@ -279,6 +279,50 @@ abstract class Arrays
 
 
     /**
+     * Flatten the keys of an array with a 'glue'.
+     *
+     * For example:
+     * ```
+     * [ 'abc' => [
+     *     'def' => 123,
+     *     'ghi' => 567,
+     * ]]
+     * ```
+     *
+     * Becomes:
+     * ```
+     * [
+     *     'abc.def' => 123,
+     *     'abc.ghi' => 567,
+     * ]
+     * ```
+     *
+     * @param array $array
+     * @param string $glue
+     * @return array
+     */
+    static function flattenKeys(array $array, string $glue = '.'): array
+    {
+        $flat = [];
+
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $value = self::flattenKeys($value, $glue);
+
+                foreach ($value as $subkey => $subvalue) {
+                    $flat[$key . $glue . $subkey] = $subvalue;
+                }
+            }
+            else {
+                $flat[$key] = $value;
+            }
+        }
+
+        return $flat;
+    }
+
+
+    /**
      * Make everything an array, all the way down.
      *
      * This converts any nested arrayables to arrays.
