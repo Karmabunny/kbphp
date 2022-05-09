@@ -306,11 +306,28 @@ abstract class Arrays
         $flat = [];
 
         foreach ($array as $key => $value) {
-            if (is_array($value)) {
-                $value = self::flattenKeys($value, $glue);
+            if (!is_numeric($key) and is_array($value)) {
 
-                foreach ($value as $subkey => $subvalue) {
-                    $flat[$key . $glue . $subkey] = $subvalue;
+                // Recurse in!
+                $subflat = self::flattenKeys($value, $glue);
+                $numeric = false;
+
+                foreach ($subflat as $subkey => $subvalue) {
+                    // Our outer value has numeric fields, we'll use that later.
+                    // Don't flatten it, but keep going - there might be other
+                    // non-numeric keys in here.
+                    if (is_numeric($subkey)) {
+                        $numeric = true;
+                    }
+                    else {
+                        $flat[$key . $glue . $subkey] = $subvalue;
+                    }
+                }
+
+                // Got some numeric keys in there so tack on the OG value.
+                // We don't want to flatten any keys in the value itself.
+                if ($numeric) {
+                    $flat[$key] = $value;
                 }
             }
             else {

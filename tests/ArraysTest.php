@@ -266,6 +266,30 @@ final class ArraysTest extends TestCase {
             ],
             'second' => 'neat',
             'third' => [ 'key1' => ['deep' => 'last'] ],
+            'fourth' => [
+                'thing' => [
+                    'abc',
+                    'def',
+                    'ghi',
+                    'oops' => [
+                        'hi' => 'there',
+                    ],
+                ],
+                'list' => [
+                    [
+                        'type' => 'object',
+                        'name' => 'first',
+                        'prop1' => 111,
+                        'prop2' => 222,
+                    ],
+                    [
+                        'type' => 'object',
+                        'name' => 'second',
+                        'prop1' => 333,
+                        'prop2' => 444,
+                    ],
+                ],
+            ],
         ];
 
         $expected = [
@@ -274,6 +298,9 @@ final class ArraysTest extends TestCase {
             'root.key2' => 'ok',
             'second' => 'neat',
             'third.key1.deep' => 'last',
+            'fourth.thing' => $nested['fourth']['thing'],
+            'fourth.thing.oops.hi' => 'there',
+            'fourth.list' => $nested['fourth']['list'],
         ];
 
         $actual = Arrays::flattenKeys($nested);
