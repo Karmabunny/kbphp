@@ -340,6 +340,68 @@ abstract class Arrays
 
 
     /**
+     * Explode a flat array into a nested array based on the keys.
+     *
+     * For example:
+     * ```
+     * // From this:
+     * [ 'key.sub.value' => $item ]
+     *
+     * // To this:
+     * [ 'key' => [ 'sub' => [ 'value' => $item ] ] ]
+     * ```
+     *
+     * @param array $array
+     * @param string $glue
+     * @param string|int $index
+     * @return array
+     */
+    static function explodeKeys(array $array, string $glue = '.', $index = ''): array
+    {
+        $output = [];
+
+        // This whole thing is _quite_ weird. I'm sure there's a more readable
+        // approach using recursion or whatever. But somehow this works.
+        foreach ($array as $key => $value) {
+            if (is_numeric($key)) continue;
+
+            // Split on glue.
+            $parts = explode($glue, trim($key, $glue));
+
+            // Start from the root.
+            $cursor = &$output;
+
+            foreach ($parts as $part) {
+                /** @var array|string|null $item */
+                $item = $cursor[$part] ?? null;
+
+                // We've seen this (as an index) - convert it to an array.
+                if ($item and !is_array($item)) {
+                    $item = [$index => $item];
+                }
+
+                // Create/replace the [key => group] and iterate up.
+                $cursor[$part] = $item ?? [];
+                $cursor = &$cursor[$part];
+            }
+
+            // Found a leaf, tack on the rule.
+            if (empty($cursor)) {
+                $cursor = $value;
+            }
+        }
+
+        // A root index key is a bit of an edge-case.
+        if ($index !== '' and isset($output[''])) {
+            $output = [ $index => $output[''] ] + $output;
+            unset($output['']);
+        }
+
+        return $output;
+    }
+
+
+    /**
      * Make everything an array, all the way down.
      *
      * This converts any nested arrayables to arrays.

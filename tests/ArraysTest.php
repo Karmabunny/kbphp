@@ -7,6 +7,8 @@
 use karmabunny\kb\Arrays;
 use PHPUnit\Framework\TestCase;
 
+use function PHPUnit\Framework\assertEquals;
+
 /**
  * Test the Arrays helpers.
  */
@@ -323,6 +325,54 @@ final class ArraysTest extends TestCase {
         ];
 
         $actual = Arrays::flattenKeys($nested, '/');
+        $this->assertEquals($expected, $actual);
+    }
+
+
+    public function testExplodeKeys()
+    {
+        $array = [
+            '' => 'value0',
+            'root' => 'value1',
+            'root/thing1' => 'value2',
+            'root/thing2' => 'value3',
+            'another/hello' => 'value4',
+            'another/world' => 'value5',
+            'one' => 'value6',
+            'one/two' => 'value7',
+            'one/two/three' => 'value8',
+            'one/two/three/four' => 'value9',
+            'one/two/three/five' => 'value10',
+            'solo' => 'value11',
+        ];
+
+        $actual = Arrays::explodeKeys($array, '/', '_');
+
+        $expected = [
+            '_' => 'value0',
+            'root' => [
+                '_' => 'value1',
+                'thing1' => 'value2',
+                'thing2' => 'value3',
+            ],
+            'another' => [
+                'hello' => 'value4',
+                'world' => 'value5',
+            ],
+            'one' => [
+                '_' => 'value6',
+                'two' => [
+                    '_' => 'value7',
+                    'three' => [
+                        '_' => 'value8',
+                        'four' => 'value9',
+                        'five' => 'value10',
+                    ],
+                ],
+            ],
+            'solo' => 'value11',
+        ];
+
         $this->assertEquals($expected, $actual);
     }
 
