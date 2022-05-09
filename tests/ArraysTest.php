@@ -305,6 +305,25 @@ final class ArraysTest extends TestCase {
 
         $actual = Arrays::flattenKeys($nested);
         $this->assertEquals($expected, $actual);
+
+        $nested = [
+            'root' => [
+                'key1' => [
+                    'deep' => 'value',
+                    'hello' => 'world',
+                ],
+                'key2' => 'ok',
+            ],
+        ];
+
+        $expected = [
+            'root/key1/deep' => 'value',
+            'root/key1/hello' => 'world',
+            'root/key2' => 'ok',
+        ];
+
+        $actual = Arrays::flattenKeys($nested, '/');
+        $this->assertEquals($expected, $actual);
     }
 
 
