@@ -29,4 +29,25 @@ final class ReflectTest extends TestCase
 
         $this->assertEquals($expected, $classes);
     }
+
+
+    public function testDocDescription()
+    {
+        $reflect = new \ReflectionClass(RandoDoc::class);
+        $doc = $reflect->getDocComment();
+
+        $expected = "Test this stuff.\n\nI can still have **markdown** if I want.";
+        $actual = Reflect::getDocDescription($doc ?: '');
+
+        $this->assertEquals($expected, $actual);
+    }
 }
+
+/**
+ * Test this stuff.
+ *
+ * I can still have **markdown** if I want.
+ *
+ * @package blah/blah/blah
+ */
+class RandoDoc {}

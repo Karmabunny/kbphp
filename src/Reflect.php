@@ -370,4 +370,28 @@ abstract class Reflect
 
         return $parameters;
     }
+
+
+    /**
+     * Get a tidy copy of a doc comment.
+     *
+     * This strips any asterisks, doctype parameters, and newlines.
+     *
+     * @param string $comment
+     * @return string
+     */
+    public static function getDocDescription(string $comment): string
+    {
+        // starts with /*
+        // ends with */
+        // tab *
+        // @...\n
+        $comment = preg_replace(
+            ['/^\/\*+/', '/\*+\/$/', '/^[ \t]*\*+[ \t]*/m', '/^@.*\n/m'],
+            '',
+            $comment
+        );
+
+        return trim($comment);
+    }
 }
