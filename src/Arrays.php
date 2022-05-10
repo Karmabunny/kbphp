@@ -73,10 +73,15 @@ abstract class Arrays
 
 
     /**
-     * Create a reversed iterator of an array.
+     * Create a reversed iterator of an array/traversable.
+     *
+     * Iterators will likely need implement SeekableIterator.
      *
      * Useful for _big_ arrays because `array_reverse()` creates a copy,
-     * whereas this one does not.
+     * whereas this one does not. *Note: memory consumption is completely
+     * untested and unfounded.*
+     *
+     * TBH not entirely sure why I wrote this.
      *
      * @param array|Traversable $array
      * @return Generator
