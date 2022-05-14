@@ -212,7 +212,8 @@ abstract class Log {
     {
         while (ob_get_level() > 0) ob_end_clean();
         header('content-type: text/plain');
-        die(self::stringify($thing));
+        echo self::stringify($thing);
+        die;
     }
 
 
