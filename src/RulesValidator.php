@@ -430,7 +430,7 @@ class RulesValidator implements Validator
     {
         if (is_array($val) and count($val) == 0) {
             return true;
-        } else if ($val == '') {
+        } else if (!is_numeric($val) and $val == '') {
             return true;
         }
         return false;
