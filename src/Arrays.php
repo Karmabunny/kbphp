@@ -425,6 +425,8 @@ abstract class Arrays
                 $item = $item->toArray();
             }
         }
+        unset($item);
+
         return $array;
     }
 
