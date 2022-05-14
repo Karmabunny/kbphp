@@ -88,6 +88,39 @@ abstract class Log {
 
 
     /**
+     *
+     * @param mixed $message
+     * @param int $level
+     * @param string $category
+     * @param int $timestamp
+     * @return string
+     */
+    public static function print($message, $level, $category, $timestamp)
+    {
+        echo self::format($message, $level, $category, $timestamp);
+    }
+
+
+    /**
+     *
+     * @param mixed $message
+     * @param int $level
+     * @param string $category
+     * @param int $timestamp
+     * @return string
+     */
+    public static function format($message, $level, $category, $timestamp)
+    {
+        $line = '';
+        $line .= '[' . date('c', $category) . ']';
+        $line .= '[' . self::name($level) . ']';
+        $line .= '[' . $category . ']';
+        $line .= ' ' . self::stringify($message);
+        return trim($line);
+    }
+
+
+    /**
      * An attempt to convert things into strings.
      *
      * @param mixed $value
