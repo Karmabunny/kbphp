@@ -35,8 +35,34 @@ abstract class Job implements Loggable
     {
         $this->start = time();
         $this->config = $config;
+        $this->validate($config);
+    }
 
-        $valid = new RulesValidator($this->config, $this->rules());
+
+    /**
+     * Update the job config and validate.
+     *
+     * @param array $config
+     * @return void
+     * @throws ValidationException
+     */
+    public function update(array $config)
+    {
+        $this->validate($config);
+        $this->config = $config;
+    }
+
+
+    /**
+     * Validate a config.
+     *
+     * @param array $config
+     * @return void
+     * @throws ValidationException
+     */
+    protected function validate(array $config)
+    {
+        $valid = new RulesValidator($config, $this->rules());
         if (!$valid->validate()) {
             throw (new ValidationException)
                 ->addErrors($valid->getErrors());
