@@ -225,9 +225,10 @@ abstract class Log {
      *
      * @param string $path Write the file here (append mode)
      * @param int $cache_size Only write to disk every 'x' messages
+     * @param int[]|int $levels Filtering; only log on these levels
      * @return callable (message, level, category)
      */
-    public static function createFileLogger(string $path, $cache_size = 5)
+    public static function createFileLogger(string $path, $cache_size = 5, $levels = null)
     {
         // A happy little closure value.
         $cache = [];
@@ -242,11 +243,18 @@ abstract class Log {
             $cache = null;
         });
 
+        if (!is_array($levels)) {
+            $levels = [$levels];
+        }
+
         return function ($message, $level, $category, $timestamp)
-                use (&$cache, $path, $cache_size) {
+                use (&$cache, $path, $cache_size, $levels) {
 
             // Disabled logging after shutdown.
             if ($cache === null) return;
+
+            // Some filtering.
+            if ($levels and !in_array($level, $levels)) return;
 
             $cache[] = self::format($message, $level, $category, $timestamp);
 
