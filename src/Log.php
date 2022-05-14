@@ -242,18 +242,13 @@ abstract class Log {
             $cache = null;
         });
 
-        return function ($message, $level, $category)
+        return function ($message, $level, $category, $timestamp)
                 use (&$cache, $path, $cache_size) {
 
             // Disabled logging after shutdown.
             if ($cache === null) return;
 
-            $line = '[' . date('c') . ']';
-            $line .= '[' . Log::name($level) . ']';
-            $line .= '[' . $category . ']';
-            $line .= ' ' . Log::stringify($message);
-
-            $cache[] = trim($line);
+            $cache[] = self::format($message, $level, $category, $timestamp);
 
             // Chunk size reached, flush the cache.
             if (count($cache) >= $cache_size) {
