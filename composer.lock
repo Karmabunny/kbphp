@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "389f4bfa23ddb8c7218df94f0ef43fba",
+    "content-hash": "866ab09ea00ef0c5d915a3c2945df6c2",
     "packages": [
         {
             "name": "symfony/polyfill-php73",
@@ -2051,7 +2051,9 @@
     "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "php": ">=7.0"
+    },
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.3.0"
 }

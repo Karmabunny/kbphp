@@ -12,7 +12,8 @@
         }
     ],
     "require": {
-        "symfony/polyfill-php73": "*"
+        "symfony/polyfill-php73": "*",
+        "php": ">=7.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.3",
