@@ -224,20 +224,24 @@ abstract class Uuid
     /**
      * Is this UUID valid?
      *
-     * This verifies given version + variant-1.
+     * This verifies given version + variant.
      *
      * @param string $uuid
-     * @param int|null $version
+     * @param int|null $version 1,2,3,4,5
+     * @param int|null $variant 0,1,2
+     * @param bool $nil empty/NIL values are valid
      * @return bool
      */
-    public static function valid(string $uuid, int $version = null): bool
+    public static function valid(string $uuid, int $version = null, $variant = 1, bool $nil = true): bool
     {
         // Strip dashes, validate length.
         $uuid = self::strip($uuid);
         if (strlen($uuid) != 32) return false;
 
         // Empty uids are valid! I guess?
-        if ($uuid === '00000000000000000000000000000000') return true;
+        if ($uuid === '00000000000000000000000000000000') {
+            return $nil;
+        }
 
         // This should always pass, given our above validation.
         $uuid = @hex2bin($uuid);
@@ -251,13 +255,36 @@ abstract class Uuid
             if ($actual !== $version) return false;
         }
 
-        // Variant-1 is one of 4 values: 89ab.
-        $variant = self::getOctalPair($uuid, 8);
-        $variant = $variant >> 12;
+        $actual = self::getOctalPair($uuid, 8);
+        $actual = $actual >> 12;
 
-        if ($variant < 0x8 or $variant > 0xb) return false;
+        // Variant-0: 0-7
+        // Variant-1: 8-b
+        // Variant-2: c-d
+        // Reserved:  e-f
+        if ($variant !== null) {
+            switch ($variant) {
+                case 0: return (
+                    $actual >= 0x0
+                    and $actual <= 0x8
+                );
+                case 1: return (
+                    $actual >= 0x8
+                    and $actual <= 0xb
+                );
+                case 2: return (
+                    $actual >= 0xc
+                    and $actual <= 0xd
+                );
+            }
 
-        return true;
+            // An invalid variant assertion is invalid.
+            // Including using reserved bits.
+            return false;
+        }
+
+        // Still validate against reserved bits.
+        return $actual < 0xe;
     }
 
 

@@ -162,6 +162,57 @@ final class UuidTest extends TestCase
     }
 
 
+    public function testUuidValidVariants()
+    {
+        $uuid = Uuid::uuid4();
+        $this->assertTrue(Uuid::valid($uuid));
+        $this->assertTrue(Uuid::valid($uuid, 4));
+        $this->assertTrue(Uuid::valid($uuid, 4, 1));
+
+        $this->assertFalse(Uuid::valid($uuid, 4, 0));
+        $this->assertFalse(Uuid::valid($uuid, 4, 2));
+        $this->assertFalse(Uuid::valid($uuid, 4, 3));
+
+        $variant0 = 'e5b8ed34-d6a1-11ec-5987-0242ac120002';
+        $this->assertFalse(Uuid::valid($variant0));
+        $this->assertTrue(Uuid::valid($variant0, null, null));
+        $this->assertTrue(Uuid::valid($variant0, null, 0));
+        $this->assertFalse(Uuid::valid($variant0, null, 1));
+        $this->assertFalse(Uuid::valid($variant0, null, 2));
+
+        $variant1 = 'e5b8ed34-d6a1-11ec-b987-0242ac120002';
+        $this->assertTrue(Uuid::valid($variant1));
+        $this->assertTrue(Uuid::valid($variant1, null, null));
+        $this->assertTrue(Uuid::valid($variant1, null, 1));
+        $this->assertFalse(Uuid::valid($variant1, null, 0));
+        $this->assertFalse(Uuid::valid($variant1, null, 2));
+
+        $variant2 = 'e5b8ed34-d6a1-11ec-d987-0242ac120002';
+        $this->assertFalse(Uuid::valid($variant2));
+        $this->assertTrue(Uuid::valid($variant2, null, null));
+        $this->assertTrue(Uuid::valid($variant2, null, 2));
+        $this->assertFalse(Uuid::valid($variant2, null, 0));
+        $this->assertFalse(Uuid::valid($variant2, null, 1));
+
+        $reserved = 'e5b8ed34-d6a1-11ec-f987-0242ac120002';
+        $this->assertFalse(Uuid::valid($reserved));
+        $this->assertFalse(Uuid::valid($reserved, null, 0));
+        $this->assertFalse(Uuid::valid($reserved, null, 1));
+        $this->assertFalse(Uuid::valid($reserved, null, 2));
+        $this->assertFalse(Uuid::valid($reserved, null, 3));
+        $this->assertFalse(Uuid::valid($reserved, null, null));
+
+        // NIL is pretty much always valid. It has no variants.
+        $nil = Uuid::NIL;
+        $this->assertTrue(Uuid::valid($nil, null, null, true));
+        $this->assertFalse(Uuid::valid($nil, null, null, false));
+        $this->assertTrue(Uuid::valid($nil, null, 0, true));
+        $this->assertTrue(Uuid::valid($nil, null, 1, true));
+        $this->assertTrue(Uuid::valid($nil, null, 2, true));
+        $this->assertTrue(Uuid::valid($nil, null, 3, true));
+    }
+
+
     public function testNil()
     {
         $uuid = Uuid::nil();
@@ -171,6 +222,8 @@ final class UuidTest extends TestCase
 
         $this->assertTrue(Uuid::empty($uuid, 4));
         $this->assertTrue(Uuid::valid($uuid, 4));
+
+        $this->assertFalse(Uuid::valid($uuid, 4, null, false));
 
         for ($i = 0; $i < self::ITERATIONS_V1; $i++) {
             $uuid = Uuid::uuid1();
