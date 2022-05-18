@@ -397,6 +397,7 @@ abstract class Arrays
         }
 
         // A root index key is a bit of an edge-case.
+        // @phpstan-ignore-next-line : Doesn't like all the reference business.
         if ($index !== '' and isset($output[''])) {
             $output = [ $index => $output[''] ] + $output;
             unset($output['']);

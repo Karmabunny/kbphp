@@ -157,7 +157,7 @@ abstract class Time
                 $time .= ':' . str_pad(min(60, $second ?: '0'), 2, '0', STR_PAD_LEFT);
 
                 if ($subsecond) {
-                    $time .= '.' . str_pad($subsecond ?: '0', 3, '0', STR_PAD_RIGHT);
+                    $time .= '.' . str_pad($subsecond, 3, '0', STR_PAD_RIGHT);
                 }
 
                 return $time;

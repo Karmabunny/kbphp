@@ -93,7 +93,7 @@ abstract class Log {
      * @param int $level
      * @param string $category
      * @param int $timestamp
-     * @return string
+     * @return void - echoes to stdout
      */
     public static function print($message, $level, $category, $timestamp)
     {
@@ -112,7 +112,7 @@ abstract class Log {
     public static function format($message, $level, $category, $timestamp)
     {
         $line = '';
-        $line .= '[' . date('c', $category) . ']';
+        $line .= '[' . date('c', $timestamp) . ']';
         $line .= '[' . self::name($level) . ']';
         $line .= '[' . $category . ']';
         $line .= ' ' . self::stringify($message);
