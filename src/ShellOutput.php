@@ -138,9 +138,11 @@ class ShellOutput
      *
      * The command is executed in non-blocking mode.
      *
+     * @param int $stream STREAM enum
+     * @param int|null $chunk_size bytes to read at a time
      * @return Generator<string>
      */
-    public function read($stream = self::STREAM_ALL): Generator
+    public function read($stream = self::STREAM_ALL, int $chunk_size = null): Generator
     {
         $target_out = (
             ($stream & self::STREAM_STDOUT) and
@@ -153,6 +155,10 @@ class ShellOutput
 
         if (!$target_out and !$target_err) return;
 
+        if ($chunk_size === null) {
+            $chunk_size = $this->config->chunk_size;
+        }
+
         $buf_out = '';
         $buf_err = '';
 
@@ -162,7 +168,7 @@ class ShellOutput
                 $eof = feof($this->pipes[1]);
 
                 if (!$eof) {
-                    $buf_out .= fgets($this->pipes[1], 1024);
+                    $buf_out .= fgets($this->pipes[1], $chunk_size);
 
                     if (self::eol($buf_out)) {
                         if ($buf_out) yield $buf_out;
@@ -176,7 +182,7 @@ class ShellOutput
                 $eof = feof($this->pipes[2]);
 
                 if (!$eof) {
-                    $buf_err .= fgets($this->pipes[2], 1024);
+                    $buf_err .= fgets($this->pipes[2], $chunk_size);
 
                     if (self::eol($buf_err)) {
                         if ($buf_err) yield $buf_err;
