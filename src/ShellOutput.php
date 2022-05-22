@@ -35,10 +35,10 @@ class ShellOutput
     /** @var int|false */
     public $exit = false;
 
-    /** @var array */
+    /** @var array [ stdin, stdout, stderr ] */
     private $pipes;
 
-    /** @var array */
+    /** @var array resource, string array */
     private $descriptors;
 
 
@@ -54,6 +54,7 @@ class ShellOutput
         $this->handle = $handle;
         $this->pipes = $pipes;
 
+        // Initialise the status, if any.
         $this->isRunning();
 
         $this->descriptors = $config->getDescriptors();
@@ -115,6 +116,7 @@ class ShellOutput
 
 
     /**
+     * Is the command running?
      *
      * @return bool
      */
@@ -215,6 +217,12 @@ class ShellOutput
 
 
     /**
+     * Read data from the stream.
+     *
+     * The stream must be a 'pipe' type.
+     *
+     * This command is executed in a non-blocking mode. The result body may be
+     * empty if the command has not yet finished.
      *
      * @param int $stream STREAM enum
      * @param int|null $chunk_size bytes to read at a time
@@ -262,6 +270,8 @@ class ShellOutput
      */
     public function wait(): string
     {
+        // TODO This relies on the process to have registered pipes.
+        // How does one wait for a process that writes to a file or resource?
         $stream = $this->read();
         foreach ($stream as $line);
         return $line ?? '';
@@ -275,16 +285,19 @@ class ShellOutput
      */
     public function close()
     {
+        // Already exited.
         if ($this->exit !== false) {
             return $this->exit;
         }
 
         $status = @proc_get_status($this->handle);
 
+        // If the process is not running, read the exit code from the status.
         if ($status and !$status['running']) {
             $this->running = false;
             $this->exit = $status['exitcode'];
         }
+        // Otherwise wait until the process is finished.
         else {
             $this->exit = @proc_close($this->handle);
             $this->running = false;
@@ -299,6 +312,7 @@ class ShellOutput
      *
      * @param int $signal
      * @return int exit code
+     * @throws ShellException
      */
     public function kill($signal = SIGTERM)
     {
@@ -339,6 +353,12 @@ class ShellOutput
 
 
     /**
+     * Create a shutdown handler.
+     *
+     * This is only to ensure the handles are closed correctly.
+     *
+     * This does not end the process.
+     *
      * @return callable
      */
     private function shutdown()

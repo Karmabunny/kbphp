@@ -37,6 +37,11 @@ class ShellOptions extends Collection
 
 
     /**
+     * Parse options.
+     *
+     * This accepts a config or string.
+     *
+     * Given a string it creates a command with default options.
      *
      * @param string|array|ShellOptions $config
      * @return ShellOptions
@@ -56,8 +61,9 @@ class ShellOptions extends Collection
 
 
     /**
+     * Get file descriptors.
      *
-     * @return array
+     * @return array resource|array
      */
     public function getDescriptors(): array
     {
@@ -78,6 +84,7 @@ class ShellOptions extends Collection
 
 
     /**
+     * Get a safe command string with the arguments correctly interpolated.
      *
      * @return string
      */
@@ -88,12 +95,20 @@ class ShellOptions extends Collection
 
 
     /**
+     * Normalise a descriptor into something that can be passed to proc_open().
      *
-     * @param string $type
-     * @param mixed $descriptor
+     * A descriptor is either a resource or a pipe config, but we also have
+     * shorthand for 'pipe' and 'file' descriptors. For whatever reason.
+     *
+     * Shorthands are:
+     * - `'pipe' => [ 'pipe', mode ]`
+     * - `'/path/to/file' => [ 'file', '/path/to/file', mode ]`
+     *
+     * @param string $mode 'r' or 'w'
+     * @param resource|array|string $descriptor
      * @return resource|array
      */
-    private static function parseDescriptor(string $type, $descriptor)
+    private static function parseDescriptor(string $mode, $descriptor)
     {
         // Resource, cool.
         if (is_resource($descriptor)) {
@@ -101,13 +116,14 @@ class ShellOptions extends Collection
         }
 
         // Custom pipe config, cool.
+        // (Assuming it's valid)
         if (is_array($descriptor)) {
             return $descriptor;
         }
 
         // Shorthand pipe, ok.
         if ($descriptor === 'pipe') {
-            return ['pipe', $type];
+            return ['pipe', $mode];
         }
 
         // String is a filename.
@@ -115,12 +131,15 @@ class ShellOptions extends Collection
             $pipe = ['file', $descriptor];
 
             // Out type will 'append' by default. Dunno about that.
-            if ($type == 'w') $pipe[] = 'a';
+            if ($mode == 'w') {
+                $pipe[] = 'a';
+            }
+
             return $pipe;
         }
 
         // Dunno, just use the default.
-        return ['pipe', $type];
+        return ['pipe', $mode];
     }
 
 }
