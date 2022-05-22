@@ -58,13 +58,11 @@ class ShellOutput
 
         $this->descriptors = $config->getDescriptors();
 
-        if ($this->getTarget(self::STREAM_STDOUT) === 'pipe') {
-            stream_set_blocking($pipes[1], false);
-        }
+        $blocking = $this->getTarget(self::STREAM_STDOUT) !== 'pipe';
+        stream_set_blocking($pipes[1], $blocking);
 
-        if ($this->getTarget(self::STREAM_STDERR) === 'pipe') {
-            stream_set_blocking($pipes[2], false);
-        }
+        $blocking = $this->getTarget(self::STREAM_STDERR) !== 'pipe';
+        stream_set_blocking($pipes[2], $blocking);
 
         register_shutdown_function($this->shutdown());
     }
@@ -73,17 +71,21 @@ class ShellOutput
     /**
      * Where does this stream go?
      *
-     * @param int $stream
-     * @return string
+     * @param int $stream STREAM enum
+     * @return string 'resource', 'pipe', or a file path.
      */
     public function getTarget(int $stream): string
     {
-        if (is_resource($this->descriptors[$stream])) {
+        $target = $this->descriptors[$stream] ?? null;
+
+        if (is_resource($target)) {
             return 'resource';
         }
 
-        $target = $this->descriptors[$stream] ?? null;
-        if (!is_array($target)) return '';
+        // This would be bad...
+        if (!is_array($target)) {
+            return '';
+        }
 
         if ($target[0] === 'pipe') return 'pipe';
         if ($target[0] === 'file') return $target[1];
