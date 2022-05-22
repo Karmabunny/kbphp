@@ -214,18 +214,27 @@ class ShellOutput
 
     /**
      *
-     * @param int $chunk
-     * @return null|string
+     * @param int $stream STREAM enum
+     * @param int|null $chunk_size bytes to read at a time
+     * @return string|false
+     * @throws ShellException
      */
-    public function readRaw(int $chunk = 1024)
+    public function readRaw($stream = self::STREAM_STDOUT, int $chunk_size = null)
     {
-        $target = $this->getTarget(self::STREAM_STDOUT);
+        $target = $this->getTarget($stream);
         if ($target !== 'pipe') {
-            throw new ShellException('Standard output is not a pipe');
+            throw new ShellException('Stream is not a pipe');
         }
 
-        if(feof($this->pipes[1])) return null;
-        return fread($this->pipes[1], $chunk);
+        if (feof($this->pipes[$stream])) {
+            return false;
+        }
+
+        if ($chunk_size === null) {
+            $chunk_size = $this->config->chunk_size;
+        }
+
+        return fread($this->pipes[$stream], $chunk_size);
     }
 
 
