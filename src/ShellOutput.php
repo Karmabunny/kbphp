@@ -20,6 +20,10 @@ class ShellOutput
     const STREAM_ALL = 3;
 
 
+    /** @var int milliseconds */
+    static $SELECT_TIMEOUT = 100;
+
+
     /** @var ShellOptions */
     public $config;
 
@@ -167,8 +171,14 @@ class ShellOutput
         $buf_err = '';
 
         while (true) {
+            // Select pipes.
+            $read = [];
+            $write = null;
+            $except = null;
+
             // stdout
             if ($target_out) {
+                $read[] = $this->pipes[1];
                 $eof = feof($this->pipes[1]);
 
                 if (!$eof) {
@@ -183,6 +193,7 @@ class ShellOutput
 
             // stderr
             if ($target_err) {
+                $read[] = $this->pipes[2];
                 $eof = feof($this->pipes[2]);
 
                 if (!$eof) {
@@ -198,8 +209,9 @@ class ShellOutput
             // End of input!
             if (!isset($eof) or $eof) break;
 
-            // Sleep for a bit.
-            usleep(10 * 1000);
+            // Sleep for a bit (100ms), but this will exit early if the
+            // system knows there's activity on the streams.
+            stream_select($read, $write, $except, 0, self::$SELECT_TIMEOUT);
         }
 
         // Flush standard out.
