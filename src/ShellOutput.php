@@ -354,8 +354,11 @@ class ShellOutput
      */
     private static function eol(string &$buffer): bool
     {
-        if (substr_compare($buffer, PHP_EOL, -1, 1) === 0) {
-            $buffer = substr($buffer, 0, -1);
+        static $length;
+        $length = $length ?? strlen(PHP_EOL);
+
+        if (substr_compare($buffer, PHP_EOL, -$length, $length) === 0) {
+            $buffer = substr($buffer, 0, -$length);
             return true;
         }
         else {
