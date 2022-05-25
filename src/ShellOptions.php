@@ -139,6 +139,7 @@ class ShellOptions extends Collection
         }
 
         // Dunno, just use the default.
+        // @phpstan-ignore-next-line : despite our type-hints, we can't guarantee this doesn't happen.
         return ['pipe', $mode];
     }
 
