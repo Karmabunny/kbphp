@@ -248,7 +248,7 @@ abstract class Arrays
         $items = [];
 
         foreach ($array as $key => $item) {
-            [$key, $item] = $fn($item, $key);
+            list($key, $item) = $fn($item, $key);
             $items[$key] = $item;
         }
 

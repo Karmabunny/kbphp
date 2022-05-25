@@ -106,7 +106,7 @@ class Text {
      */
     public static function normalizeAlpha(string $str)
     {
-        [$find, $replace] = self::$ALPHA_RULES;
+        list($find, $replace) = self::$ALPHA_RULES;
         return strtr($str, $find, $replace);
     }
 

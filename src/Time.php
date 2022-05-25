@@ -148,7 +148,7 @@ abstract class Time
             // 24-hour time.
             if (preg_match('/^T(\d{1,2})[:\.]?(\d{0,2})[:\.]?(\d{0,2})\.?(\d*)$/', $time, $matches)) {
 
-                [$_, $hour, $minute, $second, $subsecond] = $matches;
+                list($_, $hour, $minute, $second, $subsecond) = $matches;
                 // We gotta tear up and reconstruct this one. I want it so
                 // a 'T12' will be '12:00:00' with an optional subsecond.
                 $time = 'T';
@@ -256,7 +256,7 @@ abstract class Time
     public static function between(DateTimeInterface $start, DateTimeInterface $end)
     {
         $periods = self::periods($start, $end, '+1 day');
-        foreach ($periods as [$day]) yield $day;
+        foreach ($periods as $days) yield $days[0];
     }
 
 
