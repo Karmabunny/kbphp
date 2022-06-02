@@ -266,11 +266,11 @@ abstract class Uuid
             switch ($variant) {
                 case 0: return (
                     $actual >= 0x0
-                    and $actual <= 0x8
+                    and $actual < 0x8
                 );
                 case 1: return (
                     $actual >= 0x8
-                    and $actual <= 0xb
+                    and $actual < 0xc
                 );
                 case 2: return (
                     $actual >= 0xc
