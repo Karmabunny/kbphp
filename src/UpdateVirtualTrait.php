@@ -14,6 +14,8 @@ namespace karmabunny\kb;
  */
 trait UpdateVirtualTrait
 {
+    use HooksTrait;
+
 
     /**
      * A list of converter functions to apply to the data before saving.
@@ -42,6 +44,8 @@ trait UpdateVirtualTrait
      *  - `update()`
      *
      * @return void
+     * @hook update
+     * @hook __clone
      */
     protected function applyVirtual()
     {

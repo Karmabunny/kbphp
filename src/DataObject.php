@@ -34,4 +34,13 @@ abstract class DataObject implements Configurable
         }
         $this->update($config);
     }
+
+
+    /** @inheritdoc */
+    public function __clone()
+    {
+        if (method_exists($this, '_hook')) {
+            call_user_func([$this, '_hook']);
+        }
+    }
 }

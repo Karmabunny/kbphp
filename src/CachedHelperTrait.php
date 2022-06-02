@@ -43,6 +43,8 @@ trait CachedHelperTrait
      *
      * @param string|null $key
      * @return void
+     * @hook update
+     * @hook __clone
      */
     protected function clearCache(string $key = null)
     {

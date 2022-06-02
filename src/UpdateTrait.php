@@ -24,8 +24,8 @@ trait UpdateTrait
             $this->$key = $item;
         }
 
-        if (method_exists($this, 'applyVirtual')) {
-            call_user_func([$this, 'applyVirtual']);
+        if (method_exists($this, '_hook')) {
+            call_user_func([$this, '_hook']);
         }
     }
 }
