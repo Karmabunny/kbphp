@@ -128,6 +128,8 @@ abstract class Reflect
     /**
      * Get a list of method names and their parameters.
      *
+     * Note, these are only the _public_ methods of a class.
+     *
      * @param string $class
      * @param string|null $filter regex filter
      * @return array
@@ -394,4 +396,38 @@ abstract class Reflect
 
         return trim($comment);
     }
+
+
+    /**
+     * Get a set of `@tags` within a doc comment.
+     *
+     * Filtering tags will match the tag name.
+     *
+     * @param string $doc
+     * @param array $filter
+     * @return array[] [ tag => value[] ]
+     */
+    public static function getMethodTags(string $doc, array $filter = []): array
+    {
+        $tags = [];
+        $matches = [];
+
+        if ($filter) {
+            $tags = array_fill_keys($filter, []);
+        }
+
+        if (!preg_match_all("/@([^\s]+) ([^\n]+)/", $doc, $matches, PREG_SET_ORDER)) {
+            return $tags;
+        }
+
+        foreach ($matches as $match) {
+            list( , $tag, $value ) = $match;
+            if ($filter and !in_array($tag, $filter)) continue;
+
+            $tags[$tag][] = trim($value);
+        }
+
+        return $tags;
+    }
+
 }
