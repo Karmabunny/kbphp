@@ -257,6 +257,37 @@ abstract class Arrays
 
 
     /**
+     * Shuffle an array, optionally preserving the keys.
+     *
+     * @param iterable $array
+     * @param bool $preserve_keys
+     * @return array
+     */
+    static function shuffle($array, bool $preserve_keys = false): array
+    {
+        if (!is_array($array)) {
+            $array = iterator_to_array($array, $preserve_keys);
+        }
+
+        if ($preserve_keys) {
+            $keys = array_keys($array);
+            shuffle($keys);
+
+            $new = [];
+            foreach ($keys as $key) {
+                $new[$key] = $array[$key];
+            }
+
+            return $new;
+        }
+        else {
+            shuffle($array);
+            return $array;
+        }
+    }
+
+
+    /**
      * Flat arrays, with optional key support.
      *
      * @param array $array

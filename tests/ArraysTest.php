@@ -179,6 +179,31 @@ final class ArraysTest extends TestCase {
     }
 
 
+    public function testShuffle()
+    {
+        $array = ['a' => 1, 'b' => 2, 'c' => 3, 4, 5, 7, 8, 9, 10];
+
+        $copy = array_merge($array);
+        $this->assertSame($copy, $array);
+
+        $actual = Arrays::shuffle($array, false);
+
+        $this->assertTrue(Arrays::isNumeric($actual));
+        $this->assertNotSame($array, $actual);
+        $this->assertNotSame($array, array_values($actual));
+        $this->assertSame($array, $copy);
+
+        // There's a very slim chance that this test will fail.
+        // By the nature of 'random' - it's possible that the shuffle will
+        // result in an identical array.
+
+        $actual = Arrays::shuffle($array, true);
+        $this->assertTrue(Arrays::isAssociated($actual));
+        $this->assertNotSame($array, $actual);
+        $this->assertSame($array, $copy);
+    }
+
+
     public function testFlattenNoKeys()
     {
         $actual = Arrays::flatten([
