@@ -38,7 +38,7 @@ trait ConfigureTrait
      * Given a string the 'config' is implicitly an empty array.
      *
      * @param string|array|object $config [ class => config ]
-     * @param string $assert class name to verify
+     * @param string|null $assert class name to verify
      * @return object
      */
     public static function configure($config, string $assert = null)
@@ -66,13 +66,15 @@ trait ConfigureTrait
             throw new InvalidArgumentException("{$class} must extend '{$assert}'");
         }
 
+        // Pass-through the object.
         if (is_object($config)) {
-            return $config;
+            $object = $config;
         }
 
         // Do configurable things because we can.
-        if (is_subclass_of($class, Configurable::class)) {
-            $object = new $class($config);
+        else if (is_subclass_of($class, Configurable::class)) {
+            $object = new $class();
+            $object->update($config);
         }
         // Or just the regular.
         else {

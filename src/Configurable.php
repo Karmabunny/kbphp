@@ -7,8 +7,7 @@
 namespace karmabunny\kb;
 
 /**
- * This class is 'configurable' - it has an `update()` method and a
- * constructor that accepts iterables.
+ * This class is 'configurable' - it has an `update()` method accepts iterables.
  *
  * Combine this with `Configure::configure()`.
  *
@@ -16,15 +15,9 @@ namespace karmabunny\kb;
  */
 interface Configurable
 {
-
     /**
-     * @param iterable $config
-     * @return void
-     */
-    public function __construct($config);
-
-
-    /**
+     * Update the object with a new configuration.
+     *
      * @param iterable $config
      * @return void
      */
