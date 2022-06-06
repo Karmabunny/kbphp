@@ -39,9 +39,10 @@ trait ConfigureTrait
      *
      * @param string|array|object $config [ class => config ]
      * @param string|null $assert class name to verify
+     * @param bool $init whether to initialize the object after creation
      * @return object
      */
-    public static function configure($config, string $assert = null)
+    public static function configure($config, string $assert = null, bool $init = true)
     {
         // Mush it into a key-config pair.
         if (is_string($config)) {
@@ -83,6 +84,11 @@ trait ConfigureTrait
             foreach ($config as $key => $value) {
                 $object->$key = $value;
             }
+        }
+
+        // Call the init() function, if present.
+        if ($init and is_subclass_of($object, ConfigurableInit::class)) {
+            $object->init();
         }
 
         return $object;
