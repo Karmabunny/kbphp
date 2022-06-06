@@ -19,7 +19,7 @@ namespace karmabunny\kb;
  *
  * @package karmabunny\kb
  */
-abstract class DataObject
+abstract class DataObject implements Configurable
 {
     use UpdateTrait;
 
