@@ -7,18 +7,22 @@
 namespace karmabunny\kb;
 
 /**
- * This is a really dumb version of a Collection.
+ * The simplest object.
  *
- * Again, it's to encourage stronger typing for blobs of data moving within
- * a system. But here we're stripping all the additional Collection magic.
+ * It's to encourage stronger typing for blobs of data moving within a system.
+ * This particular base object has no additional magics.
  *
  * There's no array access, serialization, validations, or magic fields.
  * Just data.
+ *
+ * For more a magical base object {@see Collection}.
  *
  * @package karmabunny\kb
  */
 abstract class DataObject
 {
+    use UpdateTrait;
+
     /**
      * @param iterable $config
      */
@@ -29,21 +33,5 @@ abstract class DataObject
             $config = iterator_to_array($config);
         }
         $this->update($config);
-    }
-
-    /**
-     *
-     * @param iterable $config
-     * @return void
-     */
-    public function update($config)
-    {
-        foreach ($config as $key => $item) {
-            $this->$key = $item;
-        }
-
-        if (method_exists($this, 'applyVirtual')) {
-            call_user_func([$this, 'applyVirtual']);
-        }
     }
 }
