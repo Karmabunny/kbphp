@@ -37,7 +37,7 @@ trait ConfigureTrait
      *
      * Given a string the 'config' is implicitly an empty array.
      *
-     * @param string|array $config [ class => config ]
+     * @param string|array|object $config [ class => config ]
      * @param string $assert class name to verify
      * @return object
      */
@@ -48,8 +48,15 @@ trait ConfigureTrait
             $config = [ $config => [] ];
         }
 
-        $class = key($config);
-        $config = reset($config);
+        // Pass through objects.
+        if (is_object($config)) {
+            $class = get_class($config);
+        }
+        // It's an array.
+        else {
+            $class = key($config);
+            $config = reset($config);
+        }
 
         // Check that we're all behaving here.
         if ($assert
@@ -57,6 +64,10 @@ trait ConfigureTrait
             and !is_subclass_of($class, $assert)
         ) {
             throw new InvalidArgumentException("{$class} must extend '{$assert}'");
+        }
+
+        if (is_object($config)) {
+            return $config;
         }
 
         // Do configurable things because we can.
