@@ -19,7 +19,7 @@ namespace karmabunny\kb;
  *
  * @package karmabunny\kb
  */
-class Inflector extends DataObject
+class Inflector extends DataObject implements InflectorInterface
 {
 
     // Cached inflections
@@ -55,7 +55,7 @@ class Inflector extends DataObject
      * @param   string $word
      * @return  bool
      */
-    public function uncountable($word)
+    public function uncountable(string $word): bool
     {
         $word = strtolower(trim($word));
         return array_key_exists($word, $this->uncountable);
@@ -69,7 +69,7 @@ class Inflector extends DataObject
      * @param   int      $count number of things
      * @return  string
      */
-    public function singular($word, $count = 1)
+    public function singular($word, $count = 1): string
     {
         $key = "singular_{$word}_{$count}";
 
@@ -92,7 +92,7 @@ class Inflector extends DataObject
      * @param   int      $count
      * @return  string
      */
-    public function plural($word, $count = 0)
+    public function plural($word, $count = 0): string
     {
         $key = "singular_{$word}_{$count}";
 
