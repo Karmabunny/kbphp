@@ -69,7 +69,10 @@ trait ConfigureTrait
 
         // Pass-through the object.
         if (is_object($config)) {
-            $object = $config;
+            if ($init and is_subclass_of($config, ConfigurableInit::class)) {
+                $config->init();
+            }
+            return $config;
         }
 
         // Do configurable things because we can.
