@@ -6,14 +6,12 @@
 
 namespace karmabunny\kb;
 
-use Exception;
-
 /**
  * Url decode errors.
  *
  * @package karmabunny\kb
  */
-class UrlDecodeException extends Exception
+class UrlDecodeException extends UrlException
 {
 
     /** @var string|null */
