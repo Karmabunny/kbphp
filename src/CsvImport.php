@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use IteratorAggregate;
+use Traversable;
 
 /**
  * A CSV Importer.
@@ -116,6 +117,34 @@ class CsvImport implements IteratorAggregate
 
 
     /**
+     * Get the CSV headers.
+     *
+     * Beware, this will consume the first row if headers are not explicitly set.
+     *
+     * @return string[]
+     */
+    public function getHeaders(): array
+    {
+        if ($this->headers === null) {
+            $headers = $this->_getcsv();
+
+            // null is EOF.
+            if (!$headers) {
+                $this->headers = [];
+                return [];
+            }
+
+            // Trim them.
+            // I honestly can't imagine where not trimming a good idea.
+            // If you argue otherwise I will fight you.
+            $this->headers = array_map('trim', $headers);
+        }
+
+        return $this->headers;
+    }
+
+
+    /**
      * Get the next line.
      *
      * @return null|array An associated array or null if EOF.
@@ -123,16 +152,7 @@ class CsvImport implements IteratorAggregate
     public function getLine()
     {
         // Load in headers from the first row.
-        if ($this->headers === null) {
-            // null is EOF.
-            $headers = $this->_getcsv();
-            if (!$headers) return null;
-
-            // Trim them.
-            // I honestly can't imagine where not trimming a good idea.
-            // If you argue otherwise I will fight you.
-            $this->headers = array_map('trim', $headers);
-        }
+        $this->getHeaders();
 
         // null is EOF.
         $row = $this->_getcsv();
@@ -155,7 +175,7 @@ class CsvImport implements IteratorAggregate
 
 
     /** @inheritdoc */
-    public function getIterator()
+    public function getIterator(): Traversable
     {
         while ($line = $this->getLine()) yield $line;
     }
