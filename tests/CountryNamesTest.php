@@ -27,6 +27,14 @@ final class CountryNamesTest extends TestCase
         $this->assertContains('USA', $alpha3);
         $this->assertNotContains('AU', $alpha3);
         $this->assertNotContains('US', $alpha3);
+
+        $expected = 'AUS';
+        $actual = CountryNames::getAlpha3From2('AU');
+        $this->assertEquals($expected, $actual);
+
+        $expected = 'US';
+        $actual = CountryNames::getAlpha2From3('USA');
+        $this->assertEquals($expected, $actual);
     }
 
 
