@@ -300,7 +300,8 @@ abstract class CountryNames
      */
     public static function getAlpha3From2(string $code)
     {
-        if (strlen(trim($code)) == 3) return $code;
+        $code = strtoupper(trim($code));
+        if (strlen($code) == 3) return $code;
         return self::COUNTRY_CODES[$code] ?? null;
     }
 
@@ -313,15 +314,9 @@ abstract class CountryNames
      */
     public static function getAlpha2From3(string $code)
     {
-        if (strlen(trim($code)) == 2) return $code;
-
-        static $alpha3_codes;
-
-        if (!$alpha3_codes) {
-            $alpha3_codes = array_flip(self::COUNTRY_CODES);
-        }
-
-        return $alpha3_codes[$code] ?? null;
+        $code = strtoupper(trim($code));
+        if (strlen($code) == 2) return $code;
+        return array_search($code, self::COUNTRY_CODES);
     }
 
 
