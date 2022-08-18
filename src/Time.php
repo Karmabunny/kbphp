@@ -214,10 +214,13 @@ abstract class Time
      * Get a series of date periods between these two dates.
      *
      * For a 3 day period between 1st and 10th:
-     *  0: 1, 3
-     *  1: 3, 6
-     *  2: 6, 9,
-     *  3: 9, 10
+     *
+     *  - 0: `[01-01-2000, 03-01-2000]`
+     *  - 1: `[03-01-2000, 06-01-2000]`
+     *  - 2: `[06-01-2000, 09-01-2000]`
+     *  - 3: `[09-01-2000, 10-01-2000]`
+     *
+     * The last item will be truncated to the end of the period.
      *
      * @param DateTimeInterface $start
      * @param DateTimeInterface $end
@@ -413,6 +416,7 @@ abstract class Time
             foreach ($days as &$day) {
                 $day = substr($day, 0, $length);
             }
+            unset($day);
         }
 
         return $days;
