@@ -218,4 +218,16 @@ final class TimeTest extends TestCase {
         $this->assertEquals($expected, $actual);
         $this->assertEquals('2020-10-10 01:45:57.123123', $date->format('Y-m-d H:i:s.u'));
     }
+
+
+    public function testMutable()
+    {
+        $date = new DateTime('now', new DateTimeZone('America/New_York'));
+
+        $actual = Time::toDateTimeImmutable($date);
+        $this->assertEquals($date->format('Y-m-d H:i:s'), $actual->format('Y-m-d H:i:s'));
+
+        $actual = Time::toDateTime($date);
+        $this->assertEquals($date->format('Y-m-d H:i:s'), $actual->format('Y-m-d H:i:s'));
+    }
 }
