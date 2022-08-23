@@ -181,7 +181,7 @@ abstract class Reflect
         }
 
         $name = $function->getName();
-        $def = $fallbacks[$name] ?? null;
+        $defs = $fallbacks[$name] ?? null;
 
         $parameters = [];
         foreach ($function->getParameters() as $param) {
