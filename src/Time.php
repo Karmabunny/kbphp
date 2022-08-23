@@ -170,41 +170,43 @@ abstract class Time
 
 
     /**
+     * Convert any date interface into a datetime.
      *
-     * Any date interface into a datetime.
-     *
-     * Legit, I think these are a builtin PHP 8 thing.
-     *
-     * Also, pretty sure that you can't actually implement the
-     * DateTimeInterface, so this is pretty safe.
+     * This exists in PHP8+ as `DateTime::createFromInterface()`.
      *
      * @param DateTimeInterface $interface
      * @return DateTime
      */
     public static function toDateTime(DateTimeInterface $interface): DateTime
     {
-        return $interface instanceof DateTimeImmutable
-            ? DateTime::createFromImmutable($interface)
-            : $interface;
+        if ($interface instanceof DateTime) {
+            return $interface;
+        }
+
+        $date = new DateTime();
+        $date->setTimestamp($interface->getTimestamp());
+        $date->setTimezone($interface->getTimezone());
+        return $date;
     }
 
 
     /**
-     * Any date interface into a immutable.
+     * Convert any date interface into a immutable.
      *
-     * Legit, I think these are a builtin PHP 8 thing.
-     *
-     * Also, pretty sure that you can't actually implement the
-     * DateTimeInterface, so this is pretty safe.
+     * This exists in PHP8+ as `DateTimeImmutable::createFromInterface()`.
      *
      * @param DateTimeInterface $interface
      * @return DateTimeImmutable
      */
     public static function toDateTimeImmutable(DateTimeInterface $interface): DateTimeImmutable
     {
-        return $interface instanceof DateTime
-            ? DateTimeImmutable::createFromMutable($interface)
-            : $interface;
+        if ($interface instanceof DateTimeImmutable) {
+            return $interface;
+        }
+
+        // Pretty sure that you can't actually implement the
+        // DateTimeInterface, so this is pretty safe.
+        return DateTimeImmutable::createFromMutable($interface);
     }
 
 
