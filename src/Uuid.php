@@ -326,7 +326,7 @@ abstract class Uuid
      */
     public static function hasHighPrecisionDatetime(): bool
     {
-        return (bool) (@exec('date +%s%N') / 100);
+        return (bool) @exec('date +%s%N');
     }
 
 
@@ -351,7 +351,9 @@ abstract class Uuid
         $time = 0;
 
         if (!$lazy) {
-            $time = (int) (@exec('date +%s%N') / 100);
+            $time = (int) @exec('date +%s%N');
+            $time /= 100;
+            $time = (int) $time;
         }
 
         if (!$time) {

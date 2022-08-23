@@ -27,7 +27,7 @@ class DocType extends Collection
     /** @var mixed */
     public $value;
 
-    /** @var string[] */
+    /** @var string[]|null */
     private $_doc_types;
 
 

@@ -396,6 +396,10 @@ abstract class Arrays
     {
         $output = [];
 
+        if (empty($glue)) {
+            $glue = '.';
+        }
+
         // This whole thing is _quite_ weird. I'm sure there's a more readable
         // approach using recursion or whatever. But somehow this works.
         foreach ($array as $key => $value) {
@@ -431,6 +435,7 @@ abstract class Arrays
         // @phpstan-ignore-next-line : Doesn't like all the reference business.
         if ($index !== '' and isset($output[''])) {
             $output = [ $index => $output[''] ] + $output;
+            // @phpstan-ignore-next-line : Yeah dunno.
             unset($output['']);
         }
 
@@ -724,6 +729,8 @@ abstract class Arrays
         if ($output === null) {
             $output = (function($_path) {
                 $alt = @include $_path;
+                //This is literally a defines check. Why are you mad?
+                // @phpstan-ignore-next-line
                 return $config ?? $alt;
             })($path);
         }

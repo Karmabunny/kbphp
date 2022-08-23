@@ -219,6 +219,8 @@ class CsvExport
         try {
             $value = @(string) $value;
         }
+        // We're told that __toString() shouldn't throw, but that doesn't mean it can't.
+        // @phpstan-ignore-next-line
         catch (Throwable $exception) {
             $value = 'ERR';
         }

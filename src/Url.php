@@ -309,7 +309,7 @@ class Url extends DataObject
      * @param string $scheme
      * @return null|int
      */
-    public static function getDefaultPort(string $scheme): ?int
+    public static function getDefaultPort(string $scheme)
     {
         $ports = self::getDefaultPorts();
         return $ports[$scheme] ?? null;

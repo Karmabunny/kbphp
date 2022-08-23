@@ -183,7 +183,6 @@ abstract class Time
      */
     public static function toDateTime(DateTimeInterface $interface): DateTime
     {
-        // @phpstan-ignore-next-line : Can't extend DateTimeInterface. It's one or the other.
         return $interface instanceof DateTimeImmutable
             ? DateTime::createFromImmutable($interface)
             : $interface;
@@ -203,7 +202,6 @@ abstract class Time
      */
     public static function toDateTimeImmutable(DateTimeInterface $interface): DateTimeImmutable
     {
-        // @phpstan-ignore-next-line : Can't extend DateTimeInterface. It's one or the other.
         return $interface instanceof DateTime
             ? DateTimeImmutable::createFromMutable($interface)
             : $interface;
