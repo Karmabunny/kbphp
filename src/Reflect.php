@@ -191,11 +191,34 @@ abstract class Reflect
             $parameters[$name] = [
                 'name' => $name,
                 'definition' => self::getParameterDefinition($param, $def),
-                'type' => (string) @$param->getType() ?: ($def ?? 'mixed'),
+                'type' => self::getTypeName($param->getType(), $def),
             ];
         }
 
         return $parameters;
+    }
+
+
+    /**
+     *
+     * @param ReflectionType|null $type
+     * @param string|null $fallback
+     * @return string
+     */
+    public static function getTypeName($type, string $fallback = null): string
+    {
+        if ($type instanceof ReflectionNamedType) {
+            $type = $type->getName();
+        }
+        else {
+            $type = 'mixed';
+        }
+
+        if (!$type or $type === 'mixed') {
+            return $fallback ?: 'mixed';
+        }
+
+        return $type;
     }
 
 
@@ -220,10 +243,7 @@ abstract class Reflect
             $arg_names[] = self::getParameterDefinition($param, $def);
         }
 
-        $return = (string) @$method->getReturnType() ?: 'mixed';
-        if ($return === 'mixed') {
-            $return = $fallbacks['__return'] ?? 'mixed';
-        }
+        $return = self::getTypeName($method->getReturnType(), $fallbacks['__return'] ?? null);
 
         $definition = '';
         $definition .= implode(' ' , $modifiers);
@@ -250,16 +270,7 @@ abstract class Reflect
             $value .= '?';
         }
 
-        /** @var ReflectionType */
-        $type = @$parameter->getType() ?: null;
-
-        if ($type instanceof ReflectionNamedType) {
-            $type = $type->getName();
-        }
-
-        if (!$type or $type === 'mixed') {
-            $type = $fallback ?: 'mixed';
-        }
+        $type = self::getTypeName($parameter->getType(), $fallback);
 
         $value .= $type;
         $value .= ' ';
