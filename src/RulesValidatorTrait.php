@@ -36,6 +36,12 @@ trait RulesValidatorTrait
      *
      * // A custom inline validator.
      * 'rule-name' => ['field1', 'field2', 'func' => 'trim']
+     *
+     * // Specify different args per field.
+     * 'rule-name' => [
+     *    ['field1', 'args' => [0, 10]],
+     *    ['field2', 'args' => [0, 25]],
+     * ]
      * ```
      *
      * Special rules exist for 'validity' and 'required':
