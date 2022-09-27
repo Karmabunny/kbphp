@@ -116,6 +116,7 @@ class RulesValidator implements Validator
 
     /**
      * @param array|object $data Data to validate
+     * @param array $rules Validation rules
      */
     public function __construct($data, array $rules = [])
     {
