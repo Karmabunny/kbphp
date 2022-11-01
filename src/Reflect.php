@@ -103,7 +103,7 @@ abstract class Reflect
      * @param array|string $callable
      * @return bool
      */
-    public static function isStaticCallable($callable)
+    public static function isStaticCallable($callable): bool
     {
         if (is_string($callable)) {
             $callable = explode('::', $callable, 2);
