@@ -417,8 +417,24 @@ abstract class Reflect
      * @param string $doc
      * @param array $filter
      * @return array[] [ tag => value[] ]
+     * @deprecated use getDocTags()
      */
     public static function getMethodTags(string $doc, array $filter = []): array
+    {
+        return self::getDocTags($doc, $filter);
+    }
+
+
+    /**
+     * Get a set of `@tags` within a doc comment.
+     *
+     * Filtering tags will match the tag name.
+     *
+     * @param string $doc
+     * @param array $filter
+     * @return array[] [ tag => value[] ]
+     */
+    public static function getDocTags(string $doc, array $filter = []): array
     {
         $tags = [];
         $matches = [];
