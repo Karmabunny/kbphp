@@ -22,6 +22,9 @@ class AttributesValidator implements Validator
     /** @var object */
     public $target;
 
+    /** @var string|null */
+    public $scenario = null;
+
     /** @var string */
     public $validity = Validity::class;
 
@@ -32,10 +35,12 @@ class AttributesValidator implements Validator
     /**
      *
      * @param object $target
+     * @param string|null $scenario
      */
-    public function __construct(object $target)
+    public function __construct(object $target, string $scenario = null)
     {
         $this->target = $target;
+        $this->scenario = $scenario;
     }
 
 
