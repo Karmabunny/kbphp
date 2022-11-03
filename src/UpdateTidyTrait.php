@@ -29,19 +29,25 @@ trait UpdateTidyTrait
      */
     public function update($config)
     {
-        static $fields;
-
-        if ($fields === null) {
-            $fields = array_fill_keys(static::getProperties(), true);
-        }
+        $fields = static::getPropertyTypes();
 
         foreach ($config as $key => $value) {
-            if (!array_key_exists($key, $fields)) continue;
+            $type = $fields[$key] ?? null;
+            if (!$type) continue;
+
+            // Only occurs on PHP 7.4+.
+            if (
+                class_exists($type)
+                and !is_a($value, $type)
+            ) {
+                continue;
+            }
+
             $this->$key = $value;
         }
 
         if (method_exists($this, '_hook')) {
-            call_user_func([$this, '_hook']);
+            call_user_func([$this, '_hook'], __FUNCTION__, $config);
         }
     }
 }

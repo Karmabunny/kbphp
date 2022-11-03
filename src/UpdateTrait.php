@@ -24,8 +24,9 @@ trait UpdateTrait
             $this->$key = $item;
         }
 
+
         if (method_exists($this, '_hook')) {
-            call_user_func([$this, '_hook']);
+            call_user_func([$this, '_hook'], __FUNCTION__, $config);
         }
     }
 }

@@ -39,21 +39,17 @@ trait UpdateVirtualTrait
     /**
      * Apply the virtual converters to the all properties.
      *
-     * Recommended placements:
-     *  - `__clone()`
-     *  - `update()`
-     *
      * @return void
      * @hook update
-     * @hook __clone
      */
-    protected function applyVirtual()
+    protected function applyVirtual($config)
     {
         // Now run through the virtual stuff.
         $virtual = $this->virtual();
 
         foreach ($virtual as $key => $fn) {
-            $fn($this->$key);
+            $value = $config[$key] ?? null;
+            $fn($value);
         }
     }
 }

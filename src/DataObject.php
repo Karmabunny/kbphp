@@ -40,7 +40,7 @@ abstract class DataObject implements Configurable
     public function __clone()
     {
         if (method_exists($this, '_hook')) {
-            call_user_func([$this, '_hook']);
+            call_user_func([$this, '_hook'], __FUNCTION__);
         }
     }
 }
