@@ -25,10 +25,21 @@ trait UpdateTidyTrait
      */
     public function update($config)
     {
-        $fields = array_fill_keys(static::getProperties(), true);
+        $fields = static::getPropertyTypes();
 
         foreach ($config as $key => $value) {
-            if (!array_key_exists($key, $fields)) continue;
+            $type = $fields[$key] ?? null;
+            if (!$type) continue;
+
+            // Only occurs on PHP 7.4+.
+            if (
+                is_object($value)
+                and class_exists($type)
+                and !is_a($value, $type)
+            ) {
+                continue;
+            }
+
             $this->$key = $value;
         }
 
