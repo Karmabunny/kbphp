@@ -6,8 +6,10 @@
 
 namespace karmabunny\kb;
 
-use Attribute;
+use Error;
 use InvalidArgumentException;
+use ReflectionException;
+use ReflectionProperty;
 
 /**
  * Attach this to a property to tie it to a local method.
@@ -17,12 +19,14 @@ use InvalidArgumentException;
  *
  * @package karmabunny\kb
  */
-#[Attribute(Attribute::TARGET_PROPERTY)]
-class VirtualProperty
+class VirtualProperty extends VirtualPropertyBase
 {
 
-    /** @var string */
+    /**
+     * @var string
+     */
     public $method;
+
 
     /**
      *
@@ -36,24 +40,20 @@ class VirtualProperty
     }
 
 
-    /**
-     * Create from a doc comment.
-     *
-     * This parses a '@virtual' tag.
-     *
-     * @param string $doc
-     * @return self|null
-     */
-    public static function parseDoc(string $doc)
+    /** @inheritdoc */
+    public function apply(object $target, $value)
     {
-        $tags = Reflect::getDocTags($doc, ['virtual']);
-        $tags = $tags['virtual'];
-
-        foreach ($tags as $tag) {
-            $tag = trim($tag);
-            return new self($tag);
+        if (!($this->reflect instanceof ReflectionProperty)) {
+            throw new Error('VirtualProperty must be parsed from an object');
         }
 
-        return null;
+        try {
+            $class = $this->reflect->getDeclaringClass();
+            $method = $class->getMethod($this->method);
+            $method->invoke($target, $value);
+        }
+        catch (ReflectionException $ex) {
+            throw new Error("Virtual method not found: {$this->method}");
+        }
     }
 }
