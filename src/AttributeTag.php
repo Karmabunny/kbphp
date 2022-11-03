@@ -157,7 +157,8 @@ abstract class AttributeTag
     {
         // Static store for class metadata.
         // This only needs to be parsed once.
-        static $meta = [];
+        static $_META = [];
+        $meta = &$_META[static::class] ?? null;
 
         static $MAP = [
             'class' => ReflectionClass::class,
@@ -170,21 +171,20 @@ abstract class AttributeTag
         // A bit of inception here. We're parsing the attributes of the
         // attribute class itself. With this we can define the rules for
         // parsing attributes.
-        if (!$meta) {
+        if ($meta === null) {
+            $meta = [];
             $self = new ReflectionClass(static::class);
 
             $doc = $self->getDocComment() ?: '';
             $doc = Reflect::getDocTag($doc, 'attribute');
             $doc = reset($doc);
 
-            [$name, $args] = explode(' ', $doc, 2) + ['', ''];
-            $args = explode('|', $args);
+            if ($doc) {
+                [$name, $args] = explode(' ', $doc, 2) + ['', ''];
+                $args = explode('|', $args);
 
-            $meta['name'] = $name;
-            $meta['filter'] = [];
-
-            foreach ($args as $arg) {
-                $meta['filter'][] = trim($arg);
+                $meta['name'] = $name;
+                $meta['filter'] = array_map('trim', $args);
             }
         }
 
