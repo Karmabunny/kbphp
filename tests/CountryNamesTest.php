@@ -40,29 +40,50 @@ final class CountryNamesTest extends TestCase
 
     public function testCountryName()
     {
-        // Alpha3 English
-        $name = CountryNames::getCountryName('aus', 'en');
-        $this->assertEquals('Australia', $name);
+        $locales = \ResourceBundle::getLocales('');
+        $locales = array_fill_keys($locales, true);
 
-        // Alpha3 French
-        $name = CountryNames::getCountryName('aus', 'fr');
-        $this->assertEquals('Australie', $name);
+        $tests = 0;
 
-        // Alpha3 Chinese
-        $name = CountryNames::getCountryName('aus', 'zh');
-        $this->assertEquals('澳大利亚', $name);
+        if (!empty($locales['en'])) {
+            $tests++;
 
-        // Alpha2 English
-        $name = CountryNames::getCountryName('au', 'en');
-        $this->assertEquals('Australia', $name);
+            // Alpha3 English
+            $name = CountryNames::getCountryName('aus', 'en');
+            $this->assertEquals('Australia', $name);
 
-        // Alpha2 French
-        $name = CountryNames::getCountryName('au', 'fr');
-        $this->assertEquals('Australie', $name);
+            // Alpha2 English
+            $name = CountryNames::getCountryName('au', 'en');
+            $this->assertEquals('Australia', $name);
+        }
 
-        // Alpha2 Chinese
-        $name = CountryNames::getCountryName('au', 'zh');
-        $this->assertEquals('澳大利亚', $name);
+        if (!empty($locales['fr'])) {
+            $tests++;
+
+            // Alpha3 French
+            $name = CountryNames::getCountryName('aus', 'fr');
+            $this->assertEquals('Australie', $name);
+
+            // Alpha2 French
+            $name = CountryNames::getCountryName('au', 'fr');
+            $this->assertEquals('Australie', $name);
+        }
+
+        if (!empty($locales['zh'])) {
+            $tests++;
+
+            // Alpha3 Chinese
+            $name = CountryNames::getCountryName('aus', 'zh');
+            $this->assertEquals('澳大利亚', $name);
+
+            // Alpha2 Chinese
+            $name = CountryNames::getCountryName('au', 'zh');
+            $this->assertEquals('澳大利亚', $name);
+        }
+
+        if (!$tests) {
+            $this->markTestSkipped('No locales found');
+        }
     }
 
 
