@@ -6,8 +6,6 @@
 
 namespace karmabunny\kb;
 
-use InvalidArgumentException;
-use ReflectionClass;
 use ReflectionProperty;
 
 /**
@@ -15,6 +13,15 @@ use ReflectionProperty;
  * properties, such as arrays and objects.
  *
  * Attach a {@see VirtualProperty} to a property with the target method name.
+ *
+ * Note, these attributes cannot be used with doc tags and is therefore
+ * PHP 8+ only.
+ *
+ * Example:
+ * ```
+ * #[VirtualObject(User::class)]
+ * public User $user;
+ * ```
  *
  * @package karmabunny\kb
  */
@@ -28,43 +35,32 @@ trait AttributeVirtualTrait
      *  - `__clone()`
      *  - `update()`
      *
-     * @return void
+     * @return string[]
      */
-    protected function applyVirtual()
+    protected function applyVirtual(): array
     {
-        $reflect = new ReflectionClass($this);
-        $properties = $reflect->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);
+        $virtuals = VirtualPropertyBase::parse($this);
+        $properties = [];
 
-        foreach ($properties as $property) {
-            $virtual = null;
-
-            // Parse some attributes.
-            if (PHP_VERSION_ID > 80000) {
-                $attributes = $property->getAttributes(VirtualProperty::class);
-
-                foreach ($attributes as $attribute) {
-                    /** @var VirtualProperty $virtual */
-                    $virtual = $attribute->newInstance();
-                    break;
-                }
-            }
-
-            // Nothing found in the attributes, have a look in the docs.
-            if (!$virtual) {
-                $virtual = VirtualProperty::parseDoc($property->getDocComment() ?: '');
-            }
-
-            // Still no, move on.
-            if (!$virtual) {
+        foreach ($virtuals as $virtual) {
+            if (!($virtual->reflect instanceof ReflectionProperty)) {
                 continue;
             }
 
-            // Check it first.
-            if (!method_exists($this, $virtual->method)) {
-                throw new InvalidArgumentException("Virtual property method not found: {$virtual->method}");
-            }
+            $name = $virtual->reflect->getName();
+            $value = $virtual->reflect->getValue($this);
 
-            $this->{$virtual->method}($this->{$property->getName()});
+            if ($value === null) continue;
+
+            // Prevent applying things twice.
+            // Use the first one and ignore the rest.
+            if (!isset($properties[$name])) {
+                $properties[$name] = true;
+
+                $virtual->apply($this, $value);
+            }
         }
+
+        return array_keys($properties);
     }
 }
