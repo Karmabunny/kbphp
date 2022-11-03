@@ -8,8 +8,7 @@
 namespace karmabunny\kb;
 
 use InvalidArgumentException;
-use ReflectionClass;
-use ReflectionMethod;
+use ReflectionProperty;
 
 /**
  * Rules based validation processor.
@@ -62,28 +61,18 @@ class AttributesValidator implements Validator
     /** @inheritdoc */
     public function validate(): bool
     {
-        $reflect = new ReflectionClass($this->target);
-        $properties = $reflect->getProperties(ReflectionMethod::IS_PUBLIC);
+        $rules = Rule::parse($this->target);
 
-        foreach ($properties as $property) {
+        // print_r($rules); die;
 
-            // Parse attributes, if available.
-            if (PHP_VERSION_ID > 80000) {
-                $attributes = $property->getAttributes(Rule::class);
-
-                foreach ($attributes as $attribute) {
-                    /** @var Rule $rule */
-                    $rule = $attribute->newInstance();
-                    $this->process($property->getName(), $rule);
-                }
+        foreach ($rules as $rule) {
+            // Not entirely necessary, but it's a nice sanity check and keeps
+            // the static analysis happy.
+            if (!($rule->reflect instanceof ReflectionProperty)) {
+                continue;
             }
 
-            // Also process doc tags.
-            $rules = Rule::parseDoc($property->getDocComment() ?: '');
-
-            foreach ($rules as $rule) {
-                $this->process($property->getName(), $rule);
-            }
+            $this->process($rule);
         }
 
         return empty($this->errors);
@@ -95,12 +84,20 @@ class AttributesValidator implements Validator
      * @param string $name property
      * @param Rule $rule
      * @return void
+     * @throws InvalidArgumentException
      */
-    protected function process(string $name, Rule $rule)
+    protected function process(Rule $rule)
     {
-        try {
-            $value = $this->target->{$name};
+        // Again, quick assertion to ensure consistency and keep the static
+        // analysis out of my hair.
+        if (!($rule->reflect instanceof ReflectionProperty)) {
+            throw new \Error('Rule parsing failed, missing reflection');
+        }
 
+        $name = $rule->reflect->getName();
+        $value = $rule->reflect->getValue($this->target);
+
+        try {
             $empty = (
                 $value === null
                 or RulesValidator::isEmpty($value)

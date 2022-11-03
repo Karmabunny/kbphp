@@ -7,15 +7,18 @@
 namespace karmabunny\kb;
 
 use Attribute;
-use InvalidArgumentException;
+use Error;
+use JsonException;
+use TypeError;
 
 /**
  * This represents a single rule for a property.
  *
+ * @attribute rule property
  * @package karmabunny\kb
  */
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::IS_REPEATABLE)]
-class Rule
+class Rule extends AttributeTag
 {
 
     /** @var string */
@@ -28,41 +31,28 @@ class Rule
     /**
      *
      * @param string $rule
-     * @param array $args
+     * @param mixed $args
      * @return void
-     * @throws InvalidArgumentException
      */
-    public function __construct(string $rule, array $args = [])
+    public function __construct(string $rule, ...$args)
     {
         $this->name = $rule;
         $this->args = $args;
     }
 
 
-    /**
-     * Create a set of rules from a doc comment.
-     *
-     * This parses a '@rule' tag.
-     *
-     * @param string $doc
-     * @return self[]
-     */
-    public static function parseDoc(string $doc): array
+    /** @inheritdoc */
+    protected static function build(string $content)
     {
-        $tags = Reflect::getDocTags($doc, ['rule']);
-        $tags = $tags['rule'];
+        [$rule, $args] = explode(' ', $content, 2) + ['', ''];
 
-        $rules = [];
-
-        foreach ($tags as $tag) {
-            [$rule, $args] = explode(' ', $tag, 2) + [null, null];
-
-            $args = explode(' ', $args);
-            $args = array_map('trim', $args);
-
-            $rules[] = new self($rule, $args);
+        try {
+            $args = Json::decode("[{$args}]");
+            return new static($rule, ...$args);
         }
-
-        return $rules;
+        catch (JsonException $exception) {
+            throw new Error("Error parsing rule: {$content}", 0, $exception);
+        }
     }
+
 }

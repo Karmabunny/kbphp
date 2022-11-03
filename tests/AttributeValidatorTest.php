@@ -195,28 +195,28 @@ class AttrThing extends Collection implements Validates
 
     /**
      * @var int
-     * @rule range 10 20
+     * @rule range 10, 20
      */
     public $ten_twenty;
 
     /**
      * @var int
-     * @rule range 20 30
+     * @rule range 20, 30
      */
     public $twenty_thirty;
 
     /**
      * @var string
      * @rule email
-     * @rule matchDomain karmabunny.com.au
+     * @rule matchDomain "karmabunny.com.au"
      */
     public $address;
 
     /** @var string */
     #[Rule('required')]
     #[Rule('email')]
-    #[Rule('length', [5, 25])]
-    #[Rule('matchDomain', ['example.com'])]
+    #[Rule('length', 5, 25)]
+    #[Rule('matchDomain', 'example.com')]
     public $php8;
 
 
