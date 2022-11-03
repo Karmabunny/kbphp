@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use Error;
+use JsonException;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionClassConstant;
@@ -15,6 +16,7 @@ use ReflectionMethod;
 use ReflectionParameter;
 use ReflectionProperty;
 use Reflector;
+use TypeError;
 
 /**
  * This is a helper class for working with attributes. It's designed to aid
@@ -76,19 +78,21 @@ abstract class AttributeTag
      * Parameters are parsed as JSON. Single quotes will not work and appear
      * as `null`.
      *
-     * @param string $args
+     * @param string $content
      * @return static|null
      */
-    protected static function build(string $args)
+    protected static function build(string $content)
     {
-        if ($args) {
-            $args = json_decode("[{$args}]");
+        try {
+            $args = Json::decode("[{$content}]");
+            return new static(...$args);
         }
-        else {
-            $args = [];
+        catch (JsonException $exception) {
+            throw new Error("Error parsing: '{$content}' for tag: " . static::class, 0, $exception);
         }
-
-        return new static(...$args);
+        catch (TypeError $error) {
+            throw new Error("Error parsing '{$content}' for tag: " . static::class, 0, $error);
+        }
     }
 
 
