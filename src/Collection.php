@@ -49,6 +49,7 @@ abstract class Collection extends DataObject implements
     use ArrayAccessTrait;
     use ArrayableTrait;
     use SerializeTrait;
+    use HooksTrait;
 
 
     /** @inheritdoc */
