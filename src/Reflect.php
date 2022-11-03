@@ -463,4 +463,20 @@ abstract class Reflect
         return $tags;
     }
 
+
+    /**
+     * Get a single set of doc tags.
+     *
+     * Shorthand for `getDocTags($doc, ['tag'])['tag']`.
+     *
+     * @param string $doc
+     * @param string $tag
+     * @return string[]
+     */
+    public static function getDocTag(string $doc, string $tag): array
+    {
+        $tags = self::getDocTags($doc, [$tag]);
+        return $tags[$tag] ?? [];
+    }
+
 }
