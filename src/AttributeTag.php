@@ -158,7 +158,7 @@ abstract class AttributeTag
         // Static store for class metadata.
         // This only needs to be parsed once.
         static $_META = [];
-        $meta = &$_META[static::class] ?? null;
+        $meta = $_META[static::class] ?? null;
 
         static $MAP = [
             'class' => ReflectionClass::class,
@@ -190,6 +190,8 @@ abstract class AttributeTag
                 $meta['name'] = $name;
                 $meta['filter'] = array_map('trim', $args);
             }
+
+            $_META[static::class] = $meta;
         }
 
         $tags = [];
@@ -207,6 +209,7 @@ abstract class AttributeTag
             $attributes = $reflect->getAttributes(static::class, ReflectionAttribute::IS_INSTANCEOF);
 
             foreach ($attributes as $attribute) {
+                /** @var static $tag */
                 $tag = $attribute->newInstance();
                 $tag->reflect = $reflect;
                 $tags[] = $tag;
