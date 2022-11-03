@@ -16,9 +16,17 @@ use ReflectionProperty;
  */
 trait PropertiesTrait
 {
-    public static function getProperties()
+    public static function getProperties(): array
     {
-        static $fields;
+        $properties = static::getPropertyTypes();
+        return array_keys($properties);
+    }
+
+
+    public static function getPropertyTypes(): array
+    {
+        static $_FIELDS = [];
+        $fields = $_FIELDS[static::class] ?? null;
 
         if ($fields === null) {
             $fields = [];
@@ -28,8 +36,21 @@ trait PropertiesTrait
 
             foreach ($properties as $property) {
                 if ($property->isStatic()) continue;
-                $fields[] = $property->getName();
+
+                $name = $property->getName();
+                $type = null;
+
+                if (PHP_VERSION_ID >= 74000) {
+                    $type = $property->getType();
+                    if ($type !== null) {
+                        $type = $type->getName();
+                    }
+                }
+
+                $fields[$name] = $type ?? 'mixed';
             }
+
+            $_FIELDS[static::class] = $fields;
         }
 
         return $fields;
