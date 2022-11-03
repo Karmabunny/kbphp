@@ -28,17 +28,27 @@ trait UpdateStrictTrait
      */
     public function update($config)
     {
-        static $fields;
-
-        if ($fields === null) {
-            $fields = array_fill_keys(static::getProperties(), true);
-        }
+        $fields = static::getPropertyTypes();
 
         $errors = [];
 
         foreach ($config as $key => $value) {
-            if (!array_key_exists($key, $fields)) {
+            $type = $fields[$key] ?? null;
+
+            // Check field exists.
+            if (!$type) {
                 $errors[] = $key;
+                continue;
+            }
+
+            // Check type matches, but these don't emit an error. Otherwise
+            // hooks wouldn't trigger properly.
+            // Only occurs on PHP 7.4+.
+            if (
+                is_object($value)
+                and class_exists($type)
+                and !is_a($value, $type)
+            ) {
                 continue;
             }
 
