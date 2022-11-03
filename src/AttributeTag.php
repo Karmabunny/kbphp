@@ -172,7 +172,11 @@ abstract class AttributeTag
         // attribute class itself. With this we can define the rules for
         // parsing attributes.
         if ($meta === null) {
-            $meta = [];
+            $meta = [
+                'name' => null,
+                'filter' => [],
+            ];
+
             $self = new ReflectionClass(static::class);
 
             $doc = $self->getDocComment() ?: '';
@@ -222,13 +226,15 @@ abstract class AttributeTag
 
             if ($docs) {
                 // Check if we're allowed to parse this target type.
-                foreach ($MAP as $name => $class) {
-                    if (
-                        ($reflect instanceof $class)
-                        and !in_array($name, $meta['filter'])
-                    ) {
-                        $filter = implode(', ', $meta['filter']);
-                        throw new Error("Tag \"@{$meta['name']}\" cannot target {$name} (allowed targets: {$filter})");
+                if ($meta['filter']) {
+                    foreach ($MAP as $name => $class) {
+                        if (
+                            ($reflect instanceof $class)
+                            and !in_array($name, $meta['filter'])
+                        ) {
+                            $filter = implode(', ', $meta['filter']);
+                            throw new Error("Tag \"@{$meta['name']}\" cannot target {$name} (allowed targets: {$filter})");
+                        }
                     }
                 }
 
