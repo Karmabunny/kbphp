@@ -54,7 +54,11 @@ use TypeError;
 abstract class AttributeTag
 {
 
-    /** @var Reflector|null */
+    /**
+     * The reflection object that this tag was found on.
+     *
+     * @var Reflector|null
+     */
     public $reflect;
 
 
@@ -101,7 +105,6 @@ abstract class AttributeTag
      *
      * @param string|object $target
      * @return static[]
-     * @throws Error
      */
     public static function parse($target): array
     {
@@ -136,7 +139,6 @@ abstract class AttributeTag
      *
      * @param callable $function
      * @return static[]
-     * @throws Error
      */
     public static function parseFunction($function): array
     {
@@ -150,7 +152,6 @@ abstract class AttributeTag
      *
      * @param ReflectionClass|ReflectionFunction|ReflectionProperty|ReflectionClassConstant|ReflectionParameter $reflect
      * @return static[]
-     * @throws Error when the reflector cannot parse attributes or tags
      */
     public static function parseReflector($reflect): array
     {
