@@ -6,9 +6,6 @@
 
 namespace karmabunny\kb;
 
-use Closure;
-use ReflectionClass;
-
 /**
  *
  * Usage:
@@ -20,12 +17,12 @@ use ReflectionClass;
  *
  *    public function myMethod($arg1, $arg2)
  *    {
- *       self::_hook(__FUNCTION__);
+ *       $this->_hook(__FUNCTION__, 'first');
  *       // do whatever.
  *    }
  *
  *    #[Hook('myMethod')]
- *    public function myHook()
+ *    protected function myHook($arg1)
  *    {
  *       // do something else.
  *    }
@@ -36,79 +33,40 @@ use ReflectionClass;
  */
 trait HooksTrait
 {
-    /** @var array[] [ id => Hook[] ] */
-    protected static $_hooks = null;
+    /** @var Hook[][] [ id => Hook[] ] */
+    protected $_hooks = null;
 
 
     /**
+     * Call a hook.
      *
-     * @param string|null $id
+     * This will initialise the hooks if they haven't already.
+     *
+     * @param string $id
      * @return int
      */
-    protected static function _hook(string $id = null): int
+    protected function _hook(string $id, ...$args): int
     {
-        // Fetch the calling method. Is this performant? Not sure.
-        $trace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 3);
-        $frame = $trace[1];
-
-        // Support for calling through these helpers.
-        if (
-            $frame['function'] === 'call_user_func'
-            or $frame['function'] === 'call_user_func_array'
-        ) {
-            $frame = $trace[2];
-        }
-
-        $object = $frame['object'] ?? null;
-
         // Populate all of the hooks for this class.
-        if (!isset(static::$_hooks[static::class])) {
-            static::$_hooks[static::class] = [];
+        if ($this->_hooks === null) {
+            $this->_hooks = [];
 
-            $reflect = new ReflectionClass(static::class);
-            $methods = $reflect->getMethods();
+            $hooks = Hook::parse($this);
 
-            foreach ($methods as $method) {
-                if ($method->isAbstract()) continue;
-                if (!$method->isUserDefined()) continue;
-
-                $method->setAccessible(true);
-
-                // Find regular doc tags, for PHP7 support.
-                $tags = Reflect::getMethodTags($method->getDocComment(), ['hook']);
-
-                foreach ($tags['hook'] as $tag) {
-                    $hook = new Hook($tag);
-                    $hook->prepare($method);
-
-                    static::$_hooks[static::class][$hook->getId()][] = $hook;
-                }
-
-                // Find PHP8 attribute hooks. These potentially have more
-                // power because they can be inherited and such.
-                if (PHP_VERSION_ID >= 80000) {
-                    $attributes = $method->getAttributes(Hook::class);
-
-                    foreach ($attributes as $attribute) {
-                        /** @var Hook $hook */
-                        $hook = $attribute->newInstance();
-                        $hook->prepare($method);
-
-                        static::$_hooks[static::class][$hook->getId()][] = $hook;
-                    }
-                }
+            foreach ($hooks as $hook) {
+                $this->_hooks[$hook->id][] = $hook;
             }
         }
 
-        // Fill in the ID if not specified.
-        $id = $id ?? $frame['function'] ?? null;
-        $args = $frame['args'] ?? [];
+        // Hook IDs are case insensitive.
+        $id = strtolower($id);
 
-        /** @var Hook[] */
-        $hooks = static::$_hooks[static::class][strtolower($id)] ?? [];
+        /** @var Hook[] $hooks */
+        $hooks = $this->_hooks[$id] ?? [];
 
+        // Fire off relevant hooks.
         foreach ($hooks as $hook) {
-            $hook->run($object, ...$args);
+            $hook->run($this, ...$args);
         }
 
         return count($hooks);

@@ -12,16 +12,15 @@ use RuntimeException;
 
 /**
  *
+ * @attribute hook method
  * @package karmabunny\kb
  */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
-class Hook
+class Hook extends AttributeTag
 {
+
     /** @var string */
     public $id;
-
-    /** @var ReflectionMethod|null */
-    public $target;
 
 
     /**
@@ -31,59 +30,41 @@ class Hook
      */
     public function __construct(string $id)
     {
-        $this->id = $id;
+        $this->id = strtolower($id);
     }
 
 
-    /**
-     *
-     * @param ReflectionMethod $target
-     * @return void
-     */
-    public function prepare(ReflectionMethod $target)
+    /** @inheritdoc */
+    protected static function build(string $content)
     {
-        $this->target = $target;
+        return new static($content);
     }
 
 
     /**
      *
-     * @return string
-     */
-    public function getId(): string
-    {
-        return strtolower($this->id);
-    }
-
-
-    /**
-     *
-     * @param object|null $object
+     * @param object $object
      * @param mixed $args
      * @return void
      */
-    public function run($object, ...$args)
+    public function run(object $object, ...$args)
     {
-        if (!$this->target) {
+        if (!($this->reflect instanceof ReflectionMethod)) {
             throw new RuntimeException('This hook has not been prepared.');
         }
 
-        // Shhhh.
-        if (!$this->target->isStatic() and !$object) {
-            return;
-        }
-
-        $this->target->invokeArgs($object, $args);
+        $this->reflect->setAccessible(true);
+        $this->reflect->invoke($object, ...$args);
     }
 
 
     /**
      *
-     * @param object|null $object
+     * @param object $object
      * @param mixed $args
      * @return void
      */
-    public function __invoke($object, ...$args)
+    public function __invoke(object $object, ...$args)
     {
         $this->run($object, ...$args);
     }
