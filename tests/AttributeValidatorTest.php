@@ -7,11 +7,15 @@
 use karmabunny\kb\AttributeValidatorTrait;
 use karmabunny\kb\Collection;
 use karmabunny\kb\Rule;
+use karmabunny\kb\Scenario;
 use karmabunny\kb\Validates;
 use karmabunny\kb\ValidationException;
 use PHPUnit\Framework\TestCase;
 
 
+/**
+ * Test the attribute rules validator.
+ */
 class AttributeValidatorTest extends TestCase
 {
     public function testEmpty()
@@ -30,6 +34,7 @@ class AttributeValidatorTest extends TestCase
 
             if (PHP_VERSION_ID >= 80000) {
                 $expected[] = 'php8';
+                $expected[] = 'php8_scenario';
             }
 
             $actual = array_keys($exception->errors);
@@ -53,17 +58,85 @@ class AttributeValidatorTest extends TestCase
                 // range - 10-20
                 'ten_twenty' => 13,
 
-                // range - 20-30
-                'twenty_thirty' => 26,
-
                 // email + end in karmabunny.com.au
                 'address' => 'aaaa@karmabunny.com.au',
 
                 // Not tested in PHP7
                 'php8' => 'test@example.com',
+
+                // Not tested in PHP7
+                'php8_scenario' => 'OK',
             ]);
 
             $thing->validate();
+            $this->assertTrue(true);
+        }
+        catch (ValidationException $exception) {
+            $this->fail($exception->getMessage());
+        }
+    }
+
+
+    public function testScenarios()
+    {
+        // Test required.
+        // missing twenty_thirty + (php8_scenario, when applicable)
+        try {
+            $thing = new AttrThing([
+                'id' => 100,
+                'amount' => 400,
+                'address' => 'aaaa@karmabunny.com.au',
+                'php8' => 'test@example.com',
+            ]);
+
+            $thing->validate(AttrThing::SCENARIO_TEST);
+            $this->fail('Expected ValidationException.');
+        }
+        catch (ValidationException $exception) {
+            $expected = [
+                'twenty_thirty',
+            ];
+
+            if (PHP_VERSION_ID >= 80000) {
+                $expected[] = 'php8_scenario';
+            }
+
+            $actual = array_keys($exception->errors);
+            $this->assertEquals($expected, $actual);
+        }
+
+        // Just bad validations.
+        try {
+            $thing = new AttrThing([
+                'ten_twenty' => -13,
+                'twenty_thirty' => 10,
+                'php8_scenario' => 'OK',
+            ]);
+
+            $thing->validate(AttrThing::SCENARIO_TEST);
+            $this->fail('Expected ValidationException.');
+        }
+        catch (ValidationException $exception) {
+            $expected = [
+                'ten_twenty',
+                'twenty_thirty',
+            ];
+
+            $actual = array_keys($exception->errors);
+            $this->assertEquals($expected, $actual);
+        }
+
+        try {
+            $thing = new AttrThing([
+                'ten_twenty' => 15,
+
+                'twenty_thirty' => 25,
+
+                // Not tested in PHP7
+                'php8_scenario' => 'OK',
+            ]);
+
+            $thing->validate(AttrThing::SCENARIO_TEST);
             $this->assertTrue(true);
         }
         catch (ValidationException $exception) {
@@ -84,9 +157,6 @@ class AttributeValidatorTest extends TestCase
                 // range - 10-20
                 'ten_twenty' => -13,
 
-                // range - 20-30
-                'twenty_thirty' => 31,
-
                 // email, matchDomain
                 'address' => 'eeeeee',
             ]);
@@ -100,12 +170,12 @@ class AttributeValidatorTest extends TestCase
                 'id',
                 'amount',
                 'ten_twenty',
-                'twenty_thirty',
                 'address',
             ];
 
             if (PHP_VERSION_ID >= 80000) {
                 $expected[] = 'php8';
+                $expected[] = 'php8_scenario';
             }
 
             $actual = array_keys($exception->errors);
@@ -114,7 +184,6 @@ class AttributeValidatorTest extends TestCase
             $this->assertTrue(isset($exception->errors['id']['required']));
             $this->assertCount(1, $exception->errors['amount'] ?? []);
             $this->assertCount(1, $exception->errors['ten_twenty'] ?? []);
-            $this->assertCount(1, $exception->errors['twenty_thirty'] ?? []);
             $this->assertCount(2, $exception->errors['address'] ?? []);
         }
     }
@@ -137,6 +206,7 @@ class AttributeValidatorTest extends TestCase
         // test valid.
         try {
             $thing->php8 = 'test@example.com';
+            $thing->php8_scenario = 'OK';
 
             $thing->validate();
             $this->assertTrue(true);
@@ -148,23 +218,50 @@ class AttributeValidatorTest extends TestCase
         // test required.
         try {
             $thing->php8 = null;
+            $thing->php8_scenario = 'OK';
 
             $thing->validate();
             $this->fail('Expected ValidationException.');
         }
         catch (ValidationException $exception) {
             $this->assertTrue(isset($exception->errors['php8']['required']));
+            $this->assertFalse(isset($exception->errors['php8_scenario']['required']));
         }
 
         // test invalid.
         try {
             $thing->php8 = 'eee';
+            $thing->php8_scenario = 'OK';
 
             $thing->validate();
             $this->fail('Expected ValidationException.');
         }
         catch (ValidationException $exception) {
             $this->assertCount(3, $exception->errors['php8'] ?? []);
+        }
+
+        // test bad scenario.
+        try {
+            $thing->php8 = null;
+            $thing->php8_scenario = null;
+
+            $thing->validate(AttrThing::SCENARIO_TEST);
+            $this->fail('Expected ValidationException.');
+        }
+        catch (ValidationException $exception) {
+            $this->assertTrue(isset($exception->errors['php8_scenario']['required']));
+        }
+
+        // test good scenario.
+        try {
+            $thing->php8 = null;
+            $thing->php8_scenario = 'OK';
+
+            $thing->validate(AttrThing::SCENARIO_TEST);
+            $this->assertTrue(true);
+        }
+        catch (ValidationException $exception) {
+            $this->fail($exception->getMessage());
         }
     }
 }
@@ -173,6 +270,8 @@ class AttributeValidatorTest extends TestCase
 class AttrThing extends Collection implements Validates
 {
     use AttributeValidatorTrait;
+
+    const SCENARIO_TEST = 'TEST';
 
     /**
      * @var int
@@ -190,18 +289,23 @@ class AttrThing extends Collection implements Validates
     /**
      * @var int
      * @rule required
+     * @scenario
      */
     public $default = 333;
 
     /**
      * @var int
      * @rule range 10, 20
+     * @scenario
+     * @scenario TEST
      */
     public $ten_twenty;
 
     /**
      * @var int
+     * @rule required
      * @rule range 20, 30
+     * @scenario TEST
      */
     public $twenty_thirty;
 
@@ -218,6 +322,14 @@ class AttrThing extends Collection implements Validates
     #[Rule('length', 5, 25)]
     #[Rule('matchDomain', 'example.com')]
     public $php8;
+
+    /**
+     * @var string
+     */
+    #[Rule('required')]
+    #[Scenario()]
+    #[Scenario(self::SCENARIO_TEST)]
+    public $php8_scenario;
 
 
     public static function matchDomain($value, string $domain)

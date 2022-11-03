@@ -12,10 +12,11 @@ use InvalidArgumentException;
 /**
  * This adds a scenario to an existing attribute rule.
  *
+ * @attribute scenario property
  * @package karmabunny\kb
  */
-#[Attribute(Attribute::TARGET_PROPERTY)]
-class Scenario
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::IS_REPEATABLE)]
+class Scenario extends AttributeTag
 {
 
     /** @var string|null */
@@ -34,26 +35,10 @@ class Scenario
     }
 
 
-    /**
-     * Create a set of scenarios from a doc comment.
-     *
-     * This parses a '@scenario' tag.
-     *
-     * @param string $doc
-     * @return self[]
-     */
-    public static function parseDoc(string $doc): array
+    /** @inheritdoc */
+    protected static function build(string $args)
     {
-        $tags = Reflect::getDocTags($doc, ['scenario']);
-        $tags = $tags['scenario'];
-
-        $scenarios = [];
-
-        foreach ($tags as $tag) {
-            $tag = trim($tag) ?: null;
-            $scenarios[] = new self($tag);
-        }
-
-        return $scenarios;
+        return new static(trim($args) ?: null);
     }
+
 }
