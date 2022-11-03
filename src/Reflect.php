@@ -436,22 +436,28 @@ abstract class Reflect
      */
     public static function getDocTags(string $doc, array $filter = []): array
     {
+        if (empty($doc)) {
+            return [];
+        }
+
         $tags = [];
-        $matches = [];
 
         if ($filter) {
             $tags = array_fill_keys($filter, []);
         }
 
-        if (!preg_match_all("/@([^\s]+) ([^\n]+)/", $doc, $matches, PREG_SET_ORDER)) {
+        $matches = [];
+        if (!preg_match_all("/^[*\s\/]*@([^\s]+)([\t ]*[^\n]+)?/m", $doc, $matches, PREG_SET_ORDER)) {
             return $tags;
         }
 
         foreach ($matches as $match) {
-            list( , $tag, $value ) = $match;
+            list( , $tag, $value ) = $match + ['', '', ''];
             if ($filter and !in_array($tag, $filter)) continue;
 
-            $tags[$tag][] = trim($value);
+            $value = preg_replace('/\*+\/$/', '', $value);
+            $value = trim($value);
+            $tags[$tag][] = $value;
         }
 
         return $tags;
