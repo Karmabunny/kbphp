@@ -37,7 +37,6 @@ final class HooksTest extends TestCase
         // Only hookOne has been called.
         $this->assertCount(1, $check['myMethod'] ?? []);
         $this->assertCount(0, $check['anotherMethod'] ?? []);
-        $this->assertCount(0, $check['staticMethod'] ?? []);
         $this->assertCount(1, $check['hookOne'] ?? []);
         $this->assertCount(0, $check['hookTwo'] ?? []);
         $this->assertCount(0, $check['hookThree'] ?? []);
@@ -60,7 +59,6 @@ final class HooksTest extends TestCase
         // First hook has been called twice (myMethod and anotherMethod).
         $this->assertCount(1, $check['myMethod'] ?? []);
         $this->assertCount(1, $check['anotherMethod'] ?? []);
-        $this->assertCount(0, $check['staticMethod'] ?? []);
         $this->assertCount(2, $check['hookOne'] ?? []);
         $this->assertCount(0, $check['hookTwo'] ?? []);
         $this->assertCount(1, $check['hookThree'] ?? []);
@@ -80,36 +78,6 @@ final class HooksTest extends TestCase
     }
 
 
-    public function testStaticHook()
-    {
-        ParentClass::$check = [];
-        $check = &ParentClass::$check;
-        $this->assertCount(0, $check);
-
-        ParentClass::staticMethod('blah');
-
-        // hookOne cannot be called, because it's non-static.
-        $this->assertCount(0, $check['myMethod'] ?? []);
-        $this->assertCount(0, $check['anotherMethod'] ?? []);
-        $this->assertCount(1, $check['staticMethod'] ?? []);
-        $this->assertCount(0, $check['hookOne'] ?? []);
-        $this->assertCount(0, $check['hookTwo'] ?? []);
-        $this->assertCount(1, $check['hookThree'] ?? []);
-
-        // Method exists.
-        $expected = [];
-        $expected[] = [ParentClass::class, ParentClass::class, ['blah']];
-        $actual = $check['staticMethod'];
-        $this->assertEquals($expected, $actual);
-
-        // Hook has two calls, one for each method.
-        $expected = [];
-        $expected[] = [ParentClass::class, ParentClass::class, ['blah']];
-        $actual = $check['hookThree'];
-        $this->assertEquals($expected, $actual);
-    }
-
-
     public function testChildHooks()
     {
         ParentClass::$check = [];
@@ -122,7 +90,6 @@ final class HooksTest extends TestCase
         // Two hooks exist on the child.
         $this->assertCount(1, $check['myMethod'] ?? []);
         $this->assertCount(0, $check['anotherMethod'] ?? []);
-        $this->assertCount(0, $check['staticMethod'] ?? []);
         $this->assertCount(1, $check['hookOne'] ?? []);
         $this->assertCount(1, $check['hookTwo'] ?? []);
         $this->assertCount(0, $check['hookThree'] ?? []);
@@ -151,7 +118,6 @@ final class HooksTest extends TestCase
         // 'anotherMethod' is still called on the child.
         $this->assertCount(1, $check['myMethod'] ?? []);
         $this->assertCount(1, $check['anotherMethod'] ?? []);
-        $this->assertCount(0, $check['staticMethod'] ?? []);
         $this->assertCount(2, $check['hookOne'] ?? []);
         $this->assertCount(1, $check['hookTwo'] ?? []);
         $this->assertCount(1, $check['hookThree'] ?? []);
@@ -186,21 +152,14 @@ class ParentClass
 
     public function myMethod($arg1, $arg2)
     {
-        self::_hook();
+        $this->_hook(__FUNCTION__, $arg1, $arg2);
         static::$check[__FUNCTION__][] = [self::class, static::class, func_get_args()];
     }
 
 
     public function anotherMethod()
     {
-        self::_hook();
-        static::$check[__FUNCTION__][] = [self::class, static::class, func_get_args()];
-    }
-
-
-    public static function staticMethod($arg)
-    {
-        self::_hook();
+        $this->_hook(__FUNCTION__);
         static::$check[__FUNCTION__][] = [self::class, static::class, func_get_args()];
     }
 
@@ -209,7 +168,6 @@ class ParentClass
      *
      * @hook myMethod
      * @hook anotherMethod
-     * @hook staticMethod
      */
     protected function hookOne()
     {
@@ -227,7 +185,6 @@ class ParentClass
     /**
      *
      * @hook anotherMethod
-     * @hook staticMethod
      * @return void
      */
     private static function hookThree()
@@ -250,7 +207,7 @@ class ChildClass extends ParentClass
 
     public function anotherMethod()
     {
-        self::_hook();
+        $this->_hook(__FUNCTION__);
         static::$check[__FUNCTION__][] = [self::class, static::class, func_get_args()];
     }
 }
