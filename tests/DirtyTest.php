@@ -5,6 +5,7 @@
  */
 
 use karmabunny\kb\DataObject;
+use karmabunny\kb\DirtyObjectInterface;
 use karmabunny\kb\DirtyPropertiesTrait;
 use PHPUnit\Framework\TestCase;
 
@@ -67,7 +68,7 @@ final class DirtyTest extends TestCase
 }
 
 
-class ThingoDirty extends DataObject
+class ThingoDirty extends DataObject implements DirtyObjectInterface
 {
     use DirtyPropertiesTrait;
 
@@ -78,13 +79,6 @@ class ThingoDirty extends DataObject
     public $empty;
 
     public $default = 'abc';
-
-
-    public function update($config)
-    {
-        parent::update($config);
-        $this->getChecksums();
-    }
 
 
     public function getDirtyProperties(): array
