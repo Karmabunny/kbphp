@@ -7,7 +7,6 @@
 use karmabunny\kb\Collection;
 use karmabunny\kb\UpdateStrictTrait;
 use karmabunny\kb\UpdateTidyTrait;
-use karmabunny\kb\UpdateVirtualTrait;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -264,7 +263,6 @@ class Thingo extends Collection {
 
 class ThingoTidy extends Collection {
     use UpdateTidyTrait;
-    use UpdateVirtualTrait;
 
     public $name;
 
@@ -286,7 +284,6 @@ class ThingoTidy extends Collection {
 
 class ThingoStrict extends Collection {
     use UpdateStrictTrait;
-    use UpdateVirtualTrait;
 
     public $name;
 
@@ -308,7 +305,6 @@ class ThingoStrict extends Collection {
 
 
 class ThingoVirtual extends Collection {
-    use UpdateVirtualTrait;
 
     public $name;
 
