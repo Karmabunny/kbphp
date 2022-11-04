@@ -15,7 +15,8 @@ use PHPUnit\Framework\TestCase;
 final class DirtyTest extends TestCase
 {
 
-    public function testDirty() {
+    public function testEmptyDirty()
+    {
         $thingo = new ThingoDirty([
             'parent_id' => 123,
             'description' => 'blah blah blah',
@@ -26,6 +27,15 @@ final class DirtyTest extends TestCase
         $actual = $thingo->getDirtyProperties();
         $expected = [];
         $this->assertEquals($expected, $actual);
+    }
+
+    public function testDirty()
+    {
+        $thingo = new ThingoDirty([
+            'parent_id' => 123,
+            'description' => 'blah blah blah',
+            'empty' => null,
+        ]);
 
         $thingo->description = 'neat!';
 
