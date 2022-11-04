@@ -47,6 +47,8 @@ trait AttributeVirtualTrait
                 continue;
             }
 
+            $virtual->reflect->setAccessible(true);
+
             $name = $virtual->reflect->getName();
             $value = $virtual->reflect->getValue($this);
 

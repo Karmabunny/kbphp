@@ -63,6 +63,8 @@ class VirtualObject extends VirtualPropertyBase
             throw new Error('VirtualProperty must be parsed from an object');
         }
 
+        $this->reflect->setAccessible(true);
+
         if ($this->mode & self::MODE_SINGLE) {
             $value = Configure::configure([ $this->class => $value ]);
             $this->reflect->setValue($target, $value);
