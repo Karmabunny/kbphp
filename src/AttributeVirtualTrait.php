@@ -12,16 +12,21 @@ use ReflectionProperty;
  * This modifies the behaviour of a DataObject/Collection for updating complex
  * properties, such as arrays and objects.
  *
- * Attach a {@see VirtualProperty} to a property with the target method name.
+ * Attach a {@see VirtualProperty} or {@see VirtualObject} to a property to
+ * enable automatic conversion of these properties.
  *
- * Note, these attributes cannot be used with doc tags and is therefore
- * PHP 8+ only.
+ * Notes:
+ * - 'automatic' is a stretch, implementors must call `setVirtual()`, ideally
+ *   alongside any build `update()` methods.
+ * - these attributes cannot be used with doc tags and is therefore PHP 8+ only.
  *
  * Example:
  * ```
  * #[VirtualObject(User::class)]
  * public User $user;
  * ```
+ *
+ * Implement the {@see UpdateVirtualInterface} to enable this for DataObject types.
  *
  * @package karmabunny\kb
  */
@@ -35,9 +40,10 @@ trait AttributeVirtualTrait
      *  - `__clone()`
      *  - `update()`
      *
+     * @param iterable $config
      * @return string[]
      */
-    protected function applyVirtual(): array
+    protected function setVirtual($config)
     {
         $virtuals = VirtualPropertyBase::parse($this);
         $properties = [];
@@ -47,10 +53,8 @@ trait AttributeVirtualTrait
                 continue;
             }
 
-            $virtual->reflect->setAccessible(true);
-
             $name = $virtual->reflect->getName();
-            $value = $virtual->reflect->getValue($this);
+            $value = $config[$name] ?? null;
 
             if ($value === null) continue;
 
@@ -59,10 +63,9 @@ trait AttributeVirtualTrait
             if (!isset($properties[$name])) {
                 $properties[$name] = true;
 
+                $virtual->reflect->setAccessible(true);
                 $virtual->apply($this, $value);
             }
         }
-
-        return array_keys($properties);
     }
 }
