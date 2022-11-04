@@ -32,8 +32,8 @@ trait UpdateTidyTrait
             $this->$key = $value;
         }
 
-        if (method_exists($this, 'applyVirtual')) {
-            call_user_func([$this, 'applyVirtual']);
+        if ($this instanceof UpdateVirtualInterface) {
+            $this->setVirtual($config);
         }
     }
 }

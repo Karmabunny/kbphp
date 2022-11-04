@@ -90,15 +90,11 @@ trait UpdateVirtualTrait
     /**
      * Apply the virtual converters to the all properties.
      *
-     * Recommended placements:
-     *  - `__clone()`
-     *  - `update()`
-     *
+     * @deprecated use setVirtual()
      * @return void
      */
     protected function applyVirtual()
     {
-        // Now run through the virtual stuff.
         $virtual = $this->virtual();
 
         foreach ($virtual as $key => $fn) {
