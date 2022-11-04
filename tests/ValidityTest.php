@@ -16,8 +16,17 @@ class ValidityTest extends TestCase
         return [
             ['aa', false],
             ['test@example.com', true],
+            ['test@example.com.', true],
+            ['a@b.c', true],
+            ['a@b.c.d.e.f', true],
+            ['abc@localhost', false],
+            ['a@localhost.', false],
+            ['a.@b.com', false],
+            ['a.b@localhost', false],
             ['@example.com', false],
             ['test@', false],
+            ['a@.com', false],
+            ['a@..com', false],
         ];
     }
 
