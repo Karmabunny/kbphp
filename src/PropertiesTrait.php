@@ -16,6 +16,20 @@ use ReflectionProperty;
  */
 trait PropertiesTrait
 {
+
+    /**
+     * Get a list of properties for this object.
+     *
+     * By default this is a set of non-static public properties, but can be
+     * overridden by child classes that might want to show or hide other data.
+     *
+     * This is used by:
+     * - {@see SerializeTrait}
+     * - {@see UpdateTidyTrait}
+     * - {@see UpdateStrictTrait}
+     *
+     * @return string[]
+     */
     public static function getProperties(): array
     {
         $properties = static::getPropertyTypes();
@@ -23,6 +37,14 @@ trait PropertiesTrait
     }
 
 
+    /**
+     * Get a list of properties, with respective types (if available).
+     *
+     * Beginning with PHP 7.4 object properties can have strict types. If not
+     * typed or running a older PHP all properties will be `mixed`.
+     *
+     * @return string[] [ name => type ]
+     */
     public static function getPropertyTypes(): array
     {
         static $_FIELDS = [];
