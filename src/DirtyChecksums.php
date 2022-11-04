@@ -10,7 +10,7 @@ namespace karmabunny\kb;
  *
  * @package karmabunny\kb
  */
-class DirtyChecksums
+class DirtyChecksums implements NotSerializable
 {
 
     /** @var string[] [ name => sha ] */
