@@ -46,6 +46,9 @@ abstract class Validity
     /**
      * Validate email, commonly used characters only
      *
+     * This checks for only one '@' and _at least_ one 'dot' in the domain.
+     * This means `test@localhost` will not pass. This is intentional.
+     *
      * @example
      *    $valid->check('email', 'email')
      *
@@ -54,9 +57,15 @@ abstract class Validity
      */
     public static function email($val)
     {
-        $regex = '/^[-_a-z0-9\'+*$^&%=~!?{}]++(?:\.[-_a-z0-9\'+*$^&%=~!?{}]+)*+@(?:(?![-.])[-a-z0-9.]+(?<![-.])\.[a-z]{2,6}|\d{1,3}(?:\.\d{1,3}){3})(?::\d++)?$/iD';
+        $regex = '/^[^@]+@[^@.]+\.[^@]+$/iD';
 
         if (!preg_match($regex, $val)) {
+            throw new ValidationException('Invalid email address');
+        }
+
+        $regex = '/[@.][@.]/iD';
+
+        if (preg_match($regex, $val)) {
             throw new ValidationException('Invalid email address');
         }
     }
