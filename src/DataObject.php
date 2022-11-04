@@ -28,6 +28,10 @@ abstract class DataObject implements Configurable
      */
     function __construct($config = [])
     {
+        if (method_exists($this, '_hook')) {
+            call_user_func([$this, '_hook'], __FUNCTION__, $config);
+        }
+
         // This makes things not break. Something about references.
         if (!is_array($config)) {
             $config = iterator_to_array($config);
