@@ -38,6 +38,41 @@ trait PropertiesTrait
 
 
     /**
+     * Get a list of default properties for this object.
+     *
+     * By default this is all non-static public properties with compile time
+     * default values. That is, defined in the class definition.
+     *
+     * @return array [ name => value ]
+     */
+    public static function getPropertyDefaults(): array
+    {
+        static $_FIELDS = [];
+        $defaults = $_FIELDS[static::class] ?? null;
+
+        if ($defaults === null) {
+            $reflect = new ReflectionClass(static::class);
+            $properties = $reflect->getDefaultProperties();
+
+            foreach ($properties as $name => $value) {
+                $property = $reflect->getProperty($name);
+
+                // We only want non-null, public, instance properties.
+                if ($value === null) continue;
+                if ($property->isStatic()) continue;
+                if (!$property->isPublic()) continue;
+
+                $defaults[$name] = $value;
+            }
+
+            $_FIELDS[static::class] = $defaults;
+        }
+
+        return $defaults;
+    }
+
+
+    /**
      * Get a list of properties, with respective types (if available).
      *
      * Beginning with PHP 7.4 object properties can have strict types. If not
