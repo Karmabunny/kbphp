@@ -33,5 +33,9 @@ abstract class DataObject implements Configurable
             $config = iterator_to_array($config);
         }
         $this->update($config);
+
+        if ($this instanceof DirtyObjectInterface) {
+            $this->getChecksums();
+        }
     }
 }

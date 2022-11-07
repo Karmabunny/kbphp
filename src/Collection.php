@@ -43,12 +43,14 @@ abstract class Collection extends DataObject implements
         Serializable,
         JsonSerializable,
         Arrayable,
-        Copyable
+        Copyable,
+        DirtyObjectInterface
 {
 
     use ArrayAccessTrait;
     use ArrayableTrait;
     use SerializeTrait;
+    use DirtyPropertiesTrait;
 
 
     /** @inheritdoc */
