@@ -12,6 +12,7 @@ use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionClassConstant;
 use ReflectionFunction;
+use ReflectionFunctionAbstract;
 use ReflectionMethod;
 use ReflectionParameter;
 use ReflectionProperty;
@@ -64,10 +65,8 @@ abstract class AttributeTag
 
     /**
      * Build this tag.
-     *
-     * @param mixed $args
      */
-    public function __construct(...$args) {}
+    public function __construct() {}
 
 
     /**
@@ -89,6 +88,7 @@ abstract class AttributeTag
     {
         try {
             $args = Json::decode("[{$content}]");
+            // @phpstan-ignore-next-line : Don't care.
             return new static(...$args);
         }
         catch (JsonException $exception) {
@@ -150,10 +150,10 @@ abstract class AttributeTag
     /**
      * Parse attributes and tags of a reflection object.
      *
-     * @param ReflectionClass|ReflectionFunction|ReflectionProperty|ReflectionClassConstant|ReflectionParameter $reflect
+     * @param ReflectionClass|ReflectionFunctionAbstract|ReflectionProperty|ReflectionClassConstant|ReflectionParameter $reflect
      * @return static[]
      */
-    public static function parseReflector($reflect): array
+    public static function parseReflector(object $reflect): array
     {
         // Static store for class metadata.
         // This only needs to be parsed once.
@@ -198,10 +198,8 @@ abstract class AttributeTag
 
         // Search for natural attributes.
         if (PHP_VERSION_ID >= 80000) {
-
             if (!method_exists($reflect, 'getAttributes')) {
-                $type = is_object($reflect) ? get_class($reflect) : (string) $reflect;
-                throw new Error('Cannot parse attributes from: ' . $type);
+                throw new Error('Cannot parse attributes from: ' . get_class($reflect));
             }
 
             // We're looking for instances of ourself (the attribute) and any
@@ -218,10 +216,8 @@ abstract class AttributeTag
 
         // Only parse doc tags if enabled.
         if ($meta['name']) {
-
             if (!method_exists($reflect, 'getDocComment')) {
-                $type = is_object($reflect) ? get_class($reflect) : (string) $reflect;
-                throw new Error('Cannot parse doc comments from: ' . $type);
+                throw new Error('Cannot parse doc comments from: ' . get_class($reflect));
             }
 
             $doc = $reflect->getDocComment() ?: '';
