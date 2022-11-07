@@ -33,7 +33,7 @@ class DirtyChecksums implements NotSerializable
     public function __construct(object $target)
     {
         $this->target = $target;
-        $this->update($target);
+        $this->update();
     }
 
 
@@ -61,6 +61,7 @@ class DirtyChecksums implements NotSerializable
         } else {
             // Iterating on a natural object from a foreign context will only
             // return public properties.
+            // @phpstan-ignore-next-line : Don't care what you think. It accepts object|array.
             return new ArrayIterator($this->target, ArrayIterator::STD_PROP_LIST);
         }
     }
