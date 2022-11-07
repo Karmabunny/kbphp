@@ -6,6 +6,9 @@
 
 namespace karmabunny\kb;
 
+use ArrayIterator;
+use Traversable;
+
 /**
  *
  * @package karmabunny\kb
@@ -35,6 +38,35 @@ class DirtyChecksums implements NotSerializable
 
 
     /**
+     * Get a checksum for this value.
+     *
+     * @param mixed $value
+     * @return string
+     */
+    protected function getChecksum($value): string
+    {
+        return sha1(serialize($value));
+    }
+
+
+    /**
+     * Get an iterator for the target object.
+     *
+     * @return Traversable
+     */
+    protected function getProperties(): Traversable
+    {
+        if ($this->target instanceof Traversable) {
+            return $this->target;
+        } else {
+            // Iterating on a natural object from a foreign context will only
+            // return public properties.
+            return new ArrayIterator($this->target, ArrayIterator::STD_PROP_LIST);
+        }
+    }
+
+
+    /**
      * Reset all checksums.
      *
      * This means all properties are DIRTY.
@@ -56,10 +88,8 @@ class DirtyChecksums implements NotSerializable
      */
     public function update()
     {
-        // Iterating on a natural object from a foreign context will only
-        // return public properties. Unless the object's iterator changes this.
-        foreach ($this->target as $name => $value) {
-            $this->checksums[$name] = sha1(serialize($value));
+        foreach ($this->getProperties() as $name => $value) {
+            $this->checksums[$name] = $this->getChecksum($value);
         }
     }
 
@@ -73,7 +103,7 @@ class DirtyChecksums implements NotSerializable
     public function updateField(string $name)
     {
         if (property_exists($this->target, $name)) {
-            $this->checksums[$name] = sha1(serialize($this->target->{$name}));
+            $this->checksums[$name] = $this->getChecksum($this->target->{$name});
         }
     }
 
@@ -116,7 +146,7 @@ class DirtyChecksums implements NotSerializable
         }
 
         // Checksums don't match, it's dirty.
-        if ($this->checksums[$name] !== sha1(serialize($this->target->{$name}))) {
+        if ($this->checksums[$name] !== $this->getChecksum($this->target->{$name})) {
             return true;
         }
 
@@ -134,9 +164,7 @@ class DirtyChecksums implements NotSerializable
     {
         $dirty = [];
 
-        // Iterating on a natural object from a foreign context will only
-        // return public properties. Unless the object's iterator changes this.
-        foreach ($this->target as $name => $value) {
+        foreach ($this->getProperties() as $name => $value) {
             if (!$this->isDirty($name)) continue;
             $dirty[$name] = $value;
         }
