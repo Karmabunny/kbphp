@@ -15,6 +15,7 @@ use ReflectionParameter;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionType;
+use Traversable;
 
 /**
  * I guess this is useful.
@@ -121,6 +122,24 @@ abstract class Reflect
         }
         catch (ReflectionException $exception) {
             return false;
+        }
+    }
+
+
+    /**
+     * Get public properties of an object.
+     *
+     * @param object $target
+     * @param bool $iterable use the iterator if available
+     * @return array
+     */
+    public static function getProperties(object $target, bool $iterable = true): array
+    {
+        if ($iterable and $target instanceof Traversable) {
+            return iterator_to_array($target, true);
+        }
+        else {
+            return get_object_vars($target);
         }
     }
 
