@@ -10,8 +10,6 @@ namespace karmabunny\kb;
  * This modifies the behaviour of a DataObject/Collection for updating complex
  * properties, such as arrays and objects.
  *
- * Implement the {@see UpdateVirtualTrait} to enable this for DataObject types.
- *
  * @package karmabunny\kb
  */
 trait UpdateVirtualTrait
@@ -37,31 +35,17 @@ trait UpdateVirtualTrait
 
 
     /**
-     * Apply virtual properties.
-     *
-     * @param iterable $config
-     * @return void
-     */
-    public function setVirtual($config)
-    {
-        $virtual = $this->virtual();
-
-        foreach ($config as $key => $value) {
-            $fn = $virtual[$key] ?? null;
-            if (!$fn) continue;
-            $fn($value);
-        }
-    }
-
-
-    /**
      * Apply the virtual converters to the all properties.
      *
-     * @deprecated use setVirtual()
+     * Recommended placements:
+     *  - `__clone()`
+     *  - `update()`
+     *
      * @return void
      */
     protected function applyVirtual()
     {
+        // Now run through the virtual stuff.
         $virtual = $this->virtual();
 
         foreach ($virtual as $key => $fn) {

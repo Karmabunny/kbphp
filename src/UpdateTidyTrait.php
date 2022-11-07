@@ -40,8 +40,8 @@ trait UpdateTidyTrait
             $this->$key = $value;
         }
 
-        if ($this instanceof UpdateVirtualInterface) {
-            $this->setVirtual($config);
+        if (method_exists($this, 'applyVirtual')) {
+            call_user_func([$this, 'applyVirtual']);
         }
     }
 }
