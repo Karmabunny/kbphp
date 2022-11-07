@@ -13,7 +13,7 @@ namespace karmabunny\kb;
  *
  * @package karmabunny\kb
  */
-class Url extends DataObject
+class Url extends DataObject implements UpdateVirtualInterface
 {
     use UpdateVirtualTrait;
 
