@@ -19,19 +19,25 @@ namespace karmabunny\kb;
 trait UpdateTrait
 {
     /**
+     * Update the object.
      *
      * @param iterable $config
      * @return void
      */
     public function update($config)
     {
-        foreach ($config as $key => $item) {
-            if (!property_exists($this, $key)) continue;
-            $this->$key = $item;
+        $virtual = [];
+
+        // Apply virtual properties.
+        if ($this instanceof UpdateVirtualInterface) {
+            $virtual = $this->setVirtual($config);
+            $virtual = array_fill_keys($virtual, true);
         }
 
-        if ($this instanceof UpdateVirtualInterface) {
-            $this->setVirtual($config);
+        foreach ($config as $key => $item) {
+            if (!property_exists($this, $key)) continue;
+            if (isset($virtual[$key])) continue;
+            $this->$key = $item;
         }
     }
 }
