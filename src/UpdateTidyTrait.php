@@ -23,6 +23,7 @@ trait UpdateTidyTrait
     use PropertiesTrait;
 
     /**
+     * Update the object.
      *
      * @param iterable $config
      * @return void
@@ -31,10 +32,23 @@ trait UpdateTidyTrait
     {
         $fields = static::getPropertyTypes();
 
+        $virtual = [];
+
+        // Apply virtual properties.
+        if ($this instanceof UpdateVirtualInterface) {
+            $virtual = $this->setVirtual($config);
+            $virtual = array_fill_keys($virtual, true);
+        }
+
         foreach ($config as $key => $value) {
+            // Skip virtual fields.
+            if (isset($virtual[$key])) continue;
+
+            // Skip missing properties.
             $type = $fields[$key] ?? null;
             if (!$type) continue;
 
+            // Skip invalid types.
             // Only occurs on PHP 7.4+.
             if (
                 is_object($value)
@@ -45,10 +59,6 @@ trait UpdateTidyTrait
             }
 
             $this->$key = $value;
-        }
-
-        if ($this instanceof UpdateVirtualInterface) {
-            $this->setVirtual($config);
         }
     }
 }

@@ -23,7 +23,7 @@ interface UpdateVirtualInterface
      *  - `__construct()`
      *
      * @param iterable $config
-     * @return void
+     * @return string[] keys of updated fields
      */
-    public function setVirtual($config);
+    public function setVirtual($config): array;
 }

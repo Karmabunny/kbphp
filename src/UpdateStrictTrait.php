@@ -22,6 +22,7 @@ trait UpdateStrictTrait
     use PropertiesTrait;
 
     /**
+     * Update the object.
      *
      * @param iterable $config
      * @return void
@@ -30,25 +31,34 @@ trait UpdateStrictTrait
     {
         $fields = static::getPropertyTypes();
 
+        $virtual = [];
         $errors = [];
 
+        // Apply virtual properties.
+        if ($this instanceof UpdateVirtualInterface) {
+            $virtual = $this->setVirtual($config);
+            $virtual = array_fill_keys($virtual, true);
+        }
+
         foreach ($config as $key => $value) {
-            $type = $fields[$key] ?? null;
+            // Skip virtual fields.
+            if (isset($virtual[$key])) continue;
 
             // Check field exists.
+            $type = $fields[$key] ?? null;
             if (!$type) {
                 $errors[] = $key;
                 continue;
             }
 
-            // Check type matches, but these don't emit an error. Otherwise
-            // hooks wouldn't trigger properly.
+            // Check type matches.
             // Only occurs on PHP 7.4+.
             if (
                 is_object($value)
                 and class_exists($type)
                 and !is_a($value, $type)
             ) {
+                $errors[] = $key;
                 continue;
             }
 
@@ -65,11 +75,7 @@ trait UpdateStrictTrait
                 $errors .= ' ...';
             }
 
-            throw new InvalidArgumentException("Unknown fields ({$count}): {$errors}");
-        }
-
-        if ($this instanceof UpdateVirtualInterface) {
-            $this->setVirtual($config);
+            throw new InvalidArgumentException("Unknown or invalid fields ({$count}): {$errors}");
         }
     }
 }

@@ -39,6 +39,12 @@ trait UpdateVirtualTrait
      * ]
      * ```
      *
+     * Fields specified here are included in the returned 'update set' from
+     * the `setVirtual()` method.
+     *
+     * Returning `false` from a method will prevent the field being included
+     * in the update set.
+     *
      * @return callable[]
      */
     public function virtual(): array
@@ -51,11 +57,12 @@ trait UpdateVirtualTrait
      * Apply virtual properties.
      *
      * @param iterable $config
-     * @return void
+     * @return string[] set of updated fields
      */
-    public function setVirtual($config)
+    public function setVirtual($config): array
     {
         $virtuals = $this->virtual();
+        $updated = [];
 
         foreach ($config as $name => $value) {
             $virtual = $virtuals[$name] ?? null;
@@ -64,12 +71,17 @@ trait UpdateVirtualTrait
             // do this first incase it's callable.
             if (is_object($virtual) and !($virtual instanceof Closure)) {
                 $this->{$name} = Configure::configure([$virtual => $value]);
+                $updated[] = $name;
                 continue;
             }
 
             // Mirror behaviour from UpdateVirtualTrait.
             if (is_callable($virtual)) {
-                $virtual($value);
+                $ok = $virtual($value);
+
+                if ($ok !== false) {
+                    $updated[] = $name;
+                }
                 continue;
             }
 
@@ -81,9 +93,12 @@ trait UpdateVirtualTrait
                     $this->{$name}[$key] = Configure::configure([$virtual[0] => $item]);
                 }
 
+                $updated[] = $name;
                 continue;
             }
         }
+
+        return $updated;
     }
 
 
