@@ -157,6 +157,52 @@ class Arrays
 
 
     /**
+     * Produce a keyed set of 'keys' with values from 'array' otherwise filled
+     * with the 'fill' value.
+     *
+     * Extraneous keys within the 'array' are ignored.
+     *
+     * For example:
+     * ```
+     * $output = fillIntersectionKeys(['a', 'b'], ['b' => 1, 'c' => 2], 0);
+     * // => ['a' => 0, 'b' => 1]
+     * ```
+     *
+     * @param array $keys
+     * @param array $array
+     * @param mixed $fill
+     * @return array
+     */
+    public static function fillIntersectionKeys(array $keys, array $array, $fill = null)
+    {
+        $keys = array_fill_keys($keys, $fill);
+        $array = array_merge($keys, array_intersect_key($array, $keys));
+        return $array;
+    }
+
+
+    /**
+     * Join together both key and values of an array.
+     *
+     * This has _two_ glues. One for between the item (outer glue) and one for
+     * between the key and value (inner glue).
+     *
+     * @param array $array
+     * @param string $outer_glue
+     * @param string $inner_glue
+     * @return string
+     */
+    public static function implodeWithKeys(array $array, string $outer_glue = '', string $inner_glue = '')
+    {
+        foreach ($array as $key => &$value) {
+            $value = $key . $inner_glue . $value;
+        }
+        unset($value);
+        return implode($outer_glue, $array);
+    }
+
+
+    /**
      * Find a matching item.
      *
      * The callable is provided with the value FIRST and the key SECOND.

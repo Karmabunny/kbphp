@@ -96,6 +96,48 @@ final class ArraysTest extends TestCase {
     }
 
 
+    public function testFillIntersectionKeys()
+    {
+        $keys = ['a', 'b', 'c'];
+        $config = ['a' => 100, 'x' => 200, 'z' => 300];
+
+        $actual = Arrays::fillIntersectionKeys($keys, $config);
+        $expected = ['a' => 100, 'b' => null, 'c' => null];
+
+        $this->assertEquals($expected, $actual);
+
+        $actual = Arrays::fillIntersectionKeys($keys, $config, true);
+        $expected = ['a' => 100, 'b' => true, 'c' => true];
+
+        $this->assertEquals($expected, $actual);
+    }
+
+
+    public function testImplodeWithKeys()
+    {
+        $array = [
+            'a' => 1,
+            'c' => 3,
+            'b' => 2,
+        ];
+
+        $actual = Arrays::implodeWithKeys($array);
+        $expected = 'a1c3b2';
+
+        $this->assertEquals($expected, $actual);
+
+        $actual = Arrays::implodeWithKeys($array, ' ');
+        $expected = 'a1 c3 b2';
+
+        $this->assertEquals($expected, $actual);
+
+        $actual = Arrays::implodeWithKeys($array, ', ', ': ');
+        $expected = 'a: 1, c: 3, b: 2';
+
+        $this->assertEquals($expected, $actual);
+    }
+
+
     public function testFind()
     {
         $array = ['abc', '  find this  ', 'def', 'ghi'];
