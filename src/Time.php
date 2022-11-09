@@ -332,38 +332,57 @@ class Time
     /**
      * Get a series of date periods between these two dates.
      *
-     * For a 3 day period between 1st and 10th:
+     * For a 3 day period between 1st and 20th:
      *
-     *  - 0: `[01-01-2000, 03-01-2000]`
-     *  - 1: `[03-01-2000, 06-01-2000]`
-     *  - 2: `[06-01-2000, 09-01-2000]`
-     *  - 3: `[09-01-2000, 10-01-2000]`
+     *  - 0: `[01-01-2000, 04-01-2000]`
+     *  - 1: `[04-01-2000, 07-01-2000]`
+     *  - 2: `[07-01-2000, 10-01-2000]`
+     *  - 3: `[10-01-2000, 13-01-2000]`
+     *  - 4: `[13-01-2000, 16-01-2000]`
+     *  - 5: `[16-01-2000, 19-01-2000]`
+     *  - 6: `[19-01-2000, 20-01-2000]`
      *
      * The last item will be truncated to the end of the period.
+     *
+     * Provide the 'gap' argument insert a gap between the periods.
+     * For example, the same as above but with a 2 day gap:
+     *
+     * - 0: `[01-01-2000, 03-01-2000]`
+     * - 1: `[05-02-2000, 08-01-2000]`
+     * - 2: `[10-02-2000, 13-01-2000]`
+     * - 3: `[15-02-2000, 18-01-2000]`
+     *
+     * The last item will be truncated if necessary but there's no guarantee
+     * that the last days will
      *
      * @param DateTimeInterface $start
      * @param DateTimeInterface $end
      * @param string $period A date modifier, like '+2 days'
-     * @return Generator<DateTimeInterface[]> [start, end]
+     * @param string|null $gap A date modifier, a gap between each period
+     * @return Generator<int,DateTimeInterface[]> [start, end]
      */
-    public static function periods(DateTimeInterface $start, DateTimeInterface $end, string $period)
+    public static function periods(DateTimeInterface $start, DateTimeInterface $end, string $period, string $gap = null)
     {
         $start = self::toDateTimeImmutable($start);
+        $end = self::toDateTimeImmutable($end);
 
-        while ($start < $end) {
-            $cursor = $start->modify($period);
+        $periodStart = $start;
+        $periodEnd = $end;
+
+        while ($periodStart < $end) {
+            $periodEnd = $periodStart->modify($period);
 
             // Don't overshoot - limit the end date.
-            if ($cursor > $end) {
-                $cursor = $end;
+            if ($periodEnd > $end) {
+                $periodEnd = $end;
             }
 
             yield [
-                $start,
-                $cursor,
+                $periodStart,
+                $periodEnd,
             ];
 
-            $start = $cursor;
+            $periodStart = $gap ? $periodEnd->modify($gap) : $periodEnd;
         }
     }
 

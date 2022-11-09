@@ -137,6 +137,88 @@ final class TimeTest extends TestCase {
         // The last entry is truncated.
         $this->assertEquals('2020-10-19', $dates[6]);
         $this->assertEquals('2020-10-20', $dates[7]);
+
+        $this->assertFalse(isset($dates[8]));
+    }
+
+
+    public function testPeriodGaps()
+    {
+        $start = new DateTime('2020-10-01');
+        $end = new Datetime('2020-10-20');
+
+        $periods = Time::periods($start, $end, '+3 days', '+2 days');
+        $dates = [];
+
+        foreach ($periods as [$start, $end]) {
+            $dates[] = $start->format('Y-m-d');
+            $dates[] = $end->format('Y-m-d');
+        }
+
+        $this->assertEquals('2020-10-01', $dates[0]);
+        $this->assertEquals('2020-10-04', $dates[1]);
+
+        $this->assertEquals('2020-10-06', $dates[2]);
+        $this->assertEquals('2020-10-09', $dates[3]);
+
+        $this->assertEquals('2020-10-11', $dates[4]);
+        $this->assertEquals('2020-10-14', $dates[5]);
+
+        $this->assertEquals('2020-10-16', $dates[6]);
+        $this->assertEquals('2020-10-19', $dates[7]);
+
+        $this->assertFalse(isset($dates[8]));
+    }
+
+
+    public function testPeriodGapsTruncated()
+    {
+        $start = new DateTime('2020-10-01');
+        $end = new Datetime('2020-10-20');
+
+        $periods = Time::periods($start, $end, '+5 days', '+4 days');
+        $dates = [];
+
+        foreach ($periods as [$start, $end]) {
+            $dates[] = $start->format('Y-m-d');
+            $dates[] = $end->format('Y-m-d');
+        }
+
+        $this->assertEquals('2020-10-01', $dates[0]);
+        $this->assertEquals('2020-10-06', $dates[1]);
+
+        $this->assertEquals('2020-10-10', $dates[2]);
+        $this->assertEquals('2020-10-15', $dates[3]);
+
+        // The last entry is truncated.
+        $this->assertEquals('2020-10-19', $dates[4]);
+        $this->assertEquals('2020-10-20', $dates[5]);
+
+        $this->assertFalse(isset($dates[6]));
+    }
+
+
+    public function testPeriodGapsNoSameTruncated()
+    {
+        $start = new DateTime('2020-10-01');
+        $end = new Datetime('2020-10-19');
+
+        $periods = Time::periods($start, $end, '+5 days', '+4 days');
+        $dates = [];
+
+        foreach ($periods as [$start, $end]) {
+            $dates[] = $start->format('Y-m-d');
+            $dates[] = $end->format('Y-m-d');
+        }
+
+        $this->assertEquals('2020-10-01', $dates[0]);
+        $this->assertEquals('2020-10-06', $dates[1]);
+
+        $this->assertEquals('2020-10-10', $dates[2]);
+        $this->assertEquals('2020-10-15', $dates[3]);
+
+        // This doesn't exist.
+        $this->assertFalse(isset($dates[4]));
     }
 
 
