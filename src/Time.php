@@ -6,6 +6,7 @@
 
 namespace karmabunny\kb;
 
+use DateInterval;
 use DateTime;
 use DateTimeImmutable;
 use DateTimeInterface;
@@ -207,6 +208,124 @@ class Time
         // Pretty sure that you can't actually implement the
         // DateTimeInterface, so this is pretty safe.
         return DateTimeImmutable::createFromMutable($interface);
+    }
+
+
+    /**
+     * Modify an interval.
+     *
+     * As such, a contrived example:
+     * ```
+     * $date = new DateTimeImmutable('2000-01-01');
+     *
+     * $interval = $date->diff($date->modify('+2 days'));
+     * $interval->format('%a days');
+     * // => 2 days
+     *
+     * $modified = modifyInterval($interval, '+2 days');
+     * $modified->format('%a days');
+     * // => 4 days
+     * ```
+     *
+     * @param DateInterval|array|string $intervals
+     * @return DateInterval
+     */
+    public static function modifyInterval(...$intervals)
+    {
+        static $UNITS = ['y', 'm', 'd', 'h', 'i', 's'];
+
+        $config = array_fill_keys($UNITS, 0);
+
+        foreach ($intervals as $interval) {
+            if (is_array($interval)) {
+                $interval = array_change_key_case($interval, CASE_LOWER);
+
+                foreach ($UNITS as $unit) {
+                    $config[$unit] += $interval[$unit] ?? 0;
+                }
+            }
+            else {
+                if (is_string($interval)) {
+                    $interval = DateInterval::createFromDateString($interval);
+                }
+
+                foreach ($UNITS as $unit) {
+                    $config[$unit] += $interval->$unit;
+                }
+            }
+        }
+
+        $interval = self::createIntervalFromConfig($config);
+        return $interval;
+    }
+
+
+    /**
+     * Create an interval config.
+     *
+     * This can be used to serialise an interval.
+     *
+     * @param DateInterval $interval
+     * @return array
+     */
+    public static function getIntervalConfig(DateInterval $interval): array
+    {
+        static $UNITS = ['y', 'm', 'd', 'h', 'i', 's'];
+
+        $config = [];
+
+        foreach ($UNITS as $unit) {
+            $config[$unit] = $interval->$unit;
+        }
+
+        return $config;
+    }
+
+
+    /**
+     * Create an interval from a config.
+     *
+     * A config is a series of component keys:
+     *
+     * - y: years
+     * - m: months
+     * - d: days
+     * - h: hours
+     * - i: minutes
+     * - s: seconds
+     *
+     * @param array $config
+     * @return DateInterval
+     */
+    public static function createIntervalFromConfig(array $config): DateInterval
+    {
+        $config = array_change_key_case($config, CASE_LOWER);
+
+        $interval = 'P';
+        $interval .= ($config['y'] ?? 0) . 'Y';
+        $interval .= ($config['m'] ?? 0) . 'M';
+        $interval .= ($config['d'] ?? 0) . 'D';
+        $interval .= 'T';
+        $interval .= ($config['h'] ?? 0) . 'H';
+        $interval .= ($config['i'] ?? 0) . 'M';
+        $interval .= ($config['s'] ?? 0) . 'S';
+
+        $interval = new DateInterval($interval);
+        return $interval;
+    }
+
+
+    /**
+     * Get the interval specification string.
+     *
+     * This can be used to serialise intervals.
+     *
+     * @param DateInterval $interval
+     * @return string
+     */
+    public static function getIntervalString(DateInterval $interval): string
+    {
+        return $interval->format('P%yY%mM%dDT%hH%iM%sS');
     }
 
 

@@ -57,6 +57,61 @@ final class TimeTest extends TestCase {
     }
 
 
+    public function testIntervalModify()
+    {
+        $date = new DateTimeImmutable('2000-01-01');
+
+        // duh.
+        $interval = $date->diff($date->modify('+2 days'));
+        $actual = $interval->format('%d');
+        $this->assertEquals('2', $actual);
+
+        // Oh.
+        $modified = Time::modifyInterval($interval, '+2 days');
+        $actual = $modified->format('%d');
+        $this->assertEquals('4', $actual);
+
+        $modified = Time::modifyInterval($modified, ['m' => 3]);
+        $actual = $modified->format('%y %m %d');
+        $this->assertEquals('0 3 4', $actual);
+
+        $modified = Time::modifyInterval($modified, new DateInterval('P1Y'), new DateInterval('P2Y2M'));
+        $actual = $modified->format('%y %m %d');
+        $this->assertEquals('3 5 4', $actual);
+    }
+
+
+    public function testIntervalConfigs()
+    {
+        $spec = 'P1Y0M2DT40H100M0S';
+        $interval = new DateInterval('P1Y2DT40H100M');
+
+        // Test the strings bit too.
+        $actual = Time::getIntervalString($interval);
+        $this->assertEquals($spec, $actual);
+
+        // Test creating a config.
+        $actual = Time::getIntervalConfig($interval);
+        $expected = [
+            'y' => 1,
+            'm' => 0,
+            'd' => 2,
+            'h' => 40,
+            'i' => 100,
+            's' => 0,
+        ];
+        $this->assertEquals($expected, $actual);
+
+        // Test creating an interval back from that config.
+        $actual = Time::createIntervalFromConfig($actual);
+        $this->assertEquals($interval, $actual);
+
+        // Test the string _again_.
+        $actual = Time::getIntervalString($actual);
+        $this->assertEquals($spec, $actual);
+    }
+
+
     public function testPeriods()
     {
         $start = new DateTime('2020-10-10');
