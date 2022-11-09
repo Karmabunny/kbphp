@@ -205,8 +205,9 @@ class Time
             return $interface;
         }
 
-        // Pretty sure that you can't actually implement the
-        // DateTimeInterface, so this is pretty safe.
+        // One can't actually implement DateTimeInterface without inheriting
+        // one of the concrete DateTime or DateTimeImmutable classes, so this
+        // is pretty safe.
         return DateTimeImmutable::createFromMutable($interface);
     }
 
