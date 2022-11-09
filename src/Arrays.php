@@ -24,7 +24,7 @@ class Arrays
      * @param array $array
      * @return int|string|null
      */
-    static function firstKey(array $array)
+    public static function firstKey(array $array)
     {
         reset($array);
         return key($array);
@@ -37,7 +37,7 @@ class Arrays
      * @param array $array
      * @return int|string|null
      */
-    static function lastKey(array $array)
+    public static function lastKey(array $array)
     {
         end($array);
         return key($array);
@@ -50,7 +50,7 @@ class Arrays
      * @param array $array
      * @return mixed
      */
-    static function first(array $array)
+    public static function first(array $array)
     {
         $key = self::firstKey($array);
         if ($key === null) return null;
@@ -64,7 +64,7 @@ class Arrays
      * @param array $array
      * @return mixed
      */
-    static function last(array $array)
+    public static function last(array $array)
     {
         $key = self::lastKey($array);
         if ($key === null) return null;
@@ -86,7 +86,7 @@ class Arrays
      * @param array|Traversable $array
      * @return Generator
      */
-    static function reverse($array)
+    public static function reverse($array)
     {
         end($array);
         while (($key = key($array)) !== null)
@@ -118,7 +118,7 @@ class Arrays
      * @param callable $fn (&$index) => $value
      * @return array
      */
-    static function fill(int $size, callable $fn)
+    public static function fill(int $size, callable $fn)
     {
         $array = [];
         for ($i = 0; $i < $size; $i++) {
@@ -145,7 +145,7 @@ class Arrays
      * @param callable $fn ($index) => [$key, $value]
      * @return array
      */
-    static function fillKeyed(int $size, callable $fn)
+    public static function fillKeyed(int $size, callable $fn)
     {
         $array = [];
         for ($i = 0; $i < $size; $i++) {
@@ -173,7 +173,7 @@ class Arrays
      * @param callable $fn ($value, $key) => bool
      * @return mixed|null
      */
-    static function find(array $array, callable $fn)
+    public static function find(array $array, callable $fn)
     {
         foreach ($array as $key => $item) {
             if ($fn($item, $key)) return $item;
@@ -199,7 +199,7 @@ class Arrays
      * @param mixed|null $initial
      * @return mixed
      */
-    static function reduce(array $array, callable $fn, $initial = null)
+    public static function reduce(array $array, callable $fn, $initial = null)
     {
         $carry = $initial;
         foreach ($array as $key => $value) {
@@ -217,7 +217,7 @@ class Arrays
      * @param bool $fill Replace missing keys with null.
      * @return array
      */
-    static function filterKeys(array $array, array $keys, $fill = false): array
+    public static function filterKeys(array $array, array $keys, $fill = false): array
     {
         $items = [];
 
@@ -243,7 +243,7 @@ class Arrays
      * @param callable $fn (item, key) => [key, item]
      * @return array
      */
-    static function mapKeys(array $array, $fn): array
+    public static function mapKeys(array $array, $fn): array
     {
         $items = [];
 
@@ -263,7 +263,7 @@ class Arrays
      * @param bool $preserve_keys
      * @return array
      */
-    static function shuffle($array, bool $preserve_keys = false): array
+    public static function shuffle($array, bool $preserve_keys = false): array
     {
         if (!is_array($array)) {
             $array = iterator_to_array($array, $preserve_keys);
@@ -294,7 +294,7 @@ class Arrays
      * @param bool $keys
      * @return array
      */
-    static function flatten(array $array, $keys = false): array
+    public static function flatten(array $array, $keys = false): array
     {
         $return = [];
 
@@ -337,7 +337,7 @@ class Arrays
      * @param string $glue
      * @return array
      */
-    static function flattenKeys(array $array, string $glue = '.'): array
+    public static function flattenKeys(array $array, string $glue = '.'): array
     {
         $flat = [];
 
@@ -392,7 +392,7 @@ class Arrays
      * @param string|int $index
      * @return array
      */
-    static function explodeKeys(array $array, string $glue = '.', $index = ''): array
+    public static function explodeKeys(array $array, string $glue = '.', $index = ''): array
     {
         $output = [];
 
@@ -451,7 +451,7 @@ class Arrays
      * @param Arrayable|array $array
      * @return array
      */
-    static function toArray($array): array
+    public static function toArray($array): array
     {
         if ($array instanceof Arrayable) {
             return $array->toArray();
@@ -478,7 +478,7 @@ class Arrays
      * @param mixed $array
      * @return bool
      */
-    static function isNumeric($array): bool
+    public static function isNumeric($array): bool
     {
         if (!is_array($array)) return false;
 
@@ -497,7 +497,7 @@ class Arrays
      * @param mixed $array
      * @return bool
      */
-    static function isAssociated($array): bool
+    public static function isAssociated($array): bool
     {
         return !self::isNumeric($array);
     }
@@ -537,7 +537,7 @@ class Arrays
      * @param array $array
      * @return mixed
      */
-    static function value($array, string $query)
+    public static function value($array, string $query)
     {
         // Must be an array.
         if (!is_array($array)) return null;
@@ -622,7 +622,7 @@ class Arrays
      * @param string|null $select Include a 'choose' option
      * @return array
      */
-    static function createMap(array $items, string $key, string $name, string $select = null)
+    public static function createMap(array $items, string $key, string $name, string $select = null)
     {
         $map = [];
 
@@ -680,7 +680,7 @@ class Arrays
      * @param mixed $default
      * @return array
      */
-    static function normalizeOptions(array $items, $default): array
+    public static function normalizeOptions(array $items, $default): array
     {
         $output = [];
 
@@ -721,7 +721,7 @@ class Arrays
      * @param string $path
      * @return array|null `null` if the file is invalid or missing.
      */
-    static function config(string $path)
+    public static function config(string $path)
     {
         static $cache = [];
         $output = $cache[$path] ?? null;
