@@ -11,7 +11,7 @@ namespace karmabunny\kb;
  *
  * @package karmabunny\kb
  */
-abstract class HttpStatus
+class HttpStatus
 {
 
     // Success //

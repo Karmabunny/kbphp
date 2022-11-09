@@ -22,7 +22,7 @@ use Traversable;
  *
  * @package karmabunny\kb
  */
-abstract class Reflect
+class Reflect
 {
 
     /** Matching `@thing description` */

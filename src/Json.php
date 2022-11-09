@@ -15,7 +15,7 @@ use Throwable;
  *
  * @package karmabunny\kb
  */
-abstract class Json
+class Json
 {
 
     const RECURSIVE_DEPTH = 512;

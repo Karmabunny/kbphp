@@ -13,7 +13,8 @@ use ArrayIterator;
  *
  * @package karmabunny\kb
  */
-abstract class Log {
+class Log
+{
 
     /** Put your noisey stuff in here. */
     const LEVEL_DEBUG = LOG_DEBUG;

@@ -24,7 +24,8 @@ if (PHP_VERSION_ID < 80000) {
  *
  * @package karmabunny\kb
  */
-abstract class XML {
+class XML
+{
 
     /**
      * Parse an XML document from a string.

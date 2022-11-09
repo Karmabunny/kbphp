@@ -12,7 +12,7 @@ namespace karmabunny\kb;
  *
  * @package karmabunny\kb
  */
-abstract class Enc
+class Enc
 {
 
     /**

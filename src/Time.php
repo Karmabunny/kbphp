@@ -16,7 +16,7 @@ use Generator;
  *
  * @package karmabunny\kb;
  */
-abstract class Time
+class Time
 {
 
     const MYSQL_DATE_FORMAT = 'Y-m-d H:i:s';

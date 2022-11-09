@@ -17,7 +17,7 @@ use InvalidArgumentException;
  *
  * @package karmabunny\kb
  */
-abstract class Validity
+class Validity
 {
 
     /**

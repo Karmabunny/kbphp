@@ -15,7 +15,7 @@ use Traversable;
  *
  * @package karmabunny\kb
  */
-abstract class Arrays
+class Arrays
 {
 
     /**

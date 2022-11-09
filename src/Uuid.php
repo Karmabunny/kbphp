@@ -46,7 +46,7 @@ use Exception;
  *
  * @package karmabunny/kb
  */
-abstract class Uuid
+class Uuid
 {
 
     /** Use less-accurate but faster datetime generation for UUIDv1. */

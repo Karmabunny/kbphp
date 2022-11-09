@@ -13,7 +13,7 @@ use Locale;
  *
  * @package karmabunny\kb
  */
-abstract class CountryNames
+class CountryNames
 {
 
     /**
