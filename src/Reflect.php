@@ -133,7 +133,7 @@ class Reflect
      * @param bool $iterable use the iterator if available
      * @return array
      */
-    public static function getProperties(object $target, bool $iterable = true): array
+    public static function getProperties($target, bool $iterable = true): array
     {
         if ($iterable and $target instanceof Traversable) {
             return iterator_to_array($target, true);

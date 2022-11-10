@@ -91,6 +91,7 @@ abstract class AttributeTag
             // @phpstan-ignore-next-line : Don't care.
             return new static(...$args);
         }
+        // phpcs:ignore
         catch (JsonException $exception) {
             throw new Error("Error parsing: '{$content}' for tag: " . static::class, 0, $exception);
         }
@@ -153,7 +154,7 @@ abstract class AttributeTag
      * @param ReflectionClass|ReflectionFunctionAbstract|ReflectionProperty|ReflectionClassConstant|ReflectionParameter $reflect
      * @return static[]
      */
-    public static function parseReflector(object $reflect): array
+    public static function parseReflector($reflect): array
     {
         // Static store for class metadata.
         // This only needs to be parsed once.
@@ -184,7 +185,7 @@ abstract class AttributeTag
             $doc = reset($doc);
 
             if ($doc) {
-                [$name, $args] = explode(' ', $doc, 2) + ['', ''];
+                list($name, $args) = explode(' ', $doc, 2) + ['', ''];
                 $args = explode('|', $args);
 
                 $meta['name'] = $name;

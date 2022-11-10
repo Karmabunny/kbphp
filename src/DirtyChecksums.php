@@ -30,7 +30,7 @@ class DirtyChecksums implements NotSerializable
      *
      * @param object $target
      */
-    public function __construct(object $target)
+    public function __construct($target)
     {
         $this->target = $target;
         $this->update();
