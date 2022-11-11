@@ -7,6 +7,8 @@
 namespace karmabunny\kb;
 
 use ArrayIterator;
+use Serializable;
+use Throwable;
 use Traversable;
 
 /**
@@ -40,12 +42,30 @@ class DirtyChecksums implements NotSerializable
     /**
      * Get a checksum for this value.
      *
+     * The value must be a scalar, array or serializable object.
+     *
      * @param mixed $value
      * @return string
      */
     protected function getChecksum($value): string
     {
-        return sha1(serialize($value));
+        if (
+            $value === null
+            or is_array($value)
+            or is_scalar($value)
+            or (
+                is_object($value)
+                and ($value instanceof Serializable)
+                and !($value instanceof NotSerializable)
+            )
+        ) {
+            try {
+                return sha1(serialize($value));
+            }
+            catch (Throwable $exception) {}
+        }
+
+        return 'DIRTY';
     }
 
 
