@@ -8,12 +8,14 @@ namespace karmabunny\kb;
 
 use Generator;
 use Reflection;
+use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
 use ReflectionFunctionAbstract;
 use ReflectionParameter;
 use ReflectionMethod;
 use ReflectionNamedType;
+use ReflectionProperty;
 use ReflectionType;
 use Traversable;
 
@@ -129,13 +131,47 @@ class Reflect
     /**
      * Get public properties of an object.
      *
+     * Because PHP lacks a `IS_NOT_STATIC` flag, this method will treat an
+     * absence of the `IS_STATIC` flag to mean "Don't include static properties".
+     * Conversely, when specified the flag will restrict results to include
+     * _only_ static properties. The exception is when no flags are specified,
+     * i.e. `0` - where all properties are included, static or otherwise.
+     *
      * @param object $target
-     * @param bool $iterable use the iterator if available
+     * @param bool|int $flags
+     *  - true: use the iterator, if available (otherwise `get_object_vars`)
+     *  - false: use `get_object_vars`
+     *  - int: enum `ReflectionProperty::IS` modifier types
      * @return array
      */
-    public static function getProperties($target, bool $iterable = true): array
+    public static function getProperties($target, $flags = true): array
     {
-        if ($iterable and $target instanceof Traversable) {
+        if (is_numeric($flags)) {
+            $flags = (int) $flags;
+
+            $reflect = new ReflectionClass($target);
+            $properties = $reflect->getProperties($flags);
+
+            $data = [];
+
+            $static = ($flags & ReflectionProperty::IS_STATIC);
+
+            foreach ($properties as $property) {
+                if ($flags and !$static and $property->isStatic()) continue;
+
+                // Fix private/protected access.
+                $property->setAccessible(true);
+
+                // We need to use getValue() so to bypass any __get() magic.
+                $key = $property->getName();
+                $value = $property->getValue($target);
+
+                $data[$key] = $value;
+            }
+
+            return $data;
+        }
+        else if ($flags and $target instanceof Traversable) {
             return iterator_to_array($target, true);
         }
         else {
