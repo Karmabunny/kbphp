@@ -60,20 +60,40 @@ trait SerializeTrait
     /** @inheritdoc */
     public function serialize()
     {
-        return serialize($this->getSerializedProperties());
+        $serialized = $this->__serialize();
+        if ($serialized === null) return null;
+        return serialize($serialized);
     }
 
 
     /** @inheritdoc */
     public function unserialize($serialized)
     {
-        $result = unserialize($serialized);
+        $serialized = unserialize($serialized);
+        $this->__unserialize($serialized);
+    }
 
-        if ($this instanceof DataObject) {
-            $this->update($result);
+
+    /** @inheritdoc */
+    public function __serialize()
+    {
+        if ($this instanceof NotSerializable) {
+            return null;
         }
         else {
-            foreach ($result as $key => $item) {
+            return $this->getSerializedProperties();
+        }
+    }
+
+
+    /** @inheritdoc */
+    public function __unserialize(array $serialized)
+    {
+        if ($this instanceof DataObject) {
+            $this->update($serialized);
+        }
+        else {
+            foreach ($serialized as $key => $item) {
                 $this->$key = $item;
             }
         }
