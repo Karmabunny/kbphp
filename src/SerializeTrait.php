@@ -15,14 +15,22 @@ use ReflectionProperty;
  *  - by default this will only serialize public + protected properties.
  *  - Child object that implement `NotSerializable` are not included.
  *
- * You can extend, or restrict, serialization per class with `$SERIALIZE`.
+ * You can extend, or restrict, serialization per class by overriding
+ * the `getSerializedProperties()` method.
+ *
+ * This provides compatibility with the `Serializable` interface. Modern
+ * PHP (7.4+) will use the magic `__serialize()/__unserialize()` methods if
+ * available, but still prefers the "Serializable" methods.
+ *
+ * When overriding these methods, just override the magic ones and let this
+ * trait wrap them to comply with the `Serializable` interface.
  */
 trait SerializeTrait
 {
     /**
      * Binary-OR of property types for serialisation.
      *
-     * @deprecated use getSerializedProperties()
+     * @deprecated override the getSerializedProperties() helper instead
      *
      * @var int
      */
