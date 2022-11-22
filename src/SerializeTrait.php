@@ -83,6 +83,7 @@ trait SerializeTrait
 
 
     /** @inheritdoc */
+    // phpcs:ignore
     public function __serialize()
     {
         if ($this instanceof NotSerializable) {
@@ -95,6 +96,7 @@ trait SerializeTrait
 
 
     /** @inheritdoc */
+    // phpcs:ignore
     public function __unserialize(array $serialized)
     {
         if ($this instanceof DataObject) {
