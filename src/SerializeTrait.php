@@ -6,7 +6,6 @@
 
 namespace karmabunny\kb;
 
-use ReflectionClass;
 use ReflectionProperty;
 
 /**
@@ -43,29 +42,18 @@ trait SerializeTrait
      *
      * @return mixed[] [string => value]
      */
-    protected function getSerializedProperties()
+    protected function getSerializedProperties(): array
     {
-        $array = [];
+        $array = Reflect::getProperties($this, static::$SERIALIZE);
 
-        $reflect = new ReflectionClass($this);
-        $properties = $reflect->getProperties(static::$SERIALIZE);
+        return array_filter($array, function($value) {
 
-        foreach ($properties as $property) {
-            if ($property->isStatic()) continue;
+            if (is_object($value) and $value instanceof NotSerializable) {
+                return false;
+            }
 
-            // Fix private/protected access.
-            $property->setAccessible(true);
-
-            // We need to use getValue() so to bypass any __get() magic.
-            $key = $property->getName();
-            $value = $property->getValue($this);
-
-            if (is_object($value) and $value instanceof NotSerializable) continue;
-
-            $array[$key] = $value;
-        }
-
-        return $array;
+            return true;
+        });
     }
 
 
