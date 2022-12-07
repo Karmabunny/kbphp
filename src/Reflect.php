@@ -47,7 +47,7 @@ class Reflect
      *
      * @param string[] $paths
      * @params string $filter A full namespaced class name
-     * @return Generator<int, string, mixed, void>
+     * @return Generator<string>
      */
     public static function loadAllClasses(array $paths, string $filter = null): Generator
     {
@@ -71,7 +71,7 @@ class Reflect
      *
      * @param string $path
      * @param string $filter A full namespaced class name
-     * @return Generator<int, string, mixed, void>
+     * @return Generator<string>
      */
     public static function loadClasses(string $path, string $filter = null): Generator
     {
