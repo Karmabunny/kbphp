@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use ReflectionProperty;
+use ReturnTypeWillChange;
 
 /**
  * Implements a PHP serialiser.
@@ -66,6 +67,7 @@ trait SerializeTrait
 
 
     /** @inheritdoc */
+    #[ReturnTypeWillChange]
     public function serialize()
     {
         $serialized = $this->__serialize();
@@ -75,6 +77,7 @@ trait SerializeTrait
 
 
     /** @inheritdoc */
+    #[ReturnTypeWillChange]
     public function unserialize($serialized)
     {
         $serialized = unserialize($serialized);
@@ -84,7 +87,7 @@ trait SerializeTrait
 
     /** @inheritdoc */
     // phpcs:ignore
-    public function __serialize()
+    public function __serialize(): array
     {
         if ($this instanceof NotSerializable) {
             return null;
@@ -96,6 +99,7 @@ trait SerializeTrait
 
 
     /** @inheritdoc */
+    #[ReturnTypeWillChange]
     // phpcs:ignore
     public function __unserialize(array $serialized)
     {

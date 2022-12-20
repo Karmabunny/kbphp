@@ -10,6 +10,7 @@ use ArrayAccess;
 use ArrayIterator;
 use IteratorAggregate;
 use JsonSerializable;
+use ReturnTypeWillChange;
 use Serializable;
 use Traversable;
 
@@ -73,6 +74,7 @@ abstract class Collection extends DataObject implements
 
 
     /** @inheritdoc */
+    #[ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return $this->toArray();
