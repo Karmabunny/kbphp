@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use Generator;
+use Throwable;
 
 /**
  * @package karmabunny\kb
@@ -126,7 +127,12 @@ class ShellOutput
      */
     public function isRunning(): bool
     {
-        $status = @proc_get_status($this->handle);
+        try {
+            $status = @proc_get_status($this->handle);
+        }
+        catch (Throwable $error) {
+            $status = false;
+        }
 
         if ($status) {
             $this->pid = $status['pid'];
@@ -302,7 +308,12 @@ class ShellOutput
             return $this->exit;
         }
 
-        $status = @proc_get_status($this->handle);
+        try {
+            $status = @proc_get_status($this->handle);
+        }
+        catch (Throwable $error) {
+            $status = false;
+        }
 
         // If the process is not running, read the exit code from the status.
         if ($status and !$status['running']) {
