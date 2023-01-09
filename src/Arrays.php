@@ -18,6 +18,45 @@ class Arrays
 {
 
     /**
+     * Get the first key + value of an iterable.
+     *
+     * @param iterable $iterable
+     * @return array [ key, item ]
+     */
+    public static function firstPair($iterable)
+    {
+        foreach ($iterable as $key => $item) {
+            return [$key, $item];
+        }
+
+        return [null, null];
+    }
+
+
+    /**
+     * Get the last key + value of an iterable.
+     *
+     * @param iterable $iterable
+     * @return array [ key, item ]
+     */
+    public static function lastPair($iterable)
+    {
+        if (is_array($iterable)) {
+            $item = end($iterable);
+            $key = key($iterable);
+        }
+        else {
+            foreach ($iterable as $key => $item);
+        }
+
+        return [
+            $key ?? null,
+            $item ?? null,
+        ];
+    }
+
+
+    /**
      * Get the first key of an iterable.
      *
      * @param iterable $iterable
@@ -25,11 +64,8 @@ class Arrays
      */
     public static function firstKey($iterable)
     {
-        foreach ($iterable as $key => $item) {
-            return $key;
-        }
-
-        return null;
+        list($key) = self::firstPair($iterable);
+        return $key;
     }
 
 
@@ -41,14 +77,8 @@ class Arrays
      */
     public static function lastKey($iterable)
     {
-        if (is_array($iterable)) {
-            end($iterable);
-            return key($iterable);
-        }
-        else {
-            foreach ($iterable as $key => $item);
-            return $key ?? null;
-        }
+        list($key) = self::lastPair($iterable);
+        return $key;
     }
 
 
@@ -60,11 +90,8 @@ class Arrays
      */
     public static function first($iterable)
     {
-        foreach ($iterable as $item) {
-            return $item;
-        }
-
-        return null;
+        list( , $value) = self::firstPair($iterable);
+        return $value;
     }
 
 
@@ -76,13 +103,8 @@ class Arrays
      */
     public static function last($iterable)
     {
-        if (is_array($iterable)) {
-            return end($iterable);
-        }
-        else {
-            foreach ($iterable as $item);
-            return $item ?? null;
-        }
+        list( , $value) = self::lastPair($iterable);
+        return $value;
     }
 
 
