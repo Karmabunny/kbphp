@@ -71,7 +71,6 @@ trait SerializeTrait
     public function serialize()
     {
         $serialized = $this->__serialize();
-        if ($serialized === null) return null;
         return serialize($serialized);
     }
 
@@ -90,7 +89,7 @@ trait SerializeTrait
     public function __serialize(): array
     {
         if ($this instanceof NotSerializable) {
-            return null;
+            return [];
         }
         else {
             return $this->getSerializedProperties();
