@@ -8,7 +8,6 @@ namespace karmabunny\kb;
 
 use Generator;
 use Throwable;
-use Traversable;
 
 /**
  * Array utilities.
@@ -19,56 +18,71 @@ class Arrays
 {
 
     /**
-     * Get the first key of an array.
+     * Get the first key of an iterable.
      *
-     * @param array $array
+     * @param iterable $iterable
      * @return int|string|null
      */
-    public static function firstKey(array $array)
+    public static function firstKey($iterable)
     {
-        reset($array);
-        return key($array);
+        foreach ($iterable as $key => $item) {
+            return $key;
+        }
+
+        return null;
     }
 
 
     /**
-     * Get the last key of an array.
+     * Get the last key of an iterable.
      *
-     * @param array $array
+     * @param iterable $iterable
      * @return int|string|null
      */
-    public static function lastKey(array $array)
+    public static function lastKey($iterable)
     {
-        end($array);
-        return key($array);
+        if (is_array($iterable)) {
+            end($iterable);
+            return key($iterable);
+        }
+        else {
+            foreach ($iterable as $key => $item);
+            return $key ?? null;
+        }
     }
 
 
     /**
-     * First item in the array.
+     * First item in the iterable.
      *
-     * @param array $array
+     * @param iterable $iterable
      * @return mixed
      */
-    public static function first(array $array)
+    public static function first($iterable)
     {
-        $key = self::firstKey($array);
-        if ($key === null) return null;
-        return $array[$key];
+        foreach ($iterable as $item) {
+            return $item;
+        }
+
+        return null;
     }
 
 
     /**
-     * Last item in the array.
+     * Last item in the iterable.
      *
-     * @param array $array
+     * @param iterable $iterable
      * @return mixed
      */
-    public static function last(array $array)
+    public static function last($iterable)
     {
-        $key = self::lastKey($array);
-        if ($key === null) return null;
-        return $array[$key];
+        if (is_array($iterable)) {
+            return end($iterable);
+        }
+        else {
+            foreach ($iterable as $item);
+            return $item ?? null;
+        }
     }
 
 
@@ -83,7 +97,7 @@ class Arrays
      *
      * TBH not entirely sure why I wrote this.
      *
-     * @param array|Traversable $array
+     * @param iterable $array
      * @return Generator
      */
     public static function reverse($array)
@@ -194,11 +208,13 @@ class Arrays
      */
     public static function implodeWithKeys(array $array, string $outer_glue = '', string $inner_glue = '')
     {
-        foreach ($array as $key => &$value) {
-            $value = $key . $inner_glue . $value;
+        $output = '';
+
+        foreach ($array as $key => $value) {
+            $output .= $outer_glue . $key . $inner_glue . $value;
         }
-        unset($value);
-        return implode($outer_glue, $array);
+
+        return substr($output, strlen($outer_glue));
     }
 
 
@@ -215,13 +231,13 @@ class Arrays
      * Arrays::find($stuff, fn($item, key) => $key === 12 and $item->name === 12);
      * ```
      *
-     * @param array $array
+     * @param iterable $iterable
      * @param callable $fn ($value, $key) => bool
      * @return mixed|null
      */
-    public static function find(array $array, callable $fn)
+    public static function find($iterable, callable $fn)
     {
-        foreach ($array as $key => $item) {
+        foreach ($iterable as $key => $item) {
             if ($fn($item, $key)) return $item;
         }
 
@@ -240,15 +256,15 @@ class Arrays
      * Arrays::reduce($list, fn($sum, $item, $key) => $sum + $key, 0);
      * ```
      *
-     * @param array $array
+     * @param iterable $iterable
      * @param callable $fn (sum, item, key) => array
      * @param mixed|null $initial
      * @return mixed
      */
-    public static function reduce(array $array, callable $fn, $initial = null)
+    public static function reduce($iterable, callable $fn, $initial = null)
     {
         $carry = $initial;
-        foreach ($array as $key => $value) {
+        foreach ($iterable as $key => $value) {
             $carry = $fn($carry, $value, $key);
         }
         return $carry;
@@ -304,6 +320,9 @@ class Arrays
 
     /**
      * Shuffle an array, optionally preserving the keys.
+     *
+     * Yes, this is just the native shuffle() but it's also non-destructive
+     * with key preserving options.
      *
      * @param iterable $array
      * @param bool $preserve_keys
@@ -662,13 +681,13 @@ class Arrays
      * $options = ['' => 'Choose a user' ] + $options;
      * ```
      *
-     * @param array $items
+     * @param iterable $items
      * @param string $key
      * @param string $name
      * @param string|null $select Include a 'choose' option
      * @return array
      */
-    public static function createMap(array $items, string $key, string $name, string $select = null)
+    public static function createMap($items, string $key, string $name, string $select = null)
     {
         $map = [];
 
@@ -722,11 +741,11 @@ class Arrays
      * ];
      * ```
      *
-     * @param array $items
+     * @param iterable $items
      * @param mixed $default
      * @return array
      */
-    public static function normalizeOptions(array $items, $default): array
+    public static function normalizeOptions($items, $default): array
     {
         $output = [];
 
