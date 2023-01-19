@@ -131,6 +131,19 @@ class CsvExport
 
 
     /**
+     * Close any resources (that we own).
+     *
+     * @return void
+     */
+    public function __destruct()
+    {
+        if ($this->_own_handles and $this->handle) {
+            fclose($this->handle);
+        }
+    }
+
+
+    /**
      * Add a row.
      *
      * @param iterable $model
@@ -245,10 +258,6 @@ class CsvExport
         $buffer = '';
         while ($chunk = fread($this->handle, 1024)) {
             $buffer .= $chunk;
-        }
-
-        if ($this->_own_handles) {
-            fclose($this->handle);
         }
 
         return $buffer;
