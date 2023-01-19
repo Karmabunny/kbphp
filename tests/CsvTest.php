@@ -65,6 +65,29 @@ final class CsvTest extends TestCase
    }
 
 
+   public function testFileImportExport()
+   {
+        // File import.
+        $import = CsvImport::fromFile(__DIR__ . '/test1.csv');
+        $items = iterator_to_array($import);
+
+        $outpath = tempnam(sys_get_temp_dir(), 'kbcsv_');
+        $outfile = fopen($outpath, 'w');
+
+        // File export.
+        $export = new CsvExport($outfile);
+        $export->addAll($items);
+
+        fclose($outfile);
+
+        // Compare files.
+        $actual = file_get_contents($outpath);
+        $expected = file_get_contents(__DIR__ . '/test1.csv');
+
+        $this->assertEquals($expected, $actual);
+   }
+
+
 //    public function testExcelImport()
 //    {
 //    }
