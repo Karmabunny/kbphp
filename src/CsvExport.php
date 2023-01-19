@@ -32,7 +32,7 @@ class CsvExport
     /** @var array */
     public $formatters = [];
 
-    /** @var string */
+    /** @var string Only supported in PHP 8.1+ */
     public $break = "\n";
 
     /** @var string */
@@ -58,12 +58,15 @@ class CsvExport
 
     /**
      * Configure the CSV output format.
+     *
      * By default:
      *  - break is a LF \n
      *  - delimiter is a comma ,
      *  - null is \N
      *  - enclosure is "
      *  - escape is \
+     *
+     * Note, 'break' is only supported in PHP 8.1+.
      *
      * Headers is a map of keys -> values.
      *
@@ -178,7 +181,7 @@ class CsvExport
     public function addAll($models)
     {
         foreach ($models as $model) {
-            if (!is_array($model) and !($model instanceof \Traversable)) continue;
+            if (!is_array($model) and !($model instanceof Traversable)) continue;
             $this->add($model);
         }
     }
@@ -238,9 +241,6 @@ class CsvExport
             $value = 'ERR';
         }
 
-        // Let's not break things.
-        $value = $this->clean($value);
-
         return $value;
     }
 
@@ -267,6 +267,7 @@ class CsvExport
     /**
      * @param string $dirty
      * @return string cleaned
+     * @deprecated CsvExporter now uses fputcsv() internally.
      */
     public function clean(string $dirty): string
     {
@@ -283,23 +284,38 @@ class CsvExport
 
     /**
      *
-     * @param array $rows
+     * @param array $row
      * @return void
      */
-    protected function _write(array $rows)
+    protected function _write(array $row)
     {
-        $first = true;
+        $items = [];
 
         // Only add items that match the header set.
         // If the model is missing a header item - it's null.
         foreach ($this->headers as $key => $name) {
-            $value = $rows[$key] ?? null;
-
-            if (!$first) fwrite($this->handle, $this->delimiter);
-            fwrite($this->handle, $this->_format($name, $value));
-            $first = false;
+            $value = $row[$key] ?? null;
+            $items[$key] = $this->_format($key, $value);
         }
 
-        fwrite($this->handle, $this->break);
+        if (PHP_VERSION_ID > 80100) {
+            fputcsv(
+                $this->handle,
+                $items,
+                $this->delimiter,
+                $this->enclosure,
+                $this->escape,
+                $this->break
+            );
+        }
+        else {
+            fputcsv(
+                $this->handle,
+                $items,
+                $this->delimiter,
+                $this->enclosure,
+                $this->escape
+            );
+        }
     }
 }
