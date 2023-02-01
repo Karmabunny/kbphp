@@ -64,6 +64,12 @@ trait ArrayableTrait
 
             // Recursively convert arrayables.
             if (is_array($item) or $item instanceof Arrayable) {
+
+                // Attempt to prevent infinite recursives.
+                if ($item === $this) {
+                    continue;
+                }
+
                 $item = Arrays::toArray($item);
             }
 
@@ -80,6 +86,16 @@ trait ArrayableTrait
             // Call it.
             if (is_callable($item)) {
                 $item = $item();
+            }
+
+            // Someone typoed a callback array - abort!
+            // Or it's somehow the same object, either way it'll end up
+            // infinitely recursive so let's skip it.
+            if (
+                $item === $this
+                or (is_array($item) and ($item[0] ?? null) === $this)
+            ) {
+                continue;
             }
 
             // Recursively convert arrayables.
