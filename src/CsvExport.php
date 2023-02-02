@@ -140,7 +140,7 @@ class CsvExport
      */
     public function __destruct()
     {
-        if ($this->_own_handles and $this->handle) {
+        if ($this->_own_handles) {
             fclose($this->handle);
         }
     }
@@ -299,6 +299,7 @@ class CsvExport
         }
 
         if (PHP_VERSION_ID > 80100) {
+            // @phpstan-ignore-next-line : newer PHP has more fields.
             fputcsv(
                 $this->handle,
                 $items,
