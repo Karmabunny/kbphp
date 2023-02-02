@@ -78,6 +78,11 @@ trait ArrayableTrait
 
         // Virtual fields.
         foreach ($this->fields() as $key => $item) {
+            // Invalid.
+            if (is_numeric($key)) {
+                continue;
+            }
+
             // Filtering.
             if (!empty($fields) and !in_array($key, $fields)) {
                 continue;
