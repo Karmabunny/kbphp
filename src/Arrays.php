@@ -8,6 +8,7 @@ namespace karmabunny\kb;
 
 use Generator;
 use Throwable;
+use Traversable;
 
 /**
  * Array utilities.
@@ -535,7 +536,7 @@ class Arrays
      *
      * This converts any nested arrayables to arrays.
      *
-     * @param Arrayable|array $array
+     * @param Arrayable|Traversable|array $array
      * @return array
      */
     public static function toArray($array): array
@@ -547,6 +548,23 @@ class Arrays
         foreach ($array as &$item) {
             if ($item instanceof Arrayable) {
                 $item = $item->toArray();
+                continue;
+            }
+
+            if ($item instanceof Traversable) {
+                $item = iterator_to_array($item);
+                continue;
+            }
+
+            if (is_object($item)) {
+                $item = (array) $item;
+                continue;
+            }
+
+            // Like, what else would we do here?
+            if (is_resource($item)) {
+                $item = '(resource)';
+                continue;
             }
         }
         unset($item);
