@@ -5,6 +5,7 @@
  */
 
 use karmabunny\kb\Collection;
+use karmabunny\kb\NewArrayable;
 use karmabunny\kb\UpdateStrictTrait;
 use karmabunny\kb\UpdateTidyTrait;
 use karmabunny\kb\UpdateVirtualTrait;
@@ -67,6 +68,43 @@ final class CollectionTest extends TestCase {
         $this->assertArrayNotHasKey('name', $array);
 
         $this->assertEquals($thingo->getVirtualThing(), $array['thing']);
+    }
+
+
+    public function testNewArrayable() {
+        $thingo = new NewerThingo([
+            'parent_id' => 123,
+            'description' => 'blah blah blah',
+            'empty' => null,
+        ]);
+
+        $array = $thingo->toArray();
+
+        $this->assertEquals(1, $array['id']);
+        $this->assertEquals(123, $array['parent_id']);
+        $this->assertEquals('blah blah blah', $array['description']);
+        $this->assertArrayNotHasKey('key', $array);
+
+        $this->assertEquals($thingo->getVirtualThing(), $array['thing']);
+
+        $array = $thingo->toArray(['id', 'description']);
+
+        $this->assertArrayNotHasKey('empty', $array);
+        $this->assertArrayNotHasKey('name', $array);
+        $this->assertArrayNotHasKey('key', $array);
+
+        $array = $thingo->toArray(null, ['more_things']);
+
+        $this->assertArrayHasKey('id', $array);
+        $this->assertArrayHasKey('parent_id', $array);
+        $this->assertArrayHasKey('description', $array);
+        $this->assertArrayHasKey('thing', $array);
+        $this->assertArrayHasKey('more_things', $array);
+        $this->assertArrayNotHasKey('empty', $array);
+        $this->assertArrayNotHasKey('key', $array);
+
+        $expected = ['a', 'b', 'c'];
+        $this->assertEquals($expected, $array['more_things']);
     }
 
 
@@ -258,6 +296,34 @@ class Thingo extends Collection {
     {
         $this->_shh = $value;
         $this->_quiet = $value;
+    }
+}
+
+
+class NewerThingo extends Thingo
+    implements NewArrayable
+{
+
+    /** @var string */
+    public $key = 'kinda-secret';
+
+
+    public function fields(): array
+    {
+        $fields = Collection::fields();
+        $fields['thing'] = [$this, 'getVirtualThing'];
+        $fields['key'] = false;
+        return $fields;
+    }
+
+
+    public function extraFields(): array
+    {
+        return [
+            'more_things' => function() {
+                return ['a', 'b', 'c'];
+            },
+        ];
     }
 }
 
