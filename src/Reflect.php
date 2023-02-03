@@ -137,6 +137,11 @@ class Reflect
      * _only_ static properties. The exception is when no flags are specified,
      * i.e. `0` - where all properties are included, static or otherwise.
      *
+     * Note, there is value to NOT using `get_object_vars` and using this
+     * wrapper instead, even though it uses `get_object_vars` itself. From this
+     * external context it will only include public properties. If used from
+     * within an object it includes both protected + private properties.
+     *
      * @param object $target
      * @param bool|int $flags
      *  - true: use the iterator, if available (otherwise `get_object_vars`)
@@ -146,11 +151,11 @@ class Reflect
      */
     public static function getProperties($target, $flags = true): array
     {
-        if (is_numeric($flags)) {
+        if (is_numeric($flags) or $flags === null) {
             $flags = (int) $flags;
 
             $reflect = new ReflectionClass($target);
-            $properties = $reflect->getProperties($flags);
+            $properties = $reflect->getProperties($flags ?: null);
 
             $data = [];
 
