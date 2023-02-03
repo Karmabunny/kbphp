@@ -113,21 +113,21 @@ abstract class AttributeTag
 
         $tags = [];
 
-        $more = self::parseReflector($reflect);
+        $more = static::parseReflector($reflect);
         array_push($tags, ...$more);
 
         foreach ($reflect->getMethods() as $method) {
-            $more = self::parseReflector($method);
+            $more = static::parseReflector($method);
             array_push($tags, ...$more);
         }
 
         foreach ($reflect->getProperties() as $property) {
-            $more = self::parseReflector($property);
+            $more = static::parseReflector($property);
             array_push($tags, ...$more);
         }
 
         foreach ($reflect->getReflectionConstants() as $constant) {
-            $more = self::parseReflector($constant);
+            $more = static::parseReflector($constant);
             array_push($tags, ...$more);
         }
 
@@ -144,7 +144,7 @@ abstract class AttributeTag
     public static function parseFunction($function): array
     {
         $reflect = new ReflectionFunction($function);
-        return self::parseReflector($reflect);
+        return static::parseReflector($reflect);
     }
 
 
@@ -169,10 +169,16 @@ abstract class AttributeTag
             'constant' => ReflectionClassConstant::class,
         ];
 
-        // A bit of inception here. We're parsing the attributes of the
-        // attribute class itself. With this we can define the rules for
-        // parsing attributes.
+        // A bit of inception here. We're parsing the @doctags of the
+        // tag class itself. With this we can define the rules for @doctags.
+
+        // This is only relevant for old-style @doctags because we're _always_
+        // going to the parse #[attributes] and only @doctags needs this to
+        // mirror the Attribute::TARGET enum.
         if ($meta === null) {
+
+            // 'name' is the tag name to look for.
+            // 'filter' is the target types (see $MAP).
             $meta = [
                 'name' => null,
                 'filter' => [],
