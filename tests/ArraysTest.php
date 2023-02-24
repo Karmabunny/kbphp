@@ -284,6 +284,60 @@ final class ArraysTest extends TestCase {
     }
 
 
+    public function testFlattenIterable()
+    {
+        $it = (function() {
+            yield 123;
+            yield (function() {
+                yield 'abc';
+                yield 'def';
+                yield (function() {
+                    yield 'how';
+                    yield (function() {
+                        yield 'deep';
+                        yield from (function() {
+                            yield 'can';
+                            yield 'you';
+                            yield 'go';
+                        })();
+                    })();
+                })();
+                yield 'ghi';
+            })();
+            yield 456;
+        });
+
+        $actual = Arrays::flatten($it());
+        $expected = [
+            123,
+            'abc',
+            'def',
+            'how',
+            'deep',
+            'can',
+            'you',
+            'go',
+            'ghi',
+            456,
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        // Test max depth.
+        $actual = Arrays::flatten($it(), false, 3);
+        $expected = [
+            123,
+            'abc',
+            'def',
+            'how',
+            'ghi',
+            456,
+        ];
+
+        $this->assertEquals($expected, $actual);
+    }
+
+
     public function testFlattenWithKeys()
     {
         $actual = Arrays::flatten([

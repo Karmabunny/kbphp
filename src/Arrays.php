@@ -378,26 +378,50 @@ class Arrays
     /**
      * Flat arrays, with optional key support.
      *
-     * @param array $array
+     * @param iterable $array
      * @param bool $keys
+     * @param int $depth
      * @return array
      */
-    public static function flatten(array $array, $keys = false): array
+    public static function flatten($array, $keys = false, int $depth = 25): array
     {
         $return = [];
 
         if ($keys) {
-            $fn = function($item, $key) use (&$return) {
-                $return[$key] = $item;
-            };
+            foreach ($array as $key => $value) {
+                if (is_iterable($value)) {
+                    if ($depth <= 1) {
+                        continue;
+                    }
+
+                    $value = self::flatten($value, true, $depth - 1);
+                    foreach ($value as $key => $sub) {
+                        $return[$key] = $sub;
+                    }
+                }
+                else {
+                    $return[$key] = $value;
+                }
+            }
         }
         else {
-            $fn = function($item) use (&$return) {
-                $return[] = $item;
-            };
+            foreach ($array as $value) {
+                if (is_iterable($value)) {
+                    if ($depth <= 1) {
+                        continue;
+                    }
+
+                    $value = self::flatten($value, false, $depth - 1);
+                    foreach ($value as $sub) {
+                        $return[] = $sub;
+                    }
+                }
+                else {
+                    $return[] = $value;
+                }
+            }
         }
 
-        array_walk_recursive($array, $fn);
         return $return;
     }
 
