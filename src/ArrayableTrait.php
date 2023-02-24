@@ -151,6 +151,8 @@ trait ArrayableTrait
             $fields = array_merge($filter, $fields);
         }
 
+        $array = [];
+
         foreach ($fields as $key => $item) {
             // Invalid config.
             if (is_numeric($key)) {
