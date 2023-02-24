@@ -143,7 +143,7 @@ class Reflect
      * within an object it includes both protected + private properties.
      *
      * @param object $target
-     * @param bool|int $flags
+     * @param bool|int|null $flags
      *  - true: use the iterator, if available (otherwise `get_object_vars`)
      *  - false: use `get_object_vars`
      *  - int: enum `ReflectionProperty::IS` modifier types
