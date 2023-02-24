@@ -130,7 +130,7 @@ trait ArrayableTrait
 
         // Add extra fields.
         if ($extra) {
-            $extra = array_fill_keys($extra ?? [], true);
+            $extra = array_fill_keys($extra, true);
 
             // Extract any virtual fields.
             $extraFields = $this->extraFields();
@@ -142,7 +142,7 @@ trait ArrayableTrait
 
         // Apply filters.
         if ($filter) {
-            $filter = array_fill_keys($filter ?? [], true);
+            $filter = array_fill_keys($filter, true);
 
             // Extract any virtual fields.
             $fields = array_intersect_key($fields, $filter);
