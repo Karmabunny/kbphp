@@ -68,11 +68,7 @@ trait ArrayableTrait
             // Don't use iterable here.
             // However, it IS used for the backwards compat later.
             $fields = Reflect::getProperties($this, false);
-
-            foreach ($fields as &$field) {
-                $field = true;
-            }
-            unset($field);
+            $fields = array_fill_keys(array_keys($fields), true);
             return $fields;
         }
         else {
@@ -119,12 +115,7 @@ trait ArrayableTrait
         }
         else {
             $fields = Reflect::getProperties($this, true);
-
-            foreach ($fields as &$field) {
-                $field = true;
-            }
-            unset($field);
-
+            $fields = array_fill_keys(array_keys($fields), true);
             $fields = array_merge($fields, $this->fields());
         }
 

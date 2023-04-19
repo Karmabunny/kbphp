@@ -29,11 +29,7 @@ trait UpdateTidyTrait
      */
     public function update($config)
     {
-        static $fields;
-
-        if ($fields === null) {
-            $fields = array_fill_keys(static::getProperties(), true);
-        }
+        $fields = array_fill_keys(static::getProperties(), true);
 
         foreach ($config as $key => $value) {
             if (!array_key_exists($key, $fields)) continue;

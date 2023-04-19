@@ -28,11 +28,7 @@ trait UpdateStrictTrait
      */
     public function update($config)
     {
-        static $fields;
-
-        if ($fields === null) {
-            $fields = array_fill_keys(static::getProperties(), true);
-        }
+        $fields = array_fill_keys(static::getProperties(), true);
 
         $errors = [];
 
