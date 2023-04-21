@@ -5,7 +5,7 @@
  */
 
 use karmabunny\kb\Collection;
-use karmabunny\kb\NewArrayable;
+use karmabunny\kb\ArrayableFields;
 use karmabunny\kb\UpdateStrictTrait;
 use karmabunny\kb\UpdateTidyTrait;
 use karmabunny\kb\UpdateVirtualTrait;
@@ -71,8 +71,8 @@ final class CollectionTest extends TestCase {
     }
 
 
-    public function testNewArrayable() {
-        $thingo = new NewerThingo([
+    public function testArrayableFields() {
+        $thingo = new ThingoFields([
             'parent_id' => 123,
             'description' => 'blah blah blah',
             'empty' => null,
@@ -300,8 +300,8 @@ class Thingo extends Collection {
 }
 
 
-class NewerThingo extends Thingo
-    implements NewArrayable
+class ThingoFields extends Thingo
+    implements ArrayableFields
 {
 
     /** @var string */
