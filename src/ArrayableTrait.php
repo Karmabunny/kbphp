@@ -32,7 +32,7 @@ trait ArrayableTrait
      * Define a pair like `'name' => callback` create a 'virtual' field. This
      * can override existing properties or create whole new fields.
      *
-     * Note, if not implementing the NewArrayable interface, this method will
+     * Note, if not implementing the ArrayableFields interface, this method will
      * only define 'virtual' fields. That said, inheriting the parent fields
      * is safe and will future-proof the code.
      *
@@ -58,13 +58,13 @@ trait ArrayableTrait
      * return $fields;
      * ```
      *
-     * @see NewArrayable
+     * @see ArrayableFields
      * @see ArrayableTrait
-     * @return callable[]
+     * @return (callable|bool)[]
      */
     public function fields(): array
     {
-        if ($this instanceof NewArrayable) {
+        if ($this instanceof ArrayableFields) {
             // Don't use iterable here.
             // However, it IS used for the backwards compat later.
             $fields = Reflect::getProperties($this, false);
@@ -89,6 +89,9 @@ trait ArrayableTrait
      * A virtual field is defined as a pair like `'name' => callback`.
      *
      * @return callable[]
+     * @see ArrayableFields
+     * @see ArrayableTrait
+     * @return callable[]
      */
     public function extraFields(): array
     {
@@ -110,7 +113,7 @@ trait ArrayableTrait
      */
     public function toArray(array $filter = null, array $extra = null): array
     {
-        if ($this instanceof NewArrayable) {
+        if ($this instanceof ArrayableFields) {
             $fields = $this->fields();
         }
         else {
