@@ -14,6 +14,9 @@ use Traversable;
  * - Nested 'Arrayable' objects are also converted to arrays.
  * - Object can declare a `fields()` to include virtual fields.
  * - This requires an iterable object (`IteratorAggregate` interface).
+ *
+ * Objects should extend the {@see ArrayableFields} interface to get additional
+ * type safety and some goodies from extraFields().
  */
 trait ArrayableTrait
 {
@@ -102,9 +105,11 @@ trait ArrayableTrait
     /**
      * Convert this object to an array.
      *
-     * Specify a 'filter' to restrict the fields included in the output. This can only
+     * Specify a 'filter' to restrict the fields included in the output.
      *
-     * Specify an 'extra' to include additional fields, including those not
+     * Specify an 'extra' to include additional fields if implementing the
+     * ArrayableFields interface. This will add properties that were excluded
+     * from `fields()` and includes any virtual fields defined in `extraFields()`.
      * included in `fields()` and any virtual fields defined in `extraFields()`.
      *
      * @param string[]|null $filter
@@ -124,14 +129,18 @@ trait ArrayableTrait
 
         // Add extra fields.
         if ($extra) {
-            $extra = array_fill_keys($extra, true);
+            $extra_keys = array_fill_keys($extra, true);
+            $extra_fields = [];
 
             // Extract any virtual fields.
-            $extraFields = $this->extraFields();
-            $extraFields = array_intersect_key($extraFields, $extra);
+            if ($this instanceof ArrayableFields) {
+                $extra_fields = $this->extraFields();
+                $extra_fields = array_intersect_key($extra_fields, $extra_keys);
+            }
 
-            // Add and re-apply any 'extras' not already in extraFields().
-            $fields = array_merge($fields, $extra, $extraFields);
+            // The 'extras' field can also reference natural fields or those
+            // in fields(), so we layer them all together.
+            $fields = array_merge($fields, $extra_keys, $extra_fields);
         }
 
         // Apply filters.
