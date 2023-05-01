@@ -28,15 +28,6 @@ use ReturnTypeWillChange;
  */
 trait SerializeTrait
 {
-    /**
-     * Binary-OR of property types for serialisation.
-     *
-     * @deprecated override the getSerializedProperties() helper instead
-     *
-     * @var int
-     */
-    protected static $SERIALIZE = ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC;
-
 
     /**
      * Get an array of properties to serialize.
@@ -53,16 +44,13 @@ trait SerializeTrait
      */
     protected function getSerializedProperties(): array
     {
-        $array = Reflect::getProperties($this, static::$SERIALIZE);
+        $properties = Reflect::getProperties($this, ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC);
 
-        return array_filter($array, function($value) {
-
-            if (is_object($value) and $value instanceof NotSerializable) {
-                return false;
-            }
-
-            return true;
+        $properties = array_filter($properties, function($value) {
+            return !(is_object($value) and $value instanceof NotSerializable);
         });
+
+        return $properties;
     }
 
 
