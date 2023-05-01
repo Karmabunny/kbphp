@@ -44,7 +44,6 @@ abstract class Collection extends DataObject implements
         Serializable,
         JsonSerializable,
         Arrayable,
-        Copyable,
         DirtyObjectInterface
 {
 
@@ -59,17 +58,6 @@ abstract class Collection extends DataObject implements
     {
         // @phpstan-ignore-next-line : docs say 'array or object'
         return new ArrayIterator($this);
-    }
-
-
-    /**
-     * @deprecated Use clone instead.
-     * @return static
-     */
-    public function copy()
-    {
-        $class = static::class;
-        return new $class($this);
     }
 
 
