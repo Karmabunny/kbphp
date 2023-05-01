@@ -13,7 +13,7 @@
     ],
     "require": {
         "symfony/polyfill-php73": "*",
-        "php": ">=7.0",
+        "php": "^7.2|^8",
         "symfony/polyfill-php81": "^1.26"
     },
     "require-dev": {
