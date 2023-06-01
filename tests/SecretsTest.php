@@ -20,15 +20,27 @@ const DATA = [
 
     'basic_auth' => 'http://username:whywouldyouusehttpforpasswords@example.com',
 
+    'badly_named_aws_bits' => 'AKIAIOSFODNN7EXAMPLE',
+
     'aws_access_key' => 'AKIAIOSFODNN7EXAMPLE',
     'aws_secret_access_key' => 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
 
     'stripe' => [
         'key' => 'sk_liveetcetcetc',
-        'publishable' => 'pk_livenot-a-problem',
+        'publishable' => 'pk_live-not-a-problem',
 
         'alternatively' => [
             'hash' => '$2y$eyyoooo$',
+            'password' => 'plaintext omg',
+            'cvv' => '555',
+            'token' => 'lots of these',
+            'list' => [
+                'ghp_asdfasdf',
+                'eyJ44444444444.11111111',
+                'sq0csp-1234567890',
+                'aws.1111token',
+                'SG.1111122222333334444455.1111122222333334444455555666667777788888999'
+            ],
         ],
     ],
 ];
@@ -44,9 +56,8 @@ class SecretsTest extends TestCase
     public function testKeys()
     {
         $secrets = Secrets::create();
-
         $this->assertFalse($secrets->isSecretKey('red_herring'));
-        $this->assertFalse($secrets->isSecretKey('aws_access_key'));
+        $this->assertFalse($secrets->isSecretKey('badly_named_aws_bits'));
         $this->assertTrue($secrets->isSecretKey('aws_secret_access_key'));
     }
 
@@ -54,9 +65,8 @@ class SecretsTest extends TestCase
     public function testValues()
     {
         $secrets = Secrets::create();
-
         $this->assertFalse($secrets->isSecretValue(DATA['red_herring']));
-        $this->assertTrue($secrets->isSecretValue(DATA['aws_access_key']));
+        $this->assertTrue($secrets->isSecretValue(DATA['badly_named_aws_bits']));
         $this->assertFalse($secrets->isSecretValue(DATA['aws_secret_access_key']));
     }
 
@@ -93,18 +103,29 @@ class SecretsTest extends TestCase
         $expected = [
             'red_herring' => 'DEADBEEF',
             'id' => 'YW1pYWx3YXlzZ2VuZXJhdGluZ3BheWxvYWRzd2hlbmltaHVuZ3J5b3JhbWlhbHdheXNodW5ncnk',
-            'base64_secret' => '*************************',
-            'base64_sub_secret' => '*************************',
-            'hex_secret' => '*************************',
-            'hex_sub_secret' => '*************************',
-            'basic_auth' => 'http://username:whywouldyouusehttpforpasswords@example.com',
-            'aws_access_key' => '********************',
-            'aws_secret_access_key' => '*************************',
+            'base64_secret' => '****************',
+            'base64_sub_secret' => '****************',
+            'hex_secret' => '****************',
+            'hex_sub_secret' => '****************',
+            'basic_auth' => '****************',
+            'badly_named_aws_bits' => '****************',
+            'aws_access_key' => '****************',
+            'aws_secret_access_key' => '****************',
             'stripe' => [
                 'key' => '****************',
-                'publishable' => 'pk_livenot-a-problem',
+                'publishable' => 'pk_live-not-a-problem',
                 'alternatively' => [
-                    'hash' => '************',
+                    'hash' => '****************',
+                    'password' => '****************',
+                    'cvv' => '****************',
+                    'token' => '****************',
+                    'list' => [
+                        '****************',
+                        '****************',
+                        '****************',
+                        '****************',
+                        '****************'
+                    ],
                 ],
             ],
         ];
@@ -115,8 +136,6 @@ class SecretsTest extends TestCase
 
     public function testClean()
     {
-        $this->markTestSkipped('recursive mode is unfinished');
-
         $input = DATA;
 
         $secrets = Secrets::create();
@@ -125,10 +144,10 @@ class SecretsTest extends TestCase
         $expected = [
             'red_herring' => 'DEADBEEF',
             'id' => 'YW1pYWx3YXlzZ2VuZXJhdGluZ3BheWxvYWRzd2hlbmltaHVuZ3J5b3JhbWlhbHdheXNodW5ncnk',
-            'basic_auth' => 'http://username:whywouldyouusehttpforpasswords@example.com',
             'stripe' => [
-                'publishable' => 'pk_livenot-a-problem',
+                'publishable' => 'pk_live-not-a-problem',
                 'alternatively' => [
+                    'list' => [],
                 ],
             ],
         ];
