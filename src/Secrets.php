@@ -27,6 +27,7 @@ class Secrets extends DataObject
     const RULE_KEY_CVV = '(?i:cvv|cvn|ccv)';
 
     const RULE_HTTP_AUTH = '^(?i:basic|bearer)\w(.*)';
+    const RULE_HTTP_INLINE = ':\/\/[^:]+:[^@]+@';
     const RULE_JWT = '^eyJ[^.]+\.';
     const RULE_SSH_PGP = '^BEGIN.*PRIVATE KEY';
     const RULE_BYCRYPT_HASH = '^\$2[aby]\$.*\$';
@@ -45,8 +46,10 @@ class Secrets extends DataObject
         self::RULE_KEY_CVV,
     ];
 
+
     const RULE_VALUES = [
         self::RULE_HTTP_AUTH,
+        self::RULE_HTTP_INLINE,
         self::RULE_JWT,
         self::RULE_SSH_PGP,
         self::RULE_BYCRYPT_HASH,
