@@ -93,18 +93,11 @@ class Secrets extends DataObject
     public $hex = false;
 
     /**
-     * Create masks no smaller than this.
+     * Create masks with fixed sizes.
      *
-     * @var int
+     * @var int|null
      */
-    public $min_mask = 10;
-
-    /**
-     * Create masks no bigger than this.
-     *
-     * @var int
-     */
-    public $max_mask = 25;
+    public $mask_length = 16;
 
 
     /**
@@ -311,20 +304,11 @@ class Secrets extends DataObject
      * TODO use php8 sensitive attributes here.
      *
      * @param string $value
-     * @return void
+     * @return string
      */
-    protected function getMask(string $value)
+    protected function getMask(string $value): string
     {
-        $length = strlen($value);
-
-        if ($this->min_mask) {
-            $length = max($this->min_mask, $length);
-        }
-
-        if ($this->max_mask) {
-            $length = min($this->max_mask, $length);
-        }
-
+        $length = $this->mask_length ?: strlen($value);
         return str_repeat('*', $length);
     }
 
