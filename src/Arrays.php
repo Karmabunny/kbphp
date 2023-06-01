@@ -299,30 +299,42 @@ class Arrays
      *
      * Both value and key are always passed to the callback.
      *
+     * The default `empty_arrays` setting is implied by the callback:
+     * - If _no_ callback, empty arrays are discard - `empty_arrays = false`
+     * - Otherwise, empty arrays are preserved - `empty_arrays = true`
+     *
      * @param array $array
      * @param callable|null $callback
-     * @param bool $keep_arrays
+     * @param bool|null $empty_arrays
      * @return array
      */
-    public static function filterRecursive(array $array, callable $callback = null, $keep_arrays = false): array
+    public static function filterRecursive(array $array, callable $callback = null, bool $empty_arrays = null): array
     {
+        if ($empty_arrays === null) {
+            $empty_arrays = $callback !== null;
+        }
+
         foreach ($array as $key => &$value) {
             if (is_array($value)) {
-                $value = self::filterRecursive($value, $callback, $keep_arrays);
+                $value = self::filterRecursive($value, $callback, $empty_arrays);
 
-                // Skip empty checks.
-                if ($keep_arrays) continue;
+                if (!$empty_arrays and empty($value)) {
+                    unset($array[$key]);
+                }
             }
-            else if ($callback && $callback($value, $key)) {
-                unset($array[$key]);
+            else if ($callback) {
+                if ($callback($value, $key)) {
+                    unset($array[$key]);
+                }
             }
-
-            if (empty($value)) {
-                unset($array[$key]);
+            else {
+                if (empty($value)) {
+                    unset($array[$key]);
+                }
             }
         }
-        unset($value);
 
+        unset($value);
         return $array;
     }
 
