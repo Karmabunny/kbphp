@@ -262,8 +262,7 @@ class Secrets extends DataObject
             if ($this->isSecretKey($key)) {
                 $value = $this->getMask($value);
             }
-
-            if ($this->isSecretValue($value)) {
+            else if ($this->isSecretValue($value)) {
                 $value = $this->getMask($value);
             }
         };
@@ -290,35 +289,18 @@ class Secrets extends DataObject
      */
     public function clean(array $item, bool $recursive = true): array
     {
+        $process = function ($value, $key) {
+            return (
+                $this->isSecretKey($key)
+                or $this->isSecretValue($value)
+            );
+        };
+
         if ($recursive) {
-            $arrayIterator = new \RecursiveArrayIterator($item);
-            $recursiveIterator = new \RecursiveIteratorIterator($arrayIterator, \RecursiveIteratorIterator::SELF_FIRST);
-
-            foreach ($recursiveIterator as $key => $value) {
-                // TODO none of this works...
-                if ($this->isSecretKey($key)) {
-                    $arrayIterator->offsetUnset($key);
-                }
-
-                if ($this->isSecretValue($value)) {
-                    $arrayIterator->offsetUnset($key);
-                }
-            }
-
-            return $arrayIterator->getArrayCopy();
+            return Arrays::filterRecursive($item, $process, true);
         }
         else {
-            foreach ($item as $key => $value) {
-                if ($this->isSecretKey($key)) {
-                    unset($item[$key]);
-                }
-
-                if ($this->isSecretValue($value)) {
-                    unset($item[$key]);
-                }
-            }
-
-            return $item;
+            return array_filter($item, $process, ARRAY_FILTER_USE_BOTH);
         }
     }
 
