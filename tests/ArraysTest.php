@@ -169,6 +169,78 @@ final class ArraysTest extends TestCase {
     }
 
 
+    public function testFilterRecursive()
+    {
+        $array = [
+            'item1' => [
+                'nested1' => 123,
+                'nested2' => 0,
+                'nested3' => null,
+                'nested4' => 567,
+                'deeper' => [
+                    'deepest' => 'abc',
+                ],
+            ],
+            'item2' => [],
+            'item3' => [
+                'empty1' => null,
+                'empty2' => null,
+            ],
+        ];
+
+        // Standard filter, discard arrays.
+        $expected = [
+            'item1' => [
+                'nested1' => 123,
+                'nested4' => 567,
+                'deeper' => [
+                    'deepest' => 'abc',
+                ],
+            ],
+        ];
+
+        $actual = Arrays::filterRecursive($array);
+        $this->assertEquals($expected, $actual);
+
+        // Standard filter, keep arrays.
+        $expected = [
+            'item1' => [
+                'nested1' => 123,
+                'nested4' => 567,
+                'deeper' => [
+                    'deepest' => 'abc',
+                ],
+            ],
+            'item2' => [],
+            'item3' => [],
+        ];
+
+        $actual = Arrays::filterRecursive($array, null, true);
+        $this->assertEquals($expected, $actual);
+
+        // A filter that removes integers.
+        $expected = [
+            'item1' => [
+                'nested3' => null,
+                'deeper' => [
+                    'deepest' => 'abc',
+                ],
+            ],
+            'item2' => [],
+            'item3' => [
+                'empty1' => null,
+                'empty2' => null,
+            ],
+        ];
+
+        $actual = Arrays::filterRecursive($array, function($item) {
+            return is_int($item);
+        });
+
+        $this->assertEquals($expected, $actual);
+    }
+
+
     public function testFilterKeys()
     {
         $array = [
