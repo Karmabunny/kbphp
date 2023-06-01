@@ -20,15 +20,16 @@ class Secrets extends DataObject
 {
     use UpdateTidyTrait;
 
-    const RULE_KEY_PASSWORD = '(?i:password|passwd)';
-    const RULE_KEY_SECRET = '(?:ikey|secret)';
-    const RULE_KEY_TOKEN = '(?:itoken|salt|nonce)';
-    const RULE_KEY_CVV = '(?:icvv|cvn|ccv)';
 
-    const RULE_HTTP_AUTH = '^(?:ibasic|bearer)';
-    const RULE_JWT = '^eyJ[^.]\.';
+    const RULE_KEY_PASSWORD = '(?i:password|passwd)';
+    const RULE_KEY_SECRET = '(?i:key|secret)';
+    const RULE_KEY_TOKEN = '(?i:token|salt|nonce)';
+    const RULE_KEY_CVV = '(?i:cvv|cvn|ccv)';
+
+    const RULE_HTTP_AUTH = '^(?i:basic|bearer)\w(.*)';
+    const RULE_JWT = '^eyJ[^.]+\.';
     const RULE_SSH_PGP = '^BEGIN.*PRIVATE KEY';
-    const RULE_BYCRYPT_HASH = '^\$2[aby]\$..*\$';
+    const RULE_BYCRYPT_HASH = '^\$2[aby]\$.*\$';
     const RULE_GITHUB = '^(?:ghp|gho|ghu|ghs|ghr)';
     const RULE_AWS = '^AKIA[0-9A-Z]{16}';
     const RULE_AWS_KEY = '^aws.{0,20}(?:key|pwd|pw|password|pass|token)';
