@@ -13,6 +13,14 @@ namespace karmabunny\kb;
  * Mask or remove them.
  * Whatever you like.
  *
+ * This comes preloaded with a set of rules to help you tidy up your mess.
+ *
+ * Best use case:
+ *
+ * ```
+ * $safe = Secrets::create()->mask($_POST);
+ * ```
+ *
  * @link https://github.com/Yelp/detect-secrets/
  * @package karmabunny\kb
  */
@@ -134,8 +142,9 @@ class Secrets extends DataObject
 
 
     /**
+     * Add a new key rule.
      *
-     * @param string $pattern
+     * @param string $pattern regex
      * @return void
      */
     public function addKeyRule(string $pattern)
@@ -146,8 +155,9 @@ class Secrets extends DataObject
 
 
     /**
+     * Add a new value rule.
      *
-     * @param string $pattern
+     * @param string $pattern regex
      * @return void
      */
     public function addValueRule(string $pattern)
