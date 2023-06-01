@@ -295,6 +295,39 @@ class Arrays
 
 
     /**
+     * Filter multi-dimensional arrays.
+     *
+     * Both value and key are always passed to the callback.
+     *
+     * @param array $array
+     * @param callable|null $callback
+     * @param bool $keep_arrays
+     * @return array
+     */
+    public static function filterRecursive(array $array, callable $callback = null, $keep_arrays = false): array
+    {
+        foreach ($array as $key => &$value) {
+            if (is_array($value)) {
+                $value = self::filterRecursive($value, $callback, $keep_arrays);
+
+                // Skip empty checks.
+                if ($keep_arrays) continue;
+            }
+            else if ($callback && $callback($value, $key)) {
+                unset($array[$key]);
+            }
+
+            if (empty($value)) {
+                unset($array[$key]);
+            }
+        }
+        unset($value);
+
+        return $array;
+    }
+
+
+    /**
      * Reduce the array to a subset, as defined by the keys parameter.
      *
      * @param array $array
