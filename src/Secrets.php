@@ -58,6 +58,12 @@ class Secrets extends DataObject
     ];
 
 
+    /** @var string[] */
+    public $key_rules;
+
+    /** @var string[] */
+    public $value_rules;
+
     /** @var string */
     public $key_pattern;
 
@@ -108,11 +114,8 @@ class Secrets extends DataObject
      */
     public static function create(array $config = [])
     {
-        $config = array_merge([
-            'key_rules' => self::RULE_KEYS,
-            'value_rules' => self::RULE_VALUES,
-        ], $config);
-
+        $config['key_rules'] = $config['key_rules'] ?? self::RULE_KEYS;
+        $config['value_rules'] = $config['value_rules'] ?? self::RULE_VALUES;
         return new self($config);
     }
 
@@ -121,14 +124,32 @@ class Secrets extends DataObject
     public function update($config)
     {
         parent::update($config);
+        $this->key_pattern = $this->buildPattern($this->key_rules);
+        $this->value_pattern = $this->buildPattern($this->value_rules);
+    }
 
-        if ($rules = $config['key_rules'] ?? null) {
-            $this->key_pattern = static::buildPattern($rules);
-        }
 
-        if ($rules = $config['value_rules'] ?? null) {
-            $this->value_pattern = static::buildPattern($rules);
-        }
+    /**
+     *
+     * @param string $pattern
+     * @return void
+     */
+    public function addKeyRule(string $pattern)
+    {
+        $this->key_rules[] = $pattern;
+        $this->key_pattern = $this->buildPattern($this->key_rules);
+    }
+
+
+    /**
+     *
+     * @param string $pattern
+     * @return void
+     */
+    public function addValueRule(string $pattern)
+    {
+        $this->value_rules[] = $pattern;
+        $this->value_pattern = static::buildPattern($this->value_rules);
     }
 
 
