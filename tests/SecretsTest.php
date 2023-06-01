@@ -93,6 +93,39 @@ class SecretsTest extends TestCase
     }
 
 
+    public function testCustomRuleSet() {
+        $secrets = Secrets::create([
+            'value_rules' => ['ITSASECRET-[0-9]+-ENDOFSECRET'],
+        ]);
+
+        // Good.
+        $this->assertTrue($secrets->isSecretValue('ITSASECRET-12345-ENDOFSECRET'));
+        $this->assertFalse($secrets->isSecretValue('ITSASECRET-abc-ENDOFSECRET'));
+
+        // Also good (technically).
+        $this->assertFalse($secrets->isSecretValue('sq0csp-abcdef'));
+
+        // But this still works.
+        $this->assertTrue($secrets->isSecretKey('password_hash'));
+    }
+
+
+    public function testCustomRuleSingle() {
+        $secrets = Secrets::create();
+
+        $secrets->addValueRule('^KBPHP.+\|.+');
+
+        // Good.
+        $this->assertTrue($secrets->isSecretValue('KBPHPabcdefg|1234567890'));
+
+        // Meh.
+        $this->assertFalse($secrets->isSecretValue('KBPHP|notquite'));
+
+        // This still works.
+        $this->assertTrue($secrets->isSecretValue('sq0csp-abcdef'));
+    }
+
+
     public function testMasking()
     {
         $input = DATA;
