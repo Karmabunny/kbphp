@@ -314,15 +314,15 @@ class Secrets extends DataObject
 
 
     /**
-     * Build a regex pattern (partial) from a list of rules.
+     * Build a regex pattern from a list of rules.
      *
      * @param array $rules
      * @param string $delimiter
      * @return string
      */
-    protected function buildPattern(array $rules, string $delimiter = '/')
+    protected function buildPattern(array $rules, string $delimiter = '/'): string
     {
-        return $delimiter . '(' . implode('|', $rules) . ')' . $delimiter;
+        return $delimiter . '(?:' . implode('|', $rules) . ')' . $delimiter;
     }
 
 }
