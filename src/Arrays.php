@@ -323,7 +323,7 @@ class Arrays
                 }
             }
             else if ($callback) {
-                if ($callback($value, $key)) {
+                if (!$callback($value, $key)) {
                     unset($array[$key]);
                 }
             }

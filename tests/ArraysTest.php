@@ -234,7 +234,7 @@ final class ArraysTest extends TestCase {
         ];
 
         $actual = Arrays::filterRecursive($array, function($item) {
-            return is_int($item);
+            return !is_int($item);
         });
 
         $this->assertEquals($expected, $actual);

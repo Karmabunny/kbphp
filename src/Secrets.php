@@ -301,8 +301,8 @@ class Secrets extends DataObject
     {
         $process = function ($value, $key) {
             return (
-                $this->isSecretKey($key)
-                or $this->isSecretValue($value)
+                !$this->isSecretKey($key)
+                and !$this->isSecretValue($value)
             );
         };
 
