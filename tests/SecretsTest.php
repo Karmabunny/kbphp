@@ -67,9 +67,18 @@ class SecretsTest extends TestCase
     public function testValues()
     {
         $secrets = Secrets::create();
-        $this->assertFalse($secrets->isSecretValue(DATA['red_herring']));
-        $this->assertTrue($secrets->isSecretValue(DATA['badly_named_aws_bits']));
-        $this->assertFalse($secrets->isSecretValue(DATA['aws_secret_access_key']));
+
+        $actual = $secrets->isSecretValue(DATA['red_herring']);
+        $this->assertFalse($actual, DATA['red_herring']);
+
+        $actual = $secrets->isSecretValue(DATA['badly_named_aws_bits']);
+        $this->assertTrue($actual, DATA['badly_named_aws_bits']);
+
+        $actual = $secrets->isSecretValue(DATA['aws_secret_access_key']);
+        $this->assertFalse($actual, DATA['aws_secret_access_key']);
+
+        $actual = $secrets->isSecretValue(DATA['jks_empty']);
+        $this->assertFalse($actual, DATA['jks_empty']);
     }
 
 
