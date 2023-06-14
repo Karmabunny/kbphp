@@ -229,13 +229,17 @@ class Secrets extends DataObject
             }
         }
 
+        $hex = preg_match('/^[0-9a-f]+$/i', $item)
+            ? pack('H*', $item)
+            : false;
+
         // Or maybe it's maybelline. Or hex.
-        if (preg_match('/^[0-9a-f]*$/', $item)) {
+        if (is_string($hex) and strlen($hex) > 0) {
             if ($this->hex) {
                 return true;
             }
 
-            if (preg_match($this->value_pattern, pack('H*', $item))) {
+            if (preg_match($this->value_pattern, $hex)) {
                 return true;
             }
         }

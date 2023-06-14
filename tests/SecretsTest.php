@@ -25,6 +25,8 @@ const DATA = [
     'aws_access_key' => 'AKIAIOSFODNN7EXAMPLE',
     'aws_secret_access_key' => 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
 
+    'jks_empty' => '',
+
     'stripe' => [
         'key' => 'sk_liveetcetcetc',
         'publishable' => 'pk_live-not-a-problem',
@@ -76,10 +78,12 @@ class SecretsTest extends TestCase
         $secrets = Secrets::create(['base64' => true]);
         $this->assertTrue($secrets->isSecretValue(DATA['base64_secret']));
         $this->assertTrue($secrets->isSecretValue(DATA['base64_secret']));
+        $this->assertFalse($secrets->isSecretValue(DATA['jks_empty']));
 
         $secrets = Secrets::create(['base64' => false]);
         $this->assertFalse($secrets->isSecretValue(DATA['base64_secret']));
         $this->assertTrue($secrets->isSecretValue(DATA['base64_sub_secret']));
+        $this->assertFalse($secrets->isSecretValue(DATA['jks_empty']));
     }
 
 
@@ -88,10 +92,12 @@ class SecretsTest extends TestCase
         $secrets = Secrets::create(['hex' => true]);
         $this->assertTrue($secrets->isSecretValue(DATA['hex_secret']));
         $this->assertTrue($secrets->isSecretValue(DATA['hex_sub_secret']));
+        $this->assertFalse($secrets->isSecretValue(DATA['jks_empty']));
 
         $secrets = Secrets::create(['hex' => false]);
         $this->assertFalse($secrets->isSecretValue(DATA['hex_secret']));
         $this->assertTrue($secrets->isSecretValue(DATA['hex_sub_secret']));
+        $this->assertFalse($secrets->isSecretValue(DATA['jks_empty']));
     }
 
 
@@ -148,6 +154,7 @@ class SecretsTest extends TestCase
             'badly_named_aws_bits' => '****************',
             'aws_access_key' => '****************',
             'aws_secret_access_key' => '****************',
+            'jks_empty' => '',
             'stripe' => [
                 'key' => '****************',
                 'publishable' => 'pk_live-not-a-problem',
@@ -181,6 +188,7 @@ class SecretsTest extends TestCase
         $expected = [
             'red_herring' => 'DEADBEEF',
             'id' => 'YW1pYWx3YXlzZ2VuZXJhdGluZ3BheWxvYWRzd2hlbmltaHVuZ3J5b3JhbWlhbHdheXNodW5ncnk',
+            'jks_empty' => '',
             'stripe' => [
                 'publishable' => 'pk_live-not-a-problem',
                 'alternatively' => [
