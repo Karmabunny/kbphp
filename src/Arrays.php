@@ -299,26 +299,38 @@ class Arrays
      *
      * Both value and key are always passed to the callback.
      *
-     * The default `empty_arrays` setting is implied by the callback:
-     * - If _no_ callback, empty arrays are discard - `empty_arrays = false`
-     * - Otherwise, empty arrays are preserved - `empty_arrays = true`
+     * The default `keep_empty_arrays` setting is implied by the callback:
+     * - If _no_ callback, empty arrays are discard - `keep_empty_arrays = false`
+     * - Otherwise, empty arrays are preserved - `keep_empty_arrays = true`
+     *
+     * Be aware, numeric arrays will not 're-settle' their keys. Items will
+     * retain their index position even with gaps from removed items. This is
+     * the same behaviour as `array_filter`.
+     *
+     * For example:
+     *
+     * ```
+     * $arr = [ 'a', '', 'c' ];
+     * $filtered = array_filter($arr);
+     * // => [ 0 => 'a', 2 => 'c' ]
+     * ```
      *
      * @param array $array
      * @param callable|null $callback
-     * @param bool|null $empty_arrays
+     * @param bool|null $keep_empty_arrays
      * @return array
      */
-    public static function filterRecursive(array $array, callable $callback = null, bool $empty_arrays = null): array
+    public static function filterRecursive(array $array, callable $callback = null, bool $keep_empty_arrays = null): array
     {
-        if ($empty_arrays === null) {
-            $empty_arrays = $callback !== null;
+        if ($keep_empty_arrays === null) {
+            $keep_empty_arrays = ($callback !== null);
         }
 
         foreach ($array as $key => &$value) {
             if (is_array($value)) {
-                $value = self::filterRecursive($value, $callback, $empty_arrays);
+                $value = self::filterRecursive($value, $callback, $keep_empty_arrays);
 
-                if (!$empty_arrays and empty($value)) {
+                if (!$keep_empty_arrays and empty($value)) {
                     unset($array[$key]);
                 }
             }
