@@ -6,6 +6,9 @@
 
 namespace karmabunny\kb;
 
+use JsonException;
+use RecursiveArrayIterator;
+use RecursiveIteratorIterator;
 
 /**
  * Identify secrets in strings.
@@ -195,9 +198,10 @@ class Secrets extends DataObject
      * Does this value look like a secret?
      *
      * @param mixed $item
+     * @param bool $recursive - process url/json strings
      * @return bool
      */
-    public function isSecretValue($item): bool
+    public function isSecretValue($item, bool $recursive = true): bool
     {
         if (!is_string($item)) {
             return false;
@@ -241,6 +245,64 @@ class Secrets extends DataObject
 
             if (preg_match($this->value_pattern, $hex)) {
                 return true;
+            }
+        }
+
+        if ($recursive) {
+            $items = [];
+            $items[] = $item;
+
+            if ($base64) {
+                $items[] = $base64;
+            }
+            if ($hex) {
+                $items[] = $hex;
+            }
+
+            foreach ($items as $item) {
+                // Perhaps it's a url.
+                $query = parse_url($item, PHP_URL_QUERY);
+                $query = $query ?: ltrim($item, '?');
+
+                // Perhaps it's urlencoded.
+                // I only really care if it's got an equals and no whitespace.
+                // The PHP decoder is quite liberal and doesn't effectively
+                // _identify_ query strings. Although not unfair, in truth
+                // anything can be a query string.
+                if (
+                    !preg_match('/[ \t]/', $query)
+                    and preg_match('/.=./', $query)
+                ) {
+                    try {
+                        $query = Url::decode($query);
+
+                        if ($this->hasSecret($query)) {
+                            return true;
+                        }
+                    }
+                    catch (UrlDecodeException $exception) {
+                        // ignore.
+                    }
+                }
+
+                // Or perhaps it's json.
+                try {
+                    $json = Json::decode($item);
+
+                    if (is_string($json)) {
+                        if ($this->isSecretValue($json, false)) {
+                            return true;
+                        }
+                    }
+                    else if (is_array($json)) {
+                        if ($this->hasSecret($json)) {
+                            return true;
+                        }
+                    }
+                }
+                catch (JsonException $exception) {
+                    // ignore.
+                }
             }
         }
 
@@ -331,6 +393,41 @@ class Secrets extends DataObject
         else {
             return array_filter($item, $process, ARRAY_FILTER_USE_BOTH);
         }
+    }
+
+
+    /**
+     * Does this array contain a secret?
+     *
+     * Note, this will recursively search all nodes (including leaves) but
+     * will _not_ recurse into decoded URL/JSON strings.
+     *
+     * For that reason, this isn't a public method because it's confusing
+     * outside of this internal context and not particularly useful otherwise.
+     *
+     * @param array $array
+     * @return bool
+     */
+    protected function hasSecret(array $array): bool
+    {
+        // Remember: array_walk_recursive and our own recursiveFilter only
+        // visits leaf nodes. But here we definitely want to be checking
+        // everything because we're reading through a JSON/URL string.
+
+        $arrayIterator = new RecursiveArrayIterator($array);
+        $recursiveIterator = new RecursiveIteratorIterator($arrayIterator, RecursiveIteratorIterator::SELF_FIRST);
+
+        foreach ($recursiveIterator as $key => $item) {
+            if ($this->isSecretKey($key)) {
+                return true;
+            }
+
+            if ($this->isSecretValue($item, false)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 

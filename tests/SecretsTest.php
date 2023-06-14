@@ -45,6 +45,26 @@ const DATA = [
             ],
         ],
     ],
+
+    // This won't match.
+    // TODO But should it?
+    // What would we replace it with?
+    // - a single string - potentially breaks things.
+    // - or replace/clean all strings inside it?
+    'deeply_secret' => [
+        'field1' => 123,
+        'field2' => 'abc',
+    ],
+
+    'encoded_things' => [
+        'token=abcabc&oops=sk_live-123-123&safe=dontcare',
+        'http://example.com/api?tokens[]=abcabc&tokens[]=defdef&safe=dontcare',
+        'http://example.com/oauth?access=eyJabcabcabcabc.abc',
+        'http://example.com/oauth?jwt=broken',
+        'http://example.com/oauth?error=nothingtoseehere',
+        'eyJhY2Nlc3MiOiJnaHBfMTIzMTIzMTIzIn0=',
+        'eyJjbGVhbiI6ImFuZCBhYm92ZSBib2FyZCJ9',
+    ]
 ];
 
 /**
@@ -145,6 +165,44 @@ class SecretsTest extends TestCase
     }
 
 
+    public function testEncoded()
+    {
+        $secrets = Secrets::create();
+
+        // Non-recursive check fails.
+        $actual = $secrets->isSecretValue(DATA['encoded_things'][0], false);
+        $this->assertFalse($actual, DATA['encoded_things'][0]);
+
+        // URL stripe secret
+        $actual = $secrets->isSecretValue(DATA['encoded_things'][0]);
+        $this->assertTrue($actual, DATA['encoded_things'][0]);
+
+        // URL token list
+        $actual = $secrets->isSecretValue(DATA['encoded_things'][1]);
+        $this->assertTrue($actual, DATA['encoded_things'][1]);
+
+        // URL jwt token
+        $actual = $secrets->isSecretValue(DATA['encoded_things'][2]);
+        $this->assertTrue($actual, DATA['encoded_things'][2]);
+
+        // URL jwt key
+        $actual = $secrets->isSecretValue(DATA['encoded_things'][3]);
+        $this->assertTrue($actual, DATA['encoded_things'][3]);
+
+        // URL nothing to see here
+        $actual = $secrets->isSecretValue(DATA['encoded_things'][4]);
+        $this->assertFalse($actual, DATA['encoded_things'][4]);
+
+        // base64 encoded json - github token
+        $actual = $secrets->isSecretValue(DATA['encoded_things'][5]);
+        $this->assertTrue($actual, DATA['encoded_things'][5]);
+
+        // base64 encoded json - clean and above board
+        $actual = $secrets->isSecretValue(DATA['encoded_things'][6]);
+        $this->assertFalse($actual, DATA['encoded_things'][6]);
+    }
+
+
     public function testMasking()
     {
         $input = DATA;
@@ -177,9 +235,22 @@ class SecretsTest extends TestCase
                         '****************',
                         '****************',
                         '****************',
-                        '****************'
+                        '****************',
                     ],
                 ],
+            ],
+            'deeply_secret' => [
+                'field1' => 123,
+                'field2' => 'abc',
+            ],
+            'encoded_things' => [
+                '****************',
+                '****************',
+                '****************',
+                '****************',
+                'http://example.com/oauth?error=nothingtoseehere',
+                '****************',
+                'eyJjbGVhbiI6ImFuZCBhYm92ZSBib2FyZCJ9',
             ],
         ];
 
@@ -203,6 +274,14 @@ class SecretsTest extends TestCase
                 'alternatively' => [
                     'list' => [],
                 ],
+            ],
+            'deeply_secret' => [
+                'field1' => 123,
+                'field2' => 'abc',
+            ],
+            'encoded_things' => [
+                4 => 'http://example.com/oauth?error=nothingtoseehere',
+                6 => 'eyJjbGVhbiI6ImFuZCBhYm92ZSBib2FyZCJ9',
             ],
         ];
 
