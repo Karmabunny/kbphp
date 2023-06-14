@@ -256,8 +256,23 @@ class Secrets extends DataObject
      */
     public function isSecret($item): bool
     {
-        if (!is_string($item)) return false;
-        return $this->isSecretKey($item) or $this->isSecretValue($item);
+        if (!is_string($item)) {
+            return false;
+        }
+
+        if (empty($item)) {
+            return false;
+        }
+
+        if ($this->isSecretKey($item)) {
+            return true;
+        }
+
+        if ($this->isSecretValue($item)) {
+            return true;
+        }
+
+        return false;
     }
 
 
