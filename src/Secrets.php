@@ -207,7 +207,7 @@ class Secrets extends DataObject
             return false;
         }
 
-        // What secrets is shorter than 3 chars?
+        // What secret is shorter than 3 chars?
         if (strlen($item) < 3) {
             return false;
         }
