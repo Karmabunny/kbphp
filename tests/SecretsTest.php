@@ -71,7 +71,8 @@ class SecretsTest extends TestCase
     }
 
 
-    public function testBase64() {
+    public function testBase64()
+    {
         $secrets = Secrets::create(['base64' => true]);
         $this->assertTrue($secrets->isSecretValue(DATA['base64_secret']));
         $this->assertTrue($secrets->isSecretValue(DATA['base64_secret']));
@@ -82,7 +83,8 @@ class SecretsTest extends TestCase
     }
 
 
-    public function testHex() {
+    public function testHex()
+    {
         $secrets = Secrets::create(['hex' => true]);
         $this->assertTrue($secrets->isSecretValue(DATA['hex_secret']));
         $this->assertTrue($secrets->isSecretValue(DATA['hex_sub_secret']));
@@ -93,7 +95,8 @@ class SecretsTest extends TestCase
     }
 
 
-    public function testCustomRuleSet() {
+    public function testCustomRuleSet()
+    {
         $secrets = Secrets::create([
             'value_rules' => ['ITSASECRET-[0-9]+-ENDOFSECRET'],
         ]);
@@ -110,7 +113,8 @@ class SecretsTest extends TestCase
     }
 
 
-    public function testCustomRuleSingle() {
+    public function testCustomRuleSingle()
+    {
         $secrets = Secrets::create();
 
         $secrets->addValueRule('^KBPHP.+\|.+');
