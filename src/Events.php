@@ -28,6 +28,14 @@ class Events
 
 
     /**
+     * [emitter][event] = [ time, time... ]
+     *
+     * @var float[][][]
+     */
+    protected static $_log = [];
+
+
+    /**
      * Fire an event.
      *
      * Given a class tree like:
@@ -86,6 +94,8 @@ class Events
             $results[] = $fn($event);
         }
 
+        self::$_log[$sender][get_class($event)][] = microtime(true);
+
         return $results;
     }
 
@@ -137,7 +147,10 @@ class Events
         }
 
         if (!is_subclass_of($event, EventInterface::class)) {
-            throw new InvalidArgumentException("Not an Event subclass: {$event}");
+            if (!is_scalar($event)) {
+                $event = gettype($event);
+            }
+            throw new InvalidArgumentException("Event '{$event}' is not an EventInterface");
         }
 
 
@@ -154,11 +167,91 @@ class Events
      */
     public static function off(string $sender, string $event = null)
     {
-        if ($event) {
+        if ($sender === '*') {
+            if ($event) {
+                foreach (array_keys(self::$_events) as $sender) {
+                    unset(self::$_events[$sender][$event]);
+                }
+            }
+            else {
+                self::$_events = [];
+            }
+        }
+        else if ($event) {
             unset(self::$_events[$sender][$event]);
         }
         else {
             unset(self::$_events[$sender]);
         }
+    }
+
+
+    /**
+     * How many times has events been triggered?
+     *
+     * @param array $filter [ event, sender, flatten ]
+     * @return array
+     */
+    public static function getLogs(array $filter = []): array
+    {
+        $log = [];
+
+        $filter_event = $filter['event'] ?? null;
+        $filter_sender = $filter['sender'] ?? null;
+        $filter_flatten = $filter['flatten'] ?? false;
+
+        foreach (self::$_log as $sender => $events) {
+
+            if ($filter_sender and $sender !== $filter_sender) {
+                continue;
+            }
+
+            foreach ($events as $event => $logs) {
+                if ($filter_event and $event !== $filter_event) {
+                    continue;
+                }
+
+                if ($filter_flatten) {
+                    foreach ($logs as $time) {
+                        $log[] = sprintf("%.6f::%s:%s", $time, $sender, $event);
+                    }
+                }
+                else {
+                    $log[$sender][$event] = $logs;
+                }
+            }
+        }
+
+        if ($filter_flatten) {
+            asort($log);
+        }
+
+        return $log;
+    }
+
+
+    public static function hasRun(string $sender, string $event): bool
+    {
+        if ($sender === '*') {
+            foreach (array_keys(self::$_log) as $sender) {
+                if (isset(self::$_log[$sender][$event])) {
+                    return true;
+                }
+            }
+        }
+        else {
+            return !empty(self::$_log[$sender][$event]);
+        }
+    }
+
+
+    /**
+     * Clear the event log.
+     *
+     * @return void
+     */
+    public static function clearLog()
+    {
+        self::$_log = [];
     }
 }

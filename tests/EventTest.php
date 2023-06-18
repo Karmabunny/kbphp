@@ -293,10 +293,84 @@ class EventTest extends TestCase
         $this->assertCount(3, $actual);
         $this->assertEquals(['leaf2', 'leaf1', 'sub'], $actual);
     }
+
+
+    public function testLogs()
+    {
+        $this->testNested();
+
+        // Get all logs, nested structure.
+        $logs = Events::getLogs();
+        $this->assertCount(3, $logs);
+
+        $this->assertArrayHasKey(RootEmitter::class, $logs);
+        $this->assertArrayHasKey(SubEmitter::class, $logs);
+        $this->assertArrayHasKey(LeafEmitter::class, $logs);
+
+        $this->assertCount(1, $logs[RootEmitter::class]);
+        $this->assertCount(1, $logs[SubEmitter::class]);
+        $this->assertCount(1, $logs[LeafEmitter::class]);
+
+        $this->assertArrayHasKey(TestEvent::class, $logs[RootEmitter::class]);
+        $this->assertArrayHasKey(TestEvent::class, $logs[SubEmitter::class]);
+        $this->assertArrayHasKey(TestEvent::class, $logs[LeafEmitter::class]);
+
+        $this->assertCount(2, $logs[RootEmitter::class][TestEvent::class]);
+        $this->assertCount(2, $logs[SubEmitter::class][TestEvent::class]);
+        $this->assertCount(2, $logs[LeafEmitter::class][TestEvent::class]);
+
+        Events::clearLog();
+        $logs = Events::getLogs();
+        $this->assertCount(0, $logs);
+    }
+
+
+    public function testLogsFilter()
+    {
+        $this->testNested();
+
+        $logs = Events::getLogs(['sender' => LeafEmitter::class]);
+        $this->assertCount(1, $logs);
+        $this->assertCount(1, $logs[LeafEmitter::class]);
+
+        $event = new TestOtherEvent();
+        Events::trigger(LeafEmitter::class, $event);
+
+        $logs = Events::getLogs(['sender' => LeafEmitter::class]);
+        $this->assertCount(1, $logs);
+        $this->assertCount(2, $logs[LeafEmitter::class]);
+
+        $logs = Events::getLogs(['event' => TestEvent::class]);
+        $this->assertCount(3, $logs);
+        $this->assertCount(1, $logs[LeafEmitter::class]);
+
+        $logs = Events::getLogs(['event' => TestOtherEvent::class]);
+        $this->assertCount(1, $logs);
+        $this->assertCount(1, $logs[LeafEmitter::class]);
+
+        $logs = Events::getLogs(['sender' => LeafEmitter::class, 'event' => TestEvent::class]);
+        $this->assertCount(1, $logs);
+        $this->assertCount(1, $logs[LeafEmitter::class]);
+    }
+
+
+    public function testLogsFlat()
+    {
+        $this->testNested();
+
+        $logs = Events::getLogs(['flatten' => true]);
+        $this->assertCount(6, $logs);
+
+        foreach ($logs as $item) {
+            $this->assertStringStartsWith((string) floor(time() / 10), $item);
+            $this->assertStringEndsWith('TestEvent', $item);
+        }
+    }
 }
 
 
 class TestEvent extends Event {}
+class TestOtherEvent extends Event {}
 
 
 class EventsReset extends Events
@@ -304,6 +378,7 @@ class EventsReset extends Events
     public static function reset()
     {
         Events::$_events = [];
+        Events::clearLog();
     }
 }
 
