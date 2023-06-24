@@ -342,6 +342,25 @@ class Arrays
 
 
     /**
+     * A recursive version of `array_map`.
+     *
+     * @param callable $callback ($value, $key) => $value
+     * @param array $array
+     * @return array
+     */
+    public static function mapRecursive($callback, array $array): array
+    {
+        foreach ($array as $key => &$value) {
+            $value = is_array($$value)
+                ? self::mapRecursive($callback, $value, $key)
+                : $callback($callback, $value);
+        }
+        unset($value);
+        return $array;
+    }
+
+
+    /**
      * Shuffle an array, optionally preserving the keys.
      *
      * Yes, this is just the native shuffle() but it's also non-destructive
