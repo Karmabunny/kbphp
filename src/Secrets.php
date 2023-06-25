@@ -349,23 +349,23 @@ class Secrets extends DataObject
      */
     public function mask(array $item, bool $recursive = true): array
     {
-        $process = function (&$value, $key) {
+        $process = function ($value, $key) {
             if ($this->isSecretKey($key)) {
                 $value = $this->getMask($value);
             }
             else if ($this->isSecretValue($value)) {
                 $value = $this->getMask($value);
             }
+
+            return $value;
         };
 
         if ($recursive) {
-            array_walk_recursive($item, $process);
+            return Arrays::mapRecursive($item, $process);
         }
         else {
-            array_walk($item, $process);
+            return array_map($process, $item);
         }
-
-        return $item;
     }
 
 
