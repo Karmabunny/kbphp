@@ -36,6 +36,11 @@ class Arrays
      */
     const CHILD_FIRST = RecursiveIteratorIterator::CHILD_FIRST;
 
+    /**
+     * Remove empty arrays when filtering recursively.
+     */
+    const DISCARD_EMPTY_ARRAYS = 1024;
+
 
     /**
      * Get the first key + value of an iterable.
@@ -318,9 +323,8 @@ class Arrays
      *
      * Both value and key are always passed to the callback.
      *
-     * The default `keep_empty_arrays` setting is implied by the callback:
-     * - If _no_ callback, empty arrays are discard - `keep_empty_arrays = false`
-     * - Otherwise, empty arrays are preserved - `keep_empty_arrays = true`
+     * If the callback is `null` without a specified `$mode`
+     * the `DISCARD_EMPTY_ARRAYS` mode is implicitly active.
      *
      * Be aware, numeric arrays will not 're-settle' their keys. Items will
      * retain their index position even with gaps from removed items. This is
@@ -336,36 +340,61 @@ class Arrays
      *
      * @param array $array
      * @param callable|null $callback
-     * @param bool|null $keep_empty_arrays
+     * @param int|null $mode LEAVES_ONLY (default), SELF_FIRST, CHILD_FIRST, DISCARD_EMPTY_ARRAYS
      * @return array
      */
-    public static function filterRecursive(array $array, callable $callback = null, bool $keep_empty_arrays = null): array
+    public static function filterRecursive(array $array, callable $callback = null, int $mode = null): array
     {
-        if ($keep_empty_arrays === null) {
-            $keep_empty_arrays = ($callback !== null);
+        if ($mode === null) {
+            $mode = self::LEAVES_ONLY;
+
+            if ($callback === null) {
+                $mode |= self::DISCARD_EMPTY_ARRAYS;
+            }
+        }
+
+        if ($callback === null) {
+            $callback = function($value) {
+                return !empty($value);
+            };
         }
 
         foreach ($array as $key => &$value) {
             if (is_array($value)) {
-                $value = self::filterRecursive($value, $callback, $keep_empty_arrays);
 
-                if (!$keep_empty_arrays and empty($value)) {
+                if ($mode & self::SELF_FIRST and !$callback($value, $key)) {
+                    if ($mode & self::DISCARD_EMPTY_ARRAYS) {
+                        unset($array[$key]);
+                    }
+                    else {
+                        $value = [];
+                    }
+                    continue;
+                }
+
+                $value = self::filterRecursive($value, $callback, $mode);
+
+                if ($mode & self::DISCARD_EMPTY_ARRAYS and empty($value)) {
                     unset($array[$key]);
+                    continue;
+                }
+
+                if ($mode & self::CHILD_FIRST and !$callback($value, $key)) {
+                    if ($mode & self::DISCARD_EMPTY_ARRAYS) {
+                        unset($array[$key]);
+                    }
+                    else {
+                        $value = [];
+                    }
+                    continue;
                 }
             }
-            else if ($callback) {
+            else {
                 if (!$callback($value, $key)) {
                     unset($array[$key]);
                 }
             }
-            else {
-                if (empty($value)) {
-                    unset($array[$key]);
-                }
-            }
         }
-
-        unset($value);
         return $array;
     }
 

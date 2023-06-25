@@ -7,7 +7,6 @@
 use karmabunny\kb\Arrays;
 use PHPUnit\Framework\TestCase;
 
-use function PHPUnit\Framework\assertEquals;
 
 /**
  * Test the Arrays helpers.
@@ -215,7 +214,7 @@ final class ArraysTest extends TestCase {
             'item3' => [],
         ];
 
-        $actual = Arrays::filterRecursive($array, null, true);
+        $actual = Arrays::filterRecursive($array, null, Arrays::LEAVES_ONLY);
         $this->assertEquals($expected, $actual);
 
         // A filter that removes integers.
@@ -237,6 +236,44 @@ final class ArraysTest extends TestCase {
             return !is_int($item);
         });
 
+        $this->assertEquals($expected, $actual);
+
+        // A filter that remove the 'deeper' array, requires self-first.
+        $expected = [
+            'item1' => [
+                'nested1' => 123,
+                'nested2' => 0,
+                'nested3' => null,
+                'nested4' => 567,
+                'deeper' => [],
+            ],
+            'item2' => [],
+            'item3' => [
+                'empty1' => null,
+                'empty2' => null,
+            ],
+        ];
+
+        $filter = function($item, $key) {
+            return $key !== 'deeper';
+        };
+
+        // Test with leaves-only, matches original.
+        $actual = Arrays::filterRecursive($array, $filter, Arrays::LEAVES_ONLY);
+        $this->assertEquals($array, $actual);
+
+        // Now test with self-first.
+        $actual = Arrays::filterRecursive($array, $filter, Arrays::SELF_FIRST);
+        $this->assertEquals($expected, $actual);
+
+        // Also with child-first, for good luck.
+        $actual = Arrays::filterRecursive($array, $filter, Arrays::CHILD_FIRST);
+        $this->assertEquals($expected, $actual);
+
+        // Combine both discard + self-first.
+        unset($expected['item1']['deeper']);
+        unset($expected['item2']);
+        $actual = Arrays::filterRecursive($array, $filter, Arrays::SELF_FIRST | Arrays::DISCARD_EMPTY_ARRAYS);
         $this->assertEquals($expected, $actual);
     }
 
