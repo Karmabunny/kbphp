@@ -220,6 +220,98 @@ final class ArraysTest extends TestCase {
         $this->assertEquals($expected, $actual);
     }
 
+    public function testMapRecursive()
+    {
+        $array = [
+            'aaa' => 123,
+            'xxx' => 567,
+            'zzz' => [
+                'abc',
+                'def',
+                'ghi' => [
+                    1,
+                    2,
+                    3,
+                    'xyz' => 'hello',
+                    'zzz' => ['world'],
+                ],
+            ],
+        ];
+
+        // leaves are [] if the key is numeric, otherwise ()
+        // arrays (self-first) the 'ghi' key is redacted
+        // arrays (child-first) gain additional children
+        $filter = function($item, $key) {
+            if (is_array($item)) {
+                if ($key === 'ghi') {
+                    return 'REDACTED';
+                }
+                else {
+                    $item[] = 'ADDED';
+                    return $item;
+                }
+            }
+            else if (is_numeric($key)) {
+                return '[' . $item . ']';
+            }
+            else {
+                return '(' . $item . ')';
+            }
+        };
+
+        // LEAVES_ONLY
+        $expected = [
+            'aaa' => '(123)',
+            'xxx' => '(567)',
+            'zzz' => [
+                '[abc]',
+                '[def]',
+                'ghi' => [
+                    '[1]',
+                    '[2]',
+                    '[3]',
+                    'xyz' => '(hello)',
+                    'zzz' => ['[world]'],
+                ],
+            ],
+        ];
+
+        $actual = Arrays::mapRecursive($array, $filter);
+        $this->assertEquals($expected, $actual);
+
+        // SELF_FIRST
+        $expected = [
+            'aaa' => '(123)',
+            'xxx' => '(567)',
+            'zzz' => [
+                '[abc]',
+                '[def]',
+                'ghi' => 'REDACTED',
+                '[ADDED]',
+            ],
+            '[ADDED]',
+        ];
+
+        $actual = Arrays::mapRecursive($array, $filter, Arrays::SELF_FIRST);
+        $this->assertEquals($expected, $actual);
+
+        // CHILD_FIRST
+        $expected = [
+            'aaa' => '(123)',
+            'xxx' => '(567)',
+            'zzz' => [
+                '[abc]',
+                '[def]',
+                'ghi' => 'REDACTED',
+                'ADDED',
+            ],
+            'ADDED',
+        ];
+
+        $actual = Arrays::mapRecursive($array, $filter, Arrays::CHILD_FIRST);
+        $this->assertEquals($expected, $actual);
+    }
+
 
     public function testShuffle()
     {
