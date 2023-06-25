@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use Generator;
+use RecursiveIteratorIterator;
 use Throwable;
 use Traversable;
 
@@ -17,6 +18,24 @@ use Traversable;
  */
 class Arrays
 {
+
+    /**
+     * A recursive mode that doesn't visit intermediate nodes.
+     */
+    const LEAVES_ONLY = RecursiveIteratorIterator::LEAVES_ONLY;
+
+    /**
+     * A recursive mode that first visits intermediate nodes and _then_
+     * visits each child node.
+     */
+    const SELF_FIRST = RecursiveIteratorIterator::SELF_FIRST;
+
+    /**
+     * A recursive mode that first visits leaf nodes and _then_ visits
+     * the parent node.
+     */
+    const CHILD_FIRST = RecursiveIteratorIterator::CHILD_FIRST;
+
 
     /**
      * Get the first key + value of an iterable.
@@ -395,6 +414,51 @@ class Arrays
         }
 
         return $items;
+    }
+
+
+    /**
+     * A recursive version of `array_map`.
+     *
+     * Caution when using `CHILD_FIRST`; do not map leaves into arrays - you may
+     * trigger an infinite recursion.
+     *
+     * @param array $array
+     * @param callable $fn ($value, $key) => $value
+     * @param int $mode LEAVES_ONLY (default), SELF_FIRST, CHILD_FIRST
+     * @return array
+     */
+    public static function mapRecursive(array $array, $fn, $mode = self::LEAVES_ONLY): array
+    {
+        $process = null;
+        $process = function($rootkey, array $array, $fn, $mode) use (&$process) {
+            if ($mode === self::SELF_FIRST) {
+                $array = $fn($array, $rootkey);
+
+                if (!is_array($array)) {
+                    return $array;
+                }
+            }
+
+            foreach ($array as $key => $value) {
+                if (is_array($value)) {
+                    $value = $process($key, $value, $fn, $mode);
+                }
+                else {
+                    $value = $fn($value, $key);
+                }
+
+                $array[$key] = $value;
+            }
+
+            if ($mode === self::CHILD_FIRST) {
+                $array = $fn($array, $rootkey);
+            }
+
+            return $array;
+        };
+
+        return $process(null, $array, $fn, $mode);
     }
 
 

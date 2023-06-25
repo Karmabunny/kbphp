@@ -223,7 +223,7 @@ class Env
 
 
     /**
-     * Is this app inside a docker image?
+     * Is this app inside a docker container?
      *
      * @return bool
      */
@@ -248,6 +248,42 @@ class Env
         }
 
         return false;
+    }
+
+
+    /**
+     * Is this app inside a podman container?
+     *
+     * @return bool
+     */
+    public static function isPodman(): bool
+    {
+        $env = getenv('container');
+
+        if ($env == 'podman') {
+            return true;
+        }
+
+        if ($env == 'oci') {
+            return true;
+        }
+
+        if (file_exists('/run/.containerenv')) {
+            return true;
+        }
+
+        return false;
+    }
+
+
+    /**
+     * Is this app inside a container? docker or podman?
+     *
+     * @return bool
+     */
+    public static function isContainer(): bool
+    {
+        return self::isDocker() or self::isPodman();
     }
 
 
