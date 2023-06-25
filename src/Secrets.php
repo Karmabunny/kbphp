@@ -351,17 +351,28 @@ class Secrets extends DataObject
     {
         $process = function ($value, $key) {
             if ($this->isSecretKey($key)) {
-                $value = $this->getMask($value);
+                // Dive into arrays and nuke everything.
+                // This only needs leaf nodes.
+                if (is_array($value)) {
+                    return Arrays::mapRecursive($value, function($value) {
+                        return $this->getMask($value);
+                    });
+                }
+
+                // Otherwise we assume it's scalar?
+                // TODO ...what if it's not?
+                return $this->getMask($value);
             }
-            else if ($this->isSecretValue($value)) {
-                $value = $this->getMask($value);
+
+            if ($this->isSecretValue($value)) {
+                return $this->getMask($value);
             }
 
             return $value;
         };
 
         if ($recursive) {
-            return Arrays::mapRecursive($item, $process);
+            return Arrays::mapRecursive($item, $process, Arrays::CHILD_FIRST);
         }
         else {
             return array_map($process, $item);
@@ -388,7 +399,7 @@ class Secrets extends DataObject
         };
 
         if ($recursive) {
-            return Arrays::filterRecursive($item, $process, true);
+            return Arrays::filterRecursive($item, $process, Arrays::SELF_FIRST);
         }
         else {
             return array_filter($item, $process, ARRAY_FILTER_USE_BOTH);

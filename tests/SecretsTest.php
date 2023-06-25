@@ -46,14 +46,13 @@ const DATA = [
         ],
     ],
 
-    // This won't match.
-    // TODO But should it?
-    // What would we replace it with?
-    // - a single string - potentially breaks things.
-    // - or replace/clean all strings inside it?
     'deeply_secret' => [
         'field1' => 123,
         'field2' => 'abc',
+        'nested' => [
+            'def',
+            'ghi',
+        ]
     ],
 
     'encoded_things' => [
@@ -240,8 +239,12 @@ class SecretsTest extends TestCase
                 ],
             ],
             'deeply_secret' => [
-                'field1' => 123,
-                'field2' => 'abc',
+                'field1' => '****************',
+                'field2' => '****************',
+                'nested' => [
+                    '****************',
+                    '****************',
+                ]
             ],
             'encoded_things' => [
                 '****************',
@@ -275,10 +278,7 @@ class SecretsTest extends TestCase
                     'list' => [],
                 ],
             ],
-            'deeply_secret' => [
-                'field1' => 123,
-                'field2' => 'abc',
-            ],
+            'deeply_secret' => [],
             'encoded_things' => [
                 4 => 'http://example.com/oauth?error=nothingtoseehere',
                 6 => 'eyJjbGVhbiI6ImFuZCBhYm92ZSBib2FyZCJ9',
