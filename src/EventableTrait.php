@@ -61,7 +61,7 @@ trait EventableTrait
      * ```
      *
      * @see Events::on()
-     * @param string|callable $event
+     * @param class-string<EventInterface>|callable $event
      * @param callable|null $fn
      * @return void
      * @throws InvalidArgumentException

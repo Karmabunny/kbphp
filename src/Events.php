@@ -60,7 +60,7 @@ class Events
      * - `self::class`
      * - `get_class($this)`
      *
-     * @param string $sender
+     * @param class-string $sender
      * @param EventInterface $event
      * @return array[] event results.
      */
@@ -116,8 +116,8 @@ class Events
      * In the second form the event type is derived from the first parameter
      * of the handler function.
      *
-     * @param string $sender
-     * @param string|callable $event
+     * @param class-string $sender
+     * @param class-string<EventInterface>|callable $event
      * @param callable|null $fn
      * @return void
      * @throws InvalidArgumentException
@@ -153,7 +153,6 @@ class Events
             throw new InvalidArgumentException("Event '{$event}' is not an EventInterface");
         }
 
-
         self::$_events[$sender][$event][] = $fn;
     }
 
@@ -161,8 +160,10 @@ class Events
     /**
      * Remove listeners.
      *
-     * @param string $sender
-     * @param string|null $event
+     * If `$event` is not given, all events are removed from the sender.
+     *
+     * @param class-string $sender
+     * @param class-string<EventInterface>|null $event
      * @return void
      */
     public static function off(string $sender, string $event = null)
@@ -230,6 +231,13 @@ class Events
     }
 
 
+    /**
+     * Has this event been triggered?
+     *
+     * @param class-string $sender
+     * @param class-string<EventInterface> $event
+     * @return bool
+     */
     public static function hasRun(string $sender, string $event): bool
     {
         if ($sender === '*') {
