@@ -24,7 +24,8 @@ class EventTest extends TestCase
 
         // Instance long form.
         $emitter = new RootEmitter();
-        $emitter->on(TestEvent::class, function() use (&$count) {
+        $emitter->on(TestEvent::class, function(TestEvent $event) use (&$count, $emitter) {
+            $this->assertEquals($event->sender, $emitter);
             $count++;
             return 'one';
         });
@@ -36,7 +37,8 @@ class EventTest extends TestCase
         $this->assertEquals(['one'], $actual);
 
         // Instance short form.
-        $emitter->on(function(TestEvent $event) use (&$count) {
+        $emitter->on(function(TestEvent $event) use (&$count, $emitter) {
+            $this->assertEquals($event->sender, $emitter);
             $count++;
             return 'two';
         });
@@ -46,7 +48,7 @@ class EventTest extends TestCase
 
         $this->assertEquals(2, $count);
         $this->assertCount(2, $actual);
-        $this->assertEquals(['two', 'one'], $actual);
+        $this->assertEquals(['one', 'two'], $actual);
 
         // Static long form.
         Events::on(RootEmitter::class, TestEvent::class, function() use (&$count) {
@@ -59,7 +61,7 @@ class EventTest extends TestCase
 
         $this->assertEquals(3, $count);
         $this->assertCount(3, $actual);
-        $this->assertEquals(['three', 'two', 'one'], $actual);
+        $this->assertEquals(['one', 'two', 'three'], $actual);
 
         // Static short form.
         Events::on(RootEmitter::class, function(TestEvent $event) use (&$count) {
@@ -72,7 +74,74 @@ class EventTest extends TestCase
 
         $this->assertEquals(4, $count);
         $this->assertCount(4, $actual);
-        $this->assertEquals(['four', 'three', 'two', 'one'], $actual);
+        $this->assertEquals(['one', 'two', 'three', 'four'], $actual);
+    }
+
+
+    public function testPrepend()
+    {
+
+        Events::on(RootEmitter::class, function(TestEvent $event) {
+            $this->assertNull($event->sender);
+            return 'one';
+        });
+
+        Events::on(RootEmitter::class, function(TestEvent $event) {
+            $this->assertNull($event->sender);
+            return 'two';
+        }, false);
+
+        // Test parent class listener.
+        Events::on(RootEmitter::class, TestEvent::class, function(Event $event) {
+            $this->assertNull($event->sender);
+            return 'three';
+        }, true);
+
+        Events::on(RootEmitter::class, TestEvent::class, function() {
+            return 'four';
+        }, false);
+
+        $event = new TestEvent();
+        $actual = Events::trigger(RootEmitter::class, $event);
+
+        $this->assertCount(4, $actual);
+        $this->assertEquals(['four', 'two', 'one', 'three'], $actual);
+    }
+
+
+    public function testHandled()
+    {
+        Events::on(RootEmitter::class, function(TestEvent $event) {
+            if ($event->handled) return;
+            return 'one';
+        });
+
+        Events::on(RootEmitter::class, function(TestEvent $event) {
+            if ($event->handled) return;
+            return 'two';
+        });
+
+        Events::on(RootEmitter::class, function(TestEvent $event) {
+            if ($event->handled) return;
+            $event->handled = true;
+            return 'three';
+        }, false);
+
+        Events::on(RootEmitter::class, function(TestEvent $event) {
+            if ($event->handled) return;
+            return 'four';
+        }, false);
+
+        Events::on(RootEmitter::class, function(TestEvent $event) {
+            if ($event->handled) return;
+            return 'five';
+        }, true);
+
+        $event = new TestEvent();
+        $actual = Events::trigger(RootEmitter::class, $event);
+
+        $this->assertCount(5, $actual);
+        $this->assertEquals(['four', 'three', null, null, null], $actual);
     }
 
 
@@ -252,7 +321,7 @@ class EventTest extends TestCase
         $actual = $emitter->testRoot();
         $this->assertEquals(5, $count);
         $this->assertCount(5, $actual);
-        $this->assertEquals(['other', 'leaf2', 'leaf1', 'sub', 'root'], $actual);
+        $this->assertEquals(['root', 'sub', 'leaf1', 'leaf2', 'other'], $actual);
 
         // Partial tree of events.
         // from SUB to SUB + LEAF
@@ -260,28 +329,28 @@ class EventTest extends TestCase
         $actual = $emitter->testSub();
         $this->assertEquals(3, $count);
         $this->assertCount(3, $actual);
-        $this->assertEquals(['leaf2', 'leaf1', 'sub'], $actual);
+        $this->assertEquals(['sub', 'leaf1', 'leaf2'], $actual);
 
         // from LEAF to LEAF
         $count = 0;
         $actual = $emitter->testLeaf();
         $this->assertEquals(2, $count);
         $this->assertCount(2, $actual);
-        $this->assertEquals(['leaf2', 'leaf1'], $actual);
+        $this->assertEquals(['leaf1', 'leaf2'], $actual);
 
         // from SELF (root) to LEAF
         $count = 0;
         $actual = $emitter->testSelf();
         $this->assertEquals(5, $count);
         $this->assertCount(5, $actual);
-        $this->assertEquals(['other', 'leaf2', 'leaf1', 'sub', 'root'], $actual);
+        $this->assertEquals(['root', 'sub', 'leaf1', 'leaf2', 'other'], $actual);
 
         // from THIS (leaf) to LEAF
         $count = 0;
         $actual = $emitter->testDynamic();
         $this->assertEquals(2, $count);
         $this->assertCount(2, $actual);
-        $this->assertEquals(['leaf2', 'leaf1'], $actual);
+        $this->assertEquals(['leaf1', 'leaf2'], $actual);
 
         $emitter = new SubEmitter();
 
@@ -291,7 +360,7 @@ class EventTest extends TestCase
         $actual = $emitter->testDynamic();
         $this->assertEquals(3, $count);
         $this->assertCount(3, $actual);
-        $this->assertEquals(['leaf2', 'leaf1', 'sub'], $actual);
+        $this->assertEquals(['sub', 'leaf1', 'leaf2'], $actual);
     }
 
 
