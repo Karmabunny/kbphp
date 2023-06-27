@@ -62,15 +62,16 @@ trait EventableTrait
      *
      * @see Events::on()
      * @param class-string<EventInterface>|callable $event
-     * @param callable|null $fn
+     * @param callable|bool|null $fn
+     * @param bool $append
      * @return void
      * @throws InvalidArgumentException
      */
-    public function on($event, callable $fn = null)
+    public function on($event, $fn = null, bool $append = true)
     {
         // Unlike trigger, using dynamic class names here is OK. A user is not
         // surprised (hopefully) that they only receive events appropriate for
         // the leaf node that is 'this'.
-        Events::on(static::class, $event, $fn);
+        Events::on(static::class, $event, $fn, $append);
     }
 }

@@ -76,15 +76,7 @@ class Events
             if (!is_a($class, $sender, true)) continue;
 
             $some = $events[get_class($event)] ?? [];
-
-            // Add handlers in reverse.
-            // This retains the order of classes (registration order) but each
-            // set of handlers are executed in reverse (LIFO).
-            // This is desirable so that handlers registered later are able to
-            // override or prevent behaviour of earlier handlers.
-            foreach ($some as $handler) {
-                array_unshift($handlers, $handler);
-            }
+            array_push($handlers, ...$some);
         }
 
         $results = [];
@@ -118,15 +110,18 @@ class Events
      *
      * @param class-string $sender
      * @param class-string<EventInterface>|callable $event
-     * @param callable|null $fn
+     * @param callable|bool|null $fn
+     * @param bool $append
      * @return void
      * @throws InvalidArgumentException
      */
-    public static function on(string $sender, $event, callable $fn = null)
+    public static function on(string $sender, $event, $fn = null, bool $append = true)
     {
         // If no handler is given, assume the second parameter is handler.
         // Using some cheeky reflection we can extract the event type.
-        if (!$fn) {
+        if ($fn === null or is_bool($fn)) {
+            $append = $fn ?? $append;
+
             try {
                 $fn = $event;
                 $event = null;
@@ -153,7 +148,12 @@ class Events
             throw new InvalidArgumentException("Event '{$event}' is not an EventInterface");
         }
 
-        self::$_events[$sender][$event][] = $fn;
+        if (!$append and isset(self::$_events[$sender][$event])) {
+            array_unshift(self::$_events[$sender][$event], $fn);
+        }
+        else {
+            self::$_events[$sender][$event][] = $fn;
+        }
     }
 
 
