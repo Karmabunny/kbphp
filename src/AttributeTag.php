@@ -55,6 +55,13 @@ use TypeError;
 abstract class AttributeTag
 {
 
+    const MODE_ATTRIBUTES = 1;
+
+    const MODE_DOCTAGS = 2;
+
+    const MODE_ALL = 3;
+
+
     /**
      * The reflection object that this tag was found on.
      *
@@ -105,29 +112,30 @@ abstract class AttributeTag
      * Parse all attributes of an object or class and it's sub reflections.
      *
      * @param string|object $target
+     * @param int $modes
      * @return static[]
      */
-    public static function parse($target): array
+    public static function parse($target, int $modes = self::MODE_ALL): array
     {
         $reflect = new ReflectionClass($target);
 
         $tags = [];
 
-        $more = static::parseReflector($reflect);
+        $more = static::parseReflector($reflect, $modes);
         array_push($tags, ...$more);
 
         foreach ($reflect->getMethods() as $method) {
-            $more = static::parseReflector($method);
+            $more = static::parseReflector($method, $modes);
             array_push($tags, ...$more);
         }
 
         foreach ($reflect->getProperties() as $property) {
-            $more = static::parseReflector($property);
+            $more = static::parseReflector($property, $modes);
             array_push($tags, ...$more);
         }
 
         foreach ($reflect->getReflectionConstants() as $constant) {
-            $more = static::parseReflector($constant);
+            $more = static::parseReflector($constant, $modes);
             array_push($tags, ...$more);
         }
 
@@ -139,12 +147,13 @@ abstract class AttributeTag
      * Parse all and tags attributes of a standalone function.
      *
      * @param callable $function
+     * @param int $modes
      * @return static[]
      */
-    public static function parseFunction($function): array
+    public static function parseFunction($function, int $modes = self::MODE_ALL): array
     {
         $reflect = new ReflectionFunction($function);
-        return static::parseReflector($reflect);
+        return static::parseReflector($reflect, $modes);
     }
 
 
@@ -152,15 +161,168 @@ abstract class AttributeTag
      * Parse attributes and tags of a reflection object.
      *
      * @param ReflectionClass|ReflectionFunctionAbstract|ReflectionProperty|ReflectionClassConstant|ReflectionParameter $reflect
+     * @param int $modes
      * @return static[]
      */
-    public static function parseReflector($reflect): array
+    public static function parseReflector($reflect, int $modes = self::MODE_ALL): array
     {
-        // Static store for class metadata.
-        // This only needs to be parsed once.
+        $tags = [];
+
+        if (PHP_VERSION_ID < 80000) {
+            if ($modes === self::MODE_ATTRIBUTES) {
+                throw new Error('Attributes are not supported in this version of PHP');
+            }
+
+            $modes ^= self::MODE_ATTRIBUTES;
+        }
+
+        if ($modes & self::MODE_ATTRIBUTES) {
+            $more = static::parseReflectorAttributes($reflect);
+            array_push($tags, ...$more);
+        }
+
+        if ($modes & self::MODE_DOCTAGS) {
+            $more = static::parseReflectorDocTags($reflect);
+            array_push($tags, ...$more);
+        }
+
+        return $tags;
+    }
+
+
+    /**
+     * Parse attributes (PHP+) of a reflection object.
+     *
+     * @param ReflectionClass|ReflectionFunctionAbstract|ReflectionProperty|ReflectionClassConstant|ReflectionParameter $reflect
+     * @param int $modes
+     * @return static[]
+     */
+    public static function parseReflectorAttributes($reflect): array
+    {
+        if (PHP_VERSION_ID < 80000) {
+            throw new Error('Attributes are not supported in this version of PHP');
+        }
+
+        // Safety net only because we haven't got strong types on '$reflect'.
+        if (!method_exists($reflect, 'getAttributes')) {
+            throw new Error('Cannot parse attributes from: ' . get_class($reflect));
+        }
+
+        // We're looking for instances of ourself (the attribute) and any
+        // extensions of us.
+        $attributes = $reflect->getAttributes(static::class, ReflectionAttribute::IS_INSTANCEOF);
+
+        $tags = [];
+
+        foreach ($attributes as $attribute) {
+            /** @var static $tag */
+            $tag = $attribute->newInstance();
+            $tag->reflect = $reflect;
+            $tags[] = $tag;
+        }
+
+        return $tags;
+    }
+
+
+    /**
+     * Parse doc tags of a reflection object.
+     *
+     * @param ReflectionClass|ReflectionFunctionAbstract|ReflectionProperty|ReflectionClassConstant|ReflectionParameter $reflect
+     * @return static[]
+     */
+    public static function parseReflectorDocTags($reflect): array
+    {
+        // Static store for class metadata. This only needs to be parsed once.
+        // A bit of inception here. We're parsing the @doctags of the tag
+        // class itself. With this we can define the rules for @doctags.
         static $_META = [];
         $meta = $_META[static::class] ?? null;
 
+        if ($meta === null) {
+            $meta = self::getMetaDocTag();
+            $_META[static::class] = $meta;
+        }
+
+        // Only parse doc tags if enabled.
+        if (!$meta['name']) {
+            return [];
+        }
+
+        // Safety net only because we haven't got strong types on '$reflect'.
+        if (!method_exists($reflect, 'getDocComment')) {
+            throw new Error('Cannot parse doc comments from: ' . get_class($reflect));
+        }
+
+        $doc = $reflect->getDocComment() ?: '';
+        $docs = Reflect::getDocTag($doc, $meta['name']);
+
+        if ($docs) {
+            // Check if we're allowed to parse this target type.
+            $valid = 0;
+            foreach ($meta['filter'] as $class) {
+                if ($reflect instanceof $class) {
+                    $valid++;
+                }
+            }
+
+            if (!$valid) {
+                $filters = implode(', ', array_keys($meta['filter']));
+                $target = strtr(strtolower(get_class($reflect)), [
+                    'reflection' => '',
+                    'classconstant' => 'constant',
+                ]);
+
+                throw new Error("Tag \"@{$meta['name']}\" cannot target {$target} (allowed targets: {$filters})");
+            }
+        }
+
+        $tags = [];
+
+        // The builder can be redefined for each concrete attribute.
+        foreach ($docs as $doc) {
+            $tag = static::build($doc);
+            if (!$tag) continue;
+
+            $tag->reflect = $reflect;
+            $tags[] = $tag;
+        }
+
+        return $tags;
+    }
+
+
+    /**
+     * Get the doc tag metadata for this class.
+     *
+     * This 'meta' tag is declared on the class of the 'AttributeTag'.
+     * It describes the name of the tag as it would be used elsewhere and the
+     * targets that it can be attached to.
+     *
+     * Example:
+     *
+     * `@attribute my-tag method|property`
+     *
+     * Valid targets:
+     * - class
+     * - function
+     * - method
+     * - property
+     * - constant (this is a class constant)
+     *
+     * Using this tag:
+     *
+     * ```
+     * // @my-tag arg1, arg2
+     * public function myMethod() {}
+     * ```
+     *
+     * @return array [ name, filter ]
+     *   - name: tag name
+     *   - filter: reflection target, as class names
+     */
+    public static function getMetaDocTag(): array
+    {
         static $MAP = [
             'class' => ReflectionClass::class,
             'function' => ReflectionFunction::class,
@@ -169,92 +331,35 @@ abstract class AttributeTag
             'constant' => ReflectionClassConstant::class,
         ];
 
-        // A bit of inception here. We're parsing the @doctags of the
-        // tag class itself. With this we can define the rules for @doctags.
+        // 'name' is the tag name to look for.
+        // 'filter' is the target types (see $MAP).
+        $meta = [
+            'name' => null,
+            'filter' => [],
+        ];
 
-        // This is only relevant for old-style @doctags because we're _always_
-        // going to the parse #[attributes] and only @doctags needs this to
-        // mirror the Attribute::TARGET enum.
-        if ($meta === null) {
+        $self = new ReflectionClass(static::class);
 
-            // 'name' is the tag name to look for.
-            // 'filter' is the target types (see $MAP).
-            $meta = [
-                'name' => null,
-                'filter' => [],
-            ];
+        $doc = $self->getDocComment() ?: '';
+        $doc = Reflect::getDocTag($doc, 'attribute');
+        $doc = reset($doc);
 
-            $self = new ReflectionClass(static::class);
+        if ($doc) {
+            list($name, $args) = explode(' ', $doc, 2) + ['', ''];
+            $args = explode('|', $args);
 
-            $doc = $self->getDocComment() ?: '';
-            $doc = Reflect::getDocTag($doc, 'attribute');
-            $doc = reset($doc);
+            $meta['name'] = $name;
+            $meta['filter'] = [];
 
-            if ($doc) {
-                list($name, $args) = explode(' ', $doc, 2) + ['', ''];
-                $args = explode('|', $args);
+            foreach ($args as $arg) {
+                $arg = trim($arg);
+                $filter = $MAP[$arg] ?? null;
+                if (!$filter) continue;
 
-                $meta['name'] = $name;
-                $meta['filter'] = array_map('trim', $args);
-            }
-
-            $_META[static::class] = $meta;
-        }
-
-        $tags = [];
-
-        // Search for natural attributes.
-        if (PHP_VERSION_ID >= 80000) {
-            if (!method_exists($reflect, 'getAttributes')) {
-                throw new Error('Cannot parse attributes from: ' . get_class($reflect));
-            }
-
-            // We're looking for instances of ourself (the attribute) and any
-            // extensions of us.
-            $attributes = $reflect->getAttributes(static::class, ReflectionAttribute::IS_INSTANCEOF);
-
-            foreach ($attributes as $attribute) {
-                /** @var static $tag */
-                $tag = $attribute->newInstance();
-                $tag->reflect = $reflect;
-                $tags[] = $tag;
+                $meta['filter'][$arg] = $filter;
             }
         }
 
-        // Only parse doc tags if enabled.
-        if ($meta['name']) {
-            if (!method_exists($reflect, 'getDocComment')) {
-                throw new Error('Cannot parse doc comments from: ' . get_class($reflect));
-            }
-
-            $doc = $reflect->getDocComment() ?: '';
-            $docs = Reflect::getDocTag($doc, $meta['name']);
-
-            if ($docs) {
-                // Check if we're allowed to parse this target type.
-                if ($meta['filter']) {
-                    foreach ($MAP as $name => $class) {
-                        if (
-                            ($reflect instanceof $class)
-                            and !in_array($name, $meta['filter'])
-                        ) {
-                            $filter = implode(', ', $meta['filter']);
-                            throw new Error("Tag \"@{$meta['name']}\" cannot target {$name} (allowed targets: {$filter})");
-                        }
-                    }
-                }
-
-                // The builder can be redefined for each concrete attribute.
-                foreach ($docs as $doc) {
-                    $tag = static::build($doc);
-                    if (!$tag) continue;
-
-                    $tag->reflect = $reflect;
-                    $tags[] = $tag;
-                }
-            }
-        }
-
-        return $tags;
+        return $meta;
     }
 }

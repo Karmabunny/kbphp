@@ -7,6 +7,7 @@
 // namespace Tests;
 
 use karmabunny\kb\AttributeTag;
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -17,12 +18,27 @@ final class TagsTest extends TestCase
 
     public function testBadDocTags()
     {
+        $meta = TestTag::getMetaDocTag();
+
+        $this->assertEquals('test', $meta['name']);
+
+        $filters = [
+            'property' => 'ReflectionProperty',
+            'method' => 'ReflectionMethod',
+        ];
+
+        $this->assertEquals($filters, $meta['filter']);
+
         try {
             TestTag::parse(TaggedBadTag::class);
             $this->fail('Expected an Error');
         }
         catch (Throwable $error) {
-            $this->assertInstanceOf(Error::class, $error);
+            if ($error instanceof AssertionFailedError) {
+                throw $error;
+            }
+
+            $this->assertInstanceOf(Error::class, $error, $error->getTraceAsString());
             $this->assertStringContainsString('@test', $error->getMessage());
             $this->assertStringContainsString('cannot target constant', $error->getMessage());
             $this->assertMatchesRegularExpression('/allowed.*method/', $error->getMessage());
@@ -58,6 +74,10 @@ final class TagsTest extends TestCase
             $this->fail('Expected an Error');
         }
         catch (Throwable $error) {
+            if ($error instanceof AssertionFailedError) {
+                throw $error;
+            }
+
             $this->assertInstanceOf(Error::class, $error);
             $this->assertStringContainsString(TestTag::class, $error->getMessage());
             $this->assertStringContainsString('cannot target class', $error->getMessage());
@@ -88,6 +108,40 @@ final class TagsTest extends TestCase
         $expected = ['also this one'];
         $this->assertEquals($expected, $actual[2]->args);
     }
+
+
+    /**
+     * @requires PHP < 8.0
+     */
+    public function testModeFilterAttributes()
+    {
+        try {
+            TestTag::parse(TaggedTwo::class, AttributeTag::MODE_ATTRIBUTES);
+            $this->fail('Expected an Error');
+        }
+        catch (Throwable $error) {
+            if ($error instanceof AssertionFailedError) {
+                throw $error;
+            }
+
+            $this->assertInstanceOf(Error::class, $error);
+            $this->assertStringContainsString('not supported', $error->getMessage());
+        }
+    }
+
+
+    /**
+     * @requires PHP >= 8.0
+     */
+    public function testModeFilterTags()
+    {
+        $tags = TestTag::parse(TaggedTwo::class, AttributeTag::MODE_DOCTAGS);
+        $this->assertCount(1, $tags);
+
+        $expected = ['also this one'];
+        $this->assertEquals($expected, $tags[0]->args);
+    }
+
 }
 
 
