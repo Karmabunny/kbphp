@@ -98,6 +98,7 @@ trait PropertiesTrait
                 $type = null;
 
                 if (PHP_VERSION_ID >= 74000) {
+                    // @phpstan-ignore-next-line
                     $type = $property->getType();
                     if ($type !== null) {
                         $type = $type->getName();
