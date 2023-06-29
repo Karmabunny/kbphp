@@ -36,6 +36,11 @@ class Arrays
      */
     const CHILD_FIRST = RecursiveIteratorIterator::CHILD_FIRST;
 
+    /**
+     * Remove empty arrays when filtering recursively.
+     */
+    const DISCARD_EMPTY_ARRAYS = 1024;
+
 
     /**
      * Get the first key + value of an iterable.
@@ -314,6 +319,87 @@ class Arrays
 
 
     /**
+     * Filter multi-dimensional arrays.
+     *
+     * Both value and key are always passed to the callback.
+     *
+     * If the callback is `null` without a specified `$mode`
+     * the `DISCARD_EMPTY_ARRAYS` mode is implicitly active.
+     *
+     * Be aware, numeric arrays will not 're-settle' their keys. Items will
+     * retain their index position even with gaps from removed items. This is
+     * the same behaviour as `array_filter`.
+     *
+     * For example:
+     *
+     * ```
+     * $arr = [ 'a', '', 'c' ];
+     * $filtered = array_filter($arr);
+     * // => [ 0 => 'a', 2 => 'c' ]
+     * ```
+     *
+     * @param array $array
+     * @param callable|null $callback
+     * @param int|null $mode LEAVES_ONLY (default), SELF_FIRST, CHILD_FIRST, DISCARD_EMPTY_ARRAYS
+     * @return array
+     */
+    public static function filterRecursive(array $array, callable $callback = null, int $mode = null): array
+    {
+        if ($mode === null) {
+            $mode = self::LEAVES_ONLY;
+
+            if ($callback === null) {
+                $mode |= self::DISCARD_EMPTY_ARRAYS;
+            }
+        }
+
+        if ($callback === null) {
+            $callback = function($value) {
+                return !empty($value);
+            };
+        }
+
+        foreach ($array as $key => &$value) {
+            if (is_array($value)) {
+
+                if ($mode & self::SELF_FIRST and !$callback($value, $key)) {
+                    if ($mode & self::DISCARD_EMPTY_ARRAYS) {
+                        unset($array[$key]);
+                    }
+                    else {
+                        $value = [];
+                    }
+                    continue;
+                }
+
+                $value = self::filterRecursive($value, $callback, $mode);
+
+                if ($mode & self::DISCARD_EMPTY_ARRAYS and empty($value)) {
+                    unset($array[$key]);
+                    continue;
+                }
+
+                if ($mode & self::CHILD_FIRST and !$callback($value, $key)) {
+                    if ($mode & self::DISCARD_EMPTY_ARRAYS) {
+                        unset($array[$key]);
+                    }
+                    else {
+                        $value = [];
+                    }
+                    continue;
+                }
+            }
+            else {
+                if (!$callback($value, $key)) {
+                    unset($array[$key]);
+                }
+            }
+        }
+        return $array;
+    }
+
+
+    /**
      * Reduce the array to a subset, as defined by the keys parameter.
      *
      * @param array $array
@@ -337,12 +423,49 @@ class Arrays
     /**
      * Like `array_map` but includes a 'key' argument.
      *
+     * Key modification can be done with a reference `&$key` argument.
+     *
+     * ```
+     * // Basic usage
+     * Arrays::mapWithKeys($list, fn($item, $key) => $key . $item);
+     *
+     * // OR to modify keys
+     * Arrays::mapWithKeys($list, function($item, &$key) {
+     *     $key = $item->id;
+     *     return $item;
+     * });
+     * ```
+     *
+     * Filter callbacks used with this method can be re-used (without key
+     * modification) for `array_map` or `mapRecursive`.
+     *
+     * @param array $array
+     * @param callable $fn (item, key) => item
+     * @return array
+     */
+    public static function mapWithKeys(array $array, $fn): array
+    {
+        $items = [];
+
+        foreach ($array as $key => $item) {
+            $item = $fn($item, $key);
+            $items[$key] = $item;
+        }
+
+        return $items;
+    }
+
+
+    /**
+     * A weirder version of `mapWithKeys()`.
+     *
+     * Instead this expects the callback to return a key-value pair, e.g.
+     *
      * ```
      * Arrays::mapKeys($list, fn($item, $key) => [$key, $item]);
      * ```
      *
-     * No, this cannot perform a zip.
-     *
+     * @deprecated use mapWithKeys() - what a mess.
      * @param array $array
      * @param callable $fn (item, key) => [key, item]
      * @return array
@@ -365,6 +488,9 @@ class Arrays
      *
      * Caution when using `CHILD_FIRST`; do not map leaves into arrays - you may
      * trigger an infinite recursion.
+     *
+     * Modifying the `$key` callback argument, like `mapWithKeys`, is undefined
+     * behaviour. Best avoid.
      *
      * @param array $array
      * @param callable $fn ($value, $key) => $value

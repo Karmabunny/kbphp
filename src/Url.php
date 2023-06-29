@@ -254,6 +254,7 @@ class Url extends DataObject
      *
      * @param string $url
      * @return self
+     * @throws UrlParseException
      */
     public static function parse(string $url)
     {
