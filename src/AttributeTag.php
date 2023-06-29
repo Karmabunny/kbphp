@@ -194,7 +194,6 @@ abstract class AttributeTag
      * Parse attributes (PHP+) of a reflection object.
      *
      * @param ReflectionClass|ReflectionFunctionAbstract|ReflectionProperty|ReflectionClassConstant|ReflectionParameter $reflect
-     * @param int $modes
      * @return static[]
      */
     public static function parseReflectorAttributes($reflect): array
@@ -210,6 +209,7 @@ abstract class AttributeTag
 
         // We're looking for instances of ourself (the attribute) and any
         // extensions of us.
+        // @phpstan-ignore-next-line : PHP8 only.
         $attributes = $reflect->getAttributes(static::class, ReflectionAttribute::IS_INSTANCEOF);
 
         $tags = [];
