@@ -329,6 +329,32 @@ final class ArraysTest extends TestCase {
         $this->assertEquals($expected, $actual);
     }
 
+
+
+    public function testMapWithKeys()
+    {
+        $array = [
+            'aaa' => 123,
+            'xxx' => 567,
+            'zzz' => 789,
+        ];
+
+        $expected = [
+            'prefix_aaa' => 'aaa123',
+            'prefix_xxx' => 'xxx567',
+            'prefix_zzz' => 'zzz789',
+        ];
+
+        $actual = Arrays::mapWithKeys($array, function($item, &$key) {
+            $item = $key . $item;
+            $key = 'prefix_' . $key;
+            return $item;
+        });
+
+        $this->assertEquals($expected, $actual);
+    }
+
+
     public function testMapRecursive()
     {
         $array = [

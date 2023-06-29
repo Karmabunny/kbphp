@@ -423,12 +423,49 @@ class Arrays
     /**
      * Like `array_map` but includes a 'key' argument.
      *
+     * Key modification can be done with a reference `&$key` argument.
+     *
+     * ```
+     * // Basic usage
+     * Arrays::mapWithKeys($list, fn($item, $key) => $key . $item);
+     *
+     * // OR to modify keys
+     * Arrays::mapWithKeys($list, function($item, &$key) {
+     *     $key = $item->id;
+     *     return $item;
+     * });
+     * ```
+     *
+     * Filter callbacks used with this method can be re-used (without key
+     * modification) for `array_map` or `mapRecursive`.
+     *
+     * @param array $array
+     * @param callable $fn (item, key) => item
+     * @return array
+     */
+    public static function mapWithKeys(array $array, $fn): array
+    {
+        $items = [];
+
+        foreach ($array as $key => $item) {
+            $item = $fn($item, $key);
+            $items[$key] = $item;
+        }
+
+        return $items;
+    }
+
+
+    /**
+     * A weirder version of `mapWithKeys()`.
+     *
+     * Instead this expects the callback to return a key-value pair, e.g.
+     *
      * ```
      * Arrays::mapKeys($list, fn($item, $key) => [$key, $item]);
      * ```
      *
-     * No, this cannot perform a zip.
-     *
+     * @deprecated use mapWithKeys() - what a mess.
      * @param array $array
      * @param callable $fn (item, key) => [key, item]
      * @return array
@@ -451,6 +488,9 @@ class Arrays
      *
      * Caution when using `CHILD_FIRST`; do not map leaves into arrays - you may
      * trigger an infinite recursion.
+     *
+     * Modifying the `$key` callback argument, like `mapWithKeys`, is undefined
+     * behaviour. Best avoid.
      *
      * @param array $array
      * @param callable $fn ($value, $key) => $value
