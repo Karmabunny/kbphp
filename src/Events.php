@@ -160,15 +160,19 @@ class Events
     /**
      * Remove listeners.
      *
-     * If `$event` is not given, all events are removed from the sender.
+     * If `$event` is not given (null), all listeners are removed from the sender.
      *
-     * @param class-string $sender
+     * Specify a `null` sender to remove all listeners from an event.
+     *
+     * Or both `null, null` to remove _all_ listeners from all senders.
+     *
+     * @param class-string|null $sender
      * @param class-string<EventInterface>|null $event
      * @return void
      */
-    public static function off(string $sender, string $event = null)
+    public static function off(?string $sender, string $event = null)
     {
-        if ($sender === '*') {
+        if ($sender === null) {
             if ($event) {
                 foreach (array_keys(self::$_events) as $sender) {
                     unset(self::$_events[$sender][$event]);
