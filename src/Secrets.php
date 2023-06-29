@@ -375,7 +375,7 @@ class Secrets extends DataObject
             return Arrays::mapRecursive($item, $process, Arrays::CHILD_FIRST);
         }
         else {
-            return array_map($process, $item);
+            return Arrays::mapWithKeys($item, $process);
         }
     }
 

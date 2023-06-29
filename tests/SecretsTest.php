@@ -258,6 +258,20 @@ class SecretsTest extends TestCase
         ];
 
         $this->assertEquals($expected, $actual);
+
+        $expected2 = $input;
+        $expected2['base64_secret'] = $expected['base64_secret'];
+        $expected2['base64_sub_secret'] = $expected['base64_sub_secret'];
+        $expected2['hex_secret'] = $expected['hex_secret'];
+        $expected2['hex_sub_secret'] = $expected['hex_sub_secret'];
+        $expected2['basic_auth'] = $expected['basic_auth'];
+        $expected2['badly_named_aws_bits'] = $expected['badly_named_aws_bits'];
+        $expected2['aws_access_key'] = $expected['aws_access_key'];
+        $expected2['aws_secret_access_key'] = $expected['aws_secret_access_key'];
+        $expected2['deeply_secret'] = $expected['deeply_secret'];
+
+        $actual = $secrets->mask($input, false);
+        $this->assertEquals($expected2, $actual);
     }
 
 
