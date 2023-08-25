@@ -1188,7 +1188,7 @@ abstract class SortBase
 // This is only sortable against itself.
 class SortItem1 extends SortBase implements Sortable
 {
-    public function compare($other): int
+    public function compare($other, $mode = 'default'): int
     {
         if ($other instanceof self) {
             return $this->id <=> $other->id;

@@ -1071,24 +1071,25 @@ class Arrays
      * https://www.php.net/manual/en/language.oop5.object-comparison.php#98725
      *
      * @param int $dir SORT_ASC|SORT_DESC
+     * @param string $mode 'default'
      * @return callable(mixed, mixed): int
      */
-    public static function createSort(int $dir = SORT_ASC)
+    public static function createSort(int $dir = SORT_ASC, string $mode = 'default')
     {
         $dir = $dir === SORT_DESC ? -1 : 1;
 
-        return function($a, $b) use ($dir) {
+        return function($a, $b) use ($dir, $mode) {
             // Shortcut.
             if ($a === $b) {
                 return 0;
             }
 
             if ($a instanceof Sortable) {
-                return $a->compare($b) * $dir;
+                return $a->compare($b, $mode) * $dir;
             }
 
             if ($b instanceof Sortable) {
-                return $b->compare($a) * $dir * -1;
+                return $b->compare($a, $mode) * $dir * -1;
             }
 
             $is_a = is_object($a);
