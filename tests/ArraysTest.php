@@ -5,6 +5,7 @@
  */
 
 use karmabunny\kb\Arrays;
+use karmabunny\kb\Sortable;
 use PHPUnit\Framework\TestCase;
 
 
@@ -1053,4 +1054,156 @@ final class ArraysTest extends TestCase {
         $this->assertFalse(isset($config));
         $this->assertTrue(function_exists('sillyGlobalFn'));
     }
+
+
+    public function testSort()
+    {
+        // Basic items, default options (no keys, SORT_ASC).
+        $items = [5, 6, 3.14, 100, '-100', '50.5', 0, -30.1];
+        $expected = $items;
+        sort($expected);
+
+        $actual = Arrays::sorted($items);
+        $this->assertEquals($expected, $actual);
+
+        // Reversed.
+        $expected = array_reverse($expected);
+        $actual = Arrays::sorted($items, false, SORT_DESC);
+        $this->assertEquals($expected, $actual);
+
+        // Preserve keys.
+        $items = ['a' => 'ghi', 'b' => 'abc', 'c' => 'def'];
+        $expected = $items;
+        asort($expected);
+
+        $actual = Arrays::sorted($items, true, SORT_ASC);
+        $this->assertEquals($expected, $actual);
+
+        // Preserve keys, reversed.
+        $expected = array_reverse($expected);
+
+        $actual = Arrays::sorted($items, true, SORT_DESC);
+        $this->assertEquals($expected, $actual);
+
+        // Monoculture items.
+        $items = [
+            new SortItem1(100),
+            new SortItem1(-100),
+            new SortItem1(50),
+            new SortItem1(30),
+        ];
+
+        $expected = [
+            $items[1],
+            $items[3],
+            $items[2],
+            $items[0],
+        ];
+
+        $actual = Arrays::sorted($items);
+        $this->assertEquals($expected, $actual);
+
+        // Polyculture objects.
+        $items = [
+            new SortItem1(100),  // 0 - 6
+            new SortItem1(30),   // 1 - 3
+            new SortItem2(70),   // 2 - 5
+            new SortItem1(50),   // 3 - 4
+            new SortItem2(700),  // 4 - 7
+            new SortItem2(-70),  // 5 - 1
+            new SortItem1(-100), // 6 - 0
+            new SortItem2(20),   // 7 - 2
+        ];
+
+        $expected = [
+            $items[6],
+            $items[5],
+            $items[7],
+            $items[1],
+            $items[3],
+            $items[2],
+            $items[0],
+            $items[4],
+        ];
+
+        $actual = Arrays::sorted($items);
+        $this->assertEquals($expected, $actual);
+
+        // Just anything really. Unsortable objects retain their position.
+        $items = [
+            new SortItem1(100),     // 0  - 6
+            -200,                   // 1  - 11
+            new SortItem1(30),      // 2  - 3
+            new SortItem2(70),      // 3  - 5
+            200,                    // 4  - 14
+            new SortItem1(50),      // 5  - 4
+            new SortItem3(1000),    // 6  - 8
+            new SortItem2(700),     // 7  - 7
+            30,                     // 8  - 12
+            new SortItem2(-70),     // 9  - 1
+            60,                     // 10 - 13
+            new SortItem1(-100),    // 11 - 0
+            new SortItem3(-8000),   // 12 - 9
+            null,                   // 13 - 10
+            new SortItem2(20),      // 14 - 2
+        ];
+
+        $expected = [
+            $items[11],
+            $items[9],
+            $items[14],
+            $items[2],
+            $items[5],
+            $items[3],
+            $items[0],
+            $items[7],
+            $items[13], // null
+            $items[1],
+            $items[8],
+            $items[10],
+            $items[4],
+            $items[6],  // SortItem3 1000
+            $items[12], // SortItem3 -8000
+        ];
+
+        $actual = Arrays::sorted($items);
+        $this->assertEquals($expected, $actual);
+    }
+}
+
+
+// A base class to ensure natural object ordering doesn't interfere.
+abstract class SortBase
+{
+    public $id;
+    public $rand;
+
+    public function __construct($id)
+    {
+        $this->id = $id;
+        $this->rand = random_int(0, 1000 * 1000);
+    }
+}
+
+// This is only sortable against itself.
+class SortItem1 extends SortBase implements Sortable
+{
+    public function compare($other): int
+    {
+        if ($other instanceof self) {
+            return $this->id <=> $other->id;
+        }
+
+        return -1;
+    }
+}
+
+// This sorts along with item 1.
+class SortItem2 extends SortItem1
+{
+}
+
+// This isn't sortable.
+class SortItem3 extends SortBase
+{
 }

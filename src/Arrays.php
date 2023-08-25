@@ -1058,4 +1058,93 @@ class Arrays
         $cache[$path] = $output;
         return $output;
     }
+
+
+    /**
+     * Create a comparator function.
+     *
+     * This is compatible with the {@see Sortable} interface.
+     *
+     * This explicitly does NOT compare objects using the natural PHP
+     * sorting behaviour, described here:
+     *
+     * https://www.php.net/manual/en/language.oop5.object-comparison.php#98725
+     *
+     * @param int $dir SORT_ASC|SORT_DESC
+     * @return callable(mixed, mixed): int
+     */
+    public static function createSort(int $dir = SORT_ASC)
+    {
+        $dir = $dir === SORT_DESC ? -1 : 1;
+
+        return function($a, $b) use ($dir) {
+            // Shortcut.
+            if ($a === $b) {
+                return 0;
+            }
+
+            if ($a instanceof Sortable) {
+                return $a->compare($b) * $dir;
+            }
+
+            if ($b instanceof Sortable) {
+                return $b->compare($a) * $dir * -1;
+            }
+
+            $is_a = is_object($a);
+            $is_b = is_object($b);
+
+            // Disable natural object ordering.
+            if ($is_a and $is_b) {
+                return 0;
+            }
+
+            // Put unsortable objects last.
+            if ($is_a or $is_b) {
+                return ($is_a ? 1 : -1) * $dir;
+            }
+
+            // Natural scalar sorting.
+            return ($a <=> $b) * $dir;
+        };
+    }
+
+
+    /**
+     * Sort an array using the {@see Sortable} interface.
+     *
+     * @param array $array
+     * @param bool $preserve_keys
+     * @param int $dir SORT_ASC|SORT_DESC
+     * @return void
+     */
+    public static function sort(array &$array, bool $preserve_keys = false, int $dir = SORT_ASC)
+    {
+        $fn = self::createSort($dir);
+
+        if ($preserve_keys) {
+            uasort($array, $fn);
+        }
+        else {
+            usort($array, $fn);
+        }
+    }
+
+
+    /**
+     * Sort an array and return it.
+     *
+     * Using the {@see Sortable} interface.
+     *
+     * @param array $array
+     * @param bool $preserve_keys
+     * @param int $dir SORT_ASC|SORT_DESC
+     * @return array
+     */
+    public static function sorted(array $array, bool $preserve_keys = false, int $dir = SORT_ASC): array
+    {
+        self::sort($array, $preserve_keys, $dir);
+        return $array;
+    }
+
 }
