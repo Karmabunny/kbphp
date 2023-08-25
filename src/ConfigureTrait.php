@@ -38,7 +38,7 @@ trait ConfigureTrait
      * Given a string the 'config' is implicitly an empty array.
      *
      * @param string|array|object $config [ class => config ]
-     * @param string|null $assert class name to verify
+     * @param class-string|null $assert class name to verify
      * @param bool $init whether to initialize the object after creation
      * @return object
      * @throws InvalidArgumentException

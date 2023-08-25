@@ -7,6 +7,8 @@
 namespace karmabunny\kb;
 
 use InvalidArgumentException;
+use ReflectionClass;
+use ReflectionException;
 
 /**
  * Utility for configuring things.
@@ -36,7 +38,7 @@ class Configure
      * Given a string the 'config' is implicitly an empty array.
      *
      * @param string|array|object $config [ class => config ]
-     * @param string|null $assert class name to verify
+     * @param class-string|null $assert class name to verify
      * @param bool $init whether to initialize the object after creation
      * @return object
      * @throws InvalidArgumentException
@@ -58,38 +60,24 @@ class Configure
             $config = reset($config);
         }
 
-        // Check that we're all behaving here.
-        if ($assert
-            and $assert !== $class
-            and !is_subclass_of($class, $assert)
-        ) {
-            throw new InvalidArgumentException("{$class} must extend '{$assert}'");
-        }
-
         // Pass-through the object.
         if (is_object($config)) {
-            if ($init and is_subclass_of($config, ConfigurableInit::class)) {
+            if ($assert and !$config instanceof $assert) {
+                throw new InvalidArgumentException("{$class} must extend '{$assert}'");
+            }
+
+            if ($init and $config instanceof ConfigurableInit) {
                 $config->init();
             }
+
             return $config;
         }
 
-        // Do configurable things because we can.
-        else if (is_subclass_of($class, Configurable::class)) {
-            $object = new $class();
-            $object->update($config);
-        }
-        // Or just the regular.
-        else {
-            $object = new $class();
-
-            foreach ($config as $key => $value) {
-                $object->$key = $value;
-            }
-        }
+        $object = self::instance($class, $assert);
+        self::update($object, $config);
 
         // Call the init() function, if present.
-        if ($init and is_subclass_of($object, ConfigurableInit::class)) {
+        if ($init and $object instanceof ConfigurableInit) {
             $object->init();
         }
 
@@ -101,7 +89,7 @@ class Configure
      * Configure all objects in an array.
      *
      * @param (array|object|string)[] $configs
-     * @param string|null $assert
+     * @param class-string|null $assert
      * @param bool $init
      * @return object[]
      */
@@ -146,5 +134,113 @@ class Configure
                 $object->init();
             }
         }
+    }
+
+
+    /**
+     * Construct a new instance of this class.
+     *
+     * @param class-string $class
+     * @param class-string|class-string[] $assert
+     * @return object
+     * @throws InvalidArgumentException
+     */
+    public static function instance(string $class, $assert = null)
+    {
+        // Check the class exists.
+        try {
+            $reflect = new ReflectionClass($class);
+        }
+        catch (ReflectionException $ex) {
+            throw new InvalidArgumentException("Class '{$class}' does not exist");
+        }
+
+        // Basic checks.
+        if ($reflect->isAbstract()) {
+            throw new InvalidArgumentException("Class '{$class}' is abstract");
+        }
+
+        // Do inheritance asserts.
+        if ($assert) {
+            $assert = (array) $assert;
+
+            foreach ($assert as $chk) {
+                if (!$reflect->isSubclassOf($chk)) {
+                    throw new InvalidArgumentException("Class {$class} must extend '{$chk}'");
+                }
+            }
+        }
+
+        // Do it.
+        try {
+            return $reflect->newInstance();
+        }
+        catch (ReflectionException $ex) {
+            throw new InvalidArgumentException("Class '{$class}' cannot be instantiated");
+        }
+    }
+
+
+    /**
+     * Set variables on an object.
+     *
+     * This will use the `Configurable` interface or falls back to
+     * dynamic properties.
+     *
+     * Note, in PHP 8.2 you will need the `#[\AllowDynamicProperties]`
+     * attribute to set dynamic properties. Even then, this behaviour
+     * is deprecated.
+     *
+     * @param object $object
+     * @param array $config
+     * @return void
+     */
+    public static function update($object, array $config)
+    {
+        // Do configurable things because we can.
+        if ($object instanceof Configurable) {
+            $object->update($config);
+        }
+        // Or just the regular.
+        else {
+            foreach ($config as $key => $value) {
+                $object->$key = $value;
+            }
+        }
+
+        return $object;
+    }
+
+
+    /**
+     * Instance a single object.
+     *
+     * @param class-string $class
+     * @param array $config
+     * @return object
+     */
+    public static function create(string $class, array $config)
+    {
+        $object = self::instance($class);
+        self::update($object, $config);
+        return $object;
+    }
+
+
+    /**
+     * Create lots of objects with these configs.
+     *
+     * @param class-string $class
+     * @param array[] $items
+     * @return object[]
+     */
+    public static function createAll(string $class, array $items)
+    {
+        foreach ($items as &$item) {
+            $item = self::create($class, $item);
+        }
+
+        unset($item);
+        return $items;
     }
 }
