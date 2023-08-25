@@ -300,6 +300,7 @@ class Secrets extends DataObject
                         }
                     }
                 }
+                // phpcs:ignore
                 catch (JsonException $exception) {
                     // ignore.
                 }
