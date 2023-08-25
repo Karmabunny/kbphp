@@ -250,6 +250,7 @@ class Events
                     return true;
                 }
             }
+            return false;
         }
         else {
             return !empty(self::$_log[$sender][$event]);
