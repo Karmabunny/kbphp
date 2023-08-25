@@ -238,7 +238,7 @@ class Events
     /**
      * Has this event been triggered?
      *
-     * @param class-string $sender
+     * @param string $sender
      * @param class-string<EventInterface> $event
      * @return bool
      */
