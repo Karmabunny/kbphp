@@ -110,8 +110,9 @@ class Arrays
     /**
      * First item in the iterable.
      *
-     * @param iterable $iterable
-     * @return mixed
+     * @template T
+     * @param T[]|Traversable<T> $iterable
+     * @return T|null
      */
     public static function first($iterable)
     {
@@ -123,8 +124,9 @@ class Arrays
     /**
      * Last item in the iterable.
      *
-     * @param iterable $iterable
-     * @return mixed
+     * @template T
+     * @param T[]|Traversable<T> $iterable
+     * @return T|null
      */
     public static function last($iterable)
     {
@@ -144,8 +146,9 @@ class Arrays
      *
      * TBH not entirely sure why I wrote this.
      *
-     * @param iterable $array
-     * @return Generator
+     * @template T
+     * @param T[]|Traversable<T> $array
+     * @return Traversable<T>
      */
     public static function reverse($array)
     {
@@ -278,9 +281,10 @@ class Arrays
      * Arrays::find($stuff, fn($item, key) => $key === 12 and $item->name === 12);
      * ```
      *
-     * @param iterable $iterable
+     * @template T
+     * @param T[]|Traversable<T> $iterable
      * @param callable $fn ($value, $key) => bool
-     * @return mixed|null
+     * @return T|null
      */
     public static function find($iterable, callable $fn)
     {
@@ -338,10 +342,11 @@ class Arrays
      * // => [ 0 => 'a', 2 => 'c' ]
      * ```
      *
-     * @param array $array
+     * @template T
+     * @param T[] $array
      * @param callable|null $callback
      * @param int|null $mode LEAVES_ONLY (default), SELF_FIRST, CHILD_FIRST, DISCARD_EMPTY_ARRAYS
-     * @return array
+     * @return T[]
      */
     public static function filterRecursive(array $array, callable $callback = null, int $mode = null): array
     {
@@ -402,10 +407,12 @@ class Arrays
     /**
      * Reduce the array to a subset, as defined by the keys parameter.
      *
-     * @param array $array
+     *
+     * @template T
+     * @param T[] $array
      * @param string[] $keys
      * @param bool $fill Replace missing keys with null.
-     * @return array
+     * @return T[]
      */
     public static function filterKeys(array $array, array $keys, $fill = false): array
     {
@@ -537,9 +544,10 @@ class Arrays
      * Yes, this is just the native shuffle() but it's also non-destructive
      * with key preserving options.
      *
-     * @param iterable $array
+     * @template T
+     * @param T[]|Traversable<T> $array
      * @param bool $preserve_keys
-     * @return array
+     * @return T[]
      */
     public static function shuffle($array, bool $preserve_keys = false): array
     {
@@ -1137,10 +1145,11 @@ class Arrays
      *
      * Using the {@see Sortable} interface.
      *
-     * @param array $array
+     * @template T
+     * @param T[] $array
      * @param bool $preserve_keys
      * @param int $dir SORT_ASC|SORT_DESC
-     * @return array
+     * @return T[]
      */
     public static function sorted(array $array, bool $preserve_keys = false, int $dir = SORT_ASC): array
     {
