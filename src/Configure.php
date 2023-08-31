@@ -149,6 +149,7 @@ class Configure
     {
         // Check the class exists.
         try {
+            /** @var string $class */
             $reflect = new ReflectionClass($class);
         }
         catch (ReflectionException $ex) {
@@ -207,8 +208,6 @@ class Configure
                 $object->$key = $value;
             }
         }
-
-        return $object;
     }
 
 
@@ -236,6 +235,8 @@ class Configure
      */
     public static function createAll(string $class, array $items)
     {
+        /** @var array $items */
+
         foreach ($items as &$item) {
             $item = self::create($class, $item);
         }
