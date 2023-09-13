@@ -35,6 +35,7 @@
         "tests": "phpunit --testdox --configuration phpunit.xml",
         "publish": "bash scripts/publish.sh",
         "docs": "bash scripts/docs.sh",
+        "zones": "@php scripts/zones.php",
         "analyse": "phpstan analyse -c phpstan.neon",
         "compat": "phpcs -p --standard=phpcs.xml --colors --extensions=php"
     }
