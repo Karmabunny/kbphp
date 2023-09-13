@@ -23,6 +23,7 @@ function main() {
         $territory = XML::attr($zone, 'territory');
 
         $iana = str_replace('Etc/GMT', 'GMT', $iana);
+        $iana = str_replace('Etc/UTC', 'UTC', $iana);
 
         if ($territory === '001') {
             $zones[$win] = $iana;
