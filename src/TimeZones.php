@@ -40,10 +40,40 @@ class TimeZones
      * @param string $name a windows-style timezone
      * @return null|string IANA timezone
      */
-    public static function lookup(string $name): ?string
+    public static function fromWindows(string $name): ?string
     {
         $map = self::getMap();
         return $map[$name] ?? null;
+    }
+
+
+    /**
+     * Translate from IANA to Windows timezones.
+     *
+     * @param string $name IANA timezone
+     * @return null|string a windows-style timezone
+     */
+    public static function fromIana(string $name): ?string
+    {
+        $map = self::getMap();
+        return array_search($name, $map) ?: null;
+    }
+
+
+    /**
+     * Normalize both IANA and Windows timezones into IANA.
+     *
+     * @param string $name IANA or windows timezone
+     * @return null|string IANA timezone
+     */
+    public static function normalize(string $name): ?string
+    {
+        try {
+            return self::parse($name)->getName();
+        }
+        catch (Exception $error) {
+            return null;
+        }
     }
 
 
@@ -59,7 +89,7 @@ class TimeZones
      */
     public static function parse(string $name): DateTimeZone
     {
-        $tz = self::lookup($name);
+        $tz = self::fromWindows($name);
 
         if ($tz) {
             return new DateTimeZone($tz);
