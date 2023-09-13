@@ -807,11 +807,17 @@ class Arrays
      */
     public static function isNumeric($array): bool
     {
-        if (!is_array($array)) return false;
-
-        foreach ($array as $key => $_) {
-            if (!is_int($key)) return false;
+        if (!is_array($array)) {
+            return false;
         }
+
+        $i = 0;
+        foreach ($array as $k => $_) {
+            if ($k !== $i++) {
+                return false;
+            }
+        }
+
         return true;
     }
 

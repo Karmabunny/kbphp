@@ -733,10 +733,26 @@ final class ArraysTest extends TestCase {
             '123',
         ]));
 
+        $this->assertTrue(Arrays::isNumeric([
+            0 => 'abc',
+            1 => '123',
+        ]));
+
+        $this->assertFalse(Arrays::isNumeric([
+            0 => 'abc',
+            5 => '123',
+        ]));
+
         $this->assertFalse(Arrays::isNumeric([
             'abc' => 'def',
             123 => '567',
             'thing',
+        ]));
+
+        $this->assertFalse(Arrays::isNumeric([
+            100 => 'def',
+            123 => '567',
+            200 => 'thing',
         ]));
     }
 
