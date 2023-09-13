@@ -24,6 +24,50 @@ class Cli
 
 
     /**
+     *
+     * @param mixed $args
+     * @return void
+     */
+    public static function puts(...$args)
+    {
+        self::stdout(implode(' ', $args) . PHP_EOL);
+    }
+
+
+    /**
+     *
+     * @param mixed $args
+     * @return void
+     */
+    public static function error(...$args)
+    {
+        self::stderr(implode(' ', $args) . PHP_EOL);
+    }
+
+
+    /**
+     *
+     * @param mixed $text
+     * @return void
+     */
+    public static function stdout($text)
+    {
+        fwrite(\STDOUT, $text);
+    }
+
+
+    /**
+     *
+     * @param mixed $text
+     * @return void
+     */
+    public static function stderr($text)
+    {
+        fwrite(\STDERR, $text);
+    }
+
+
+    /**
      * The readline extension is loaded.
      *
      * @return bool
