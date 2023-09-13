@@ -27,7 +27,7 @@ class TimeZones
         static $map;
 
         if (!isset($map)) {
-            $map = require __DIR__ . '/../data/tzwin.php';
+            $map = require __DIR__ . '/config/tzwin.php';
         }
 
         return $map;

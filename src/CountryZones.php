@@ -24,7 +24,7 @@ class CountryZones
         static $map;
 
         if (!isset($map)) {
-            $map = require __DIR__ . '/../data/tzcountry.php';
+            $map = require __DIR__ . '/config/tzcountry.php';
         }
 
         return $map;
