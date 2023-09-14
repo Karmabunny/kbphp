@@ -43,6 +43,11 @@ class TimeZones
     public static function fromWindows(string $name): ?string
     {
         $map = self::getMap();
+
+        if ($name === '__rev__') {
+            return null;
+        }
+
         return $map[$name] ?? null;
     }
 
@@ -56,7 +61,7 @@ class TimeZones
     public static function fromIana(string $name): ?string
     {
         $map = self::getMap();
-        return array_search($name, $map) ?: null;
+        return $map['__rev__'][$name] ?? null;
     }
 
 

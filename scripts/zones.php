@@ -10,6 +10,7 @@ function main() {
 
     $zones = [];
     $countries = [];
+    $alt = [];
 
     $url = 'https://raw.githubusercontent.com/unicode-org/cldr/main/common/supplemental/windowsZones.xml';
     $xml = file_get_contents($url);
@@ -30,7 +31,9 @@ function main() {
         }
         else {
             $ianas = explode(' ', $iana);
+
             foreach ($ianas as $iana) {
+                $alt[$iana] = $win;
                 $countries[$iana] = $territory;
             }
         }
@@ -38,6 +41,8 @@ function main() {
 
     echo "Found " . count($zones) . " windows zones\n";
     echo "Found " . count($countries) . " countries\n";
+
+    $zones['__rev__'] = $alt;
 
     // Write windows timezones.
     $target = __DIR__ . '/../src/config/tzwin.php';
