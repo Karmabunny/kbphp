@@ -59,13 +59,13 @@ class CountryZones
         $map = self::getMap();
 
         if (strlen($country) === 3) {
-            CountryNames::getAlpha2From3($country);
+            $country = CountryNames::getAlpha2From3($country);
         }
 
         $zones = [];
 
-        foreach ($map as $zone => $country) {
-            if ($country === $country) {
+        foreach ($map as $zone => $name) {
+            if ($name === $country) {
                 $zones[] = $zone;
             }
         }
