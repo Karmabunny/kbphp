@@ -14,7 +14,7 @@ final class TimeZonesTest extends TestCase
 {
 
 
-    public static function dataBasic()
+    public static function dataWindows()
     {
         return [
             ['AUS Eastern Standard Time', 'Australia/Sydney'],
@@ -28,7 +28,7 @@ final class TimeZonesTest extends TestCase
 
 
     /**
-     * @dataProvider dataBasic
+     * @dataProvider dataWindows
      */
     public function testWindows($zone, $expected)
     {
@@ -37,10 +37,25 @@ final class TimeZonesTest extends TestCase
     }
 
 
+    public static function dataIana()
+    {
+        return [
+            ['Australia/Sydney', 'AUS Eastern Standard Time'],
+            ['Australia/Brisbane', 'E. Australia Standard Time'],
+            ['America/Phoenix', 'US Mountain Standard Time'],
+            ['America/Mazatlan', 'Mountain Standard Time (Mexico)'],
+            ['America/Denver', 'Mountain Standard Time'],
+            ['UTC', 'UTC'],
+            ['Australia/Melbourne', 'AUS Eastern Standard Time'],
+            ['America/Boise', 'Mountain Standard Time'],
+        ];
+    }
+
+
     /**
-     * @dataProvider dataBasic
+     * @dataProvider dataIana
      */
-    public function testIana($expected, $zone)
+    public function testIana($zone, $expected)
     {
         $actual = TimeZones::fromIana($zone);
         $this->assertEquals($expected, $actual);
