@@ -77,30 +77,20 @@ class CountryZones
     /**
      *
      * @param string $zone
+     * @param bool $alpha3
      * @return null|string
      */
-    public static function getAlpha2(string $zone): ?string
-    {
-        $map = self::getMap();
-        $zone = $map[$zone] ?? null;
-
-        return $zone;
-    }
-
-
-    /**
-     *
-     * @param string $zone
-     * @return null|string
-     */
-    public static function getAlpha3(string $zone): ?string
+    public static function lookup(string $zone, $alpha3 = false): ?string
     {
         $map = self::getMap();
         $zone = $map[$zone] ?? null;
 
         if (!$zone) return null;
 
-        $zone = CountryNames::getAlpha3From2($zone);
+        if ($alpha3) {
+            $zone = CountryNames::getAlpha3From2($zone);
+        }
+
         return $zone;
     }
 }
