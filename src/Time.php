@@ -10,7 +10,9 @@ use DateInterval;
 use DateTime;
 use DateTimeImmutable;
 use DateTimeInterface;
+use DateTimeZone;
 use Generator;
+use InvalidArgumentException;
 
 /**
  * Various date and time utilities.
@@ -99,6 +101,71 @@ class Time
         }
 
         return $time . $unit . ($time == 1 ? ' ago' : 's ago');
+    }
+
+
+    /**
+     * Parse date strings and numbers into objects.
+     *
+     * Notable features:
+     * - pass-through date objects
+     * - parse integer as unix timestamps
+     * - support for microsecond timestamps (as float)
+     * - classic PHP date parsing
+     * - timezones
+     *
+     * @param string|int|float|DateTimeInterface $date
+     * @param string|DateTimeZone|null $zone
+     * @return DateTimeInterface
+     * @throws InvalidArgumentException
+     */
+    public static function parse($value, $zone = null): DateTimeInterface
+    {
+        // Parse integer/floats as timestamps with microseconds.
+        if (is_numeric($value)) {
+            $seconds = floor($value);
+
+            $date = new DateTimeImmutable('@' . $seconds);
+
+            // No microseconds.
+            if ($seconds == $value) {
+                return $date;
+            }
+
+            $microseconds = ($value - $seconds) * 1000000;
+            $date = $date->modify('+' . $microseconds . ' microseconds');
+
+            if ($date === false) {
+                throw new InvalidArgumentException('Invalid date value: '. $value);
+            }
+        }
+
+        // Classic timey-wimey parsing.
+        else if (is_string($value)) {
+            $date = new DateTimeImmutable($value);
+        }
+
+        // Pass-through date types.
+        else if ($value instanceof DateTimeInterface) {
+            $date = $value;
+        }
+
+        if (!isset($date)) {
+            throw new InvalidArgumentException('Invalid date value: '. gettype($value));
+        }
+
+        if ($zone) {
+            // Also parse timezones while we're here.
+            if (is_string($zone)) {
+                $zone = new DateTimeZone($zone);
+            }
+
+            /** @var DateTime|DateTimeInterface $date */
+
+            $date = $date->setTimezone($zone);
+        }
+
+        return $date;
     }
 
 
