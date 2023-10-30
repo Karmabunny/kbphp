@@ -577,11 +577,14 @@ class RulesValidator implements Validator
         foreach ($this->general_errors as $msgs) {
             $errors[''][] = $msgs;
         }
+
         foreach ($this->field_errors as $field => $msgs) {
-            $errors[$this->labels[$field]] = $msgs;
+            $key = $this->labels[$field] ?? $field;
+            $errors[$key] = $msgs;
         }
 
         $out = [];
+
         foreach ($errors as $label => $msgs) {
             $out[$label] = implode('. ', $msgs);
         }
