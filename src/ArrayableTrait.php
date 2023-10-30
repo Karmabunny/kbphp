@@ -21,9 +21,6 @@ use Traversable;
 trait ArrayableTrait
 {
 
-    public abstract function getIterator(): Traversable;
-
-
     /**
      * These are fields for use in `toArray()`.
      *
