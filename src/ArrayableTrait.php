@@ -208,10 +208,4 @@ trait ArrayableTrait
         return $array;
     }
 
-
-    /** @inheritdoc */
-    public function jsonSerialize()
-    {
-        return $this->toArray();
-    }
 }
