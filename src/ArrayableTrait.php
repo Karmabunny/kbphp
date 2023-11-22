@@ -164,17 +164,8 @@ trait ArrayableTrait
                 continue;
             }
 
-            if (is_callable($item)) {
-                $item = $item();
-            }
-
-            // Prevent self-recursion.
-            if ($item === $this) {
-                continue;
-            }
-
-            // Limited protection from [$this, 'typo'].
-            if (is_array($item) and ($item[0] ?? null) === $this) {
+            // We're not piping resources around like idiots here.
+            if (is_resource($item)) {
                 continue;
             }
 
@@ -188,8 +179,17 @@ trait ArrayableTrait
                 }
             }
 
-            // We're not piping resources around like idiots here.
-            if (is_resource($item)) {
+            if (is_callable($item)) {
+                $item = $item();
+            }
+
+            // Prevent self-recursion.
+            if ($item === $this) {
+                continue;
+            }
+
+            // Limited protection from [$this, 'typo'].
+            if (is_array($item) and ($item[0] ?? null) === $this) {
                 continue;
             }
 
