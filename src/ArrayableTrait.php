@@ -178,8 +178,8 @@ trait ArrayableTrait
                     continue;
                 }
             }
-
-            if (is_callable($item)) {
+            // A virtual field - but only if it doesn't exist as data.
+            else if (is_callable($item)) {
                 $item = $item();
             }
 
