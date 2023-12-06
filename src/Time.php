@@ -145,9 +145,14 @@ class Time
             $date = new DateTimeImmutable($value);
         }
 
-        // Pass-through date types.
-        else if ($value instanceof DateTimeInterface) {
+        // Pass-through these ones, it's safe.
+        else if ($value instanceof DateTimeImmutable) {
             $date = $value;
+        }
+
+        // Clone everything else to prevent mutation bugs.
+        else if ($value instanceof DateTimeInterface) {
+            $date = clone $value;
         }
 
         if (!isset($date)) {
