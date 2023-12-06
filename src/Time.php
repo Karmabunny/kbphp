@@ -177,37 +177,50 @@ class Time
     /**
      * Validate + normalize a time string component.
      *
-     * A time-ish string is one of:
+     * A time-ish value is one of:
      *
      *  - an integer (24-hour)
+     *  - a float (24-hour with milliseconds)
      *  - starts with T (24-hour)
      *  - ends with am/pm (12-hour)
      *
-     * This should always return a whole time component. So all units will be
-     * updated (hour, minute, second, sub-second) if used in `$date->modify()`.
-     *
-     * That is;
-     * - `14` will be 'T14:00:00'
-     * - `T12:34:56.789` will be 'T12:34:56'
-     * - `12am` naturally strips minutes/seconds/etc
-     *
      * @param string|int $time
-     * @return string|null
+     * @return string|null `T HH:MM:II.SSS`
      */
     public static function parseTimeString($time)
     {
         // 24 hour time.
-        // hours: 10 -> T100000 (10 am)
-        // minutes: 1020 -> T102000 (10:20 am)
-        // seconds: 102030 -> T102030 (10:20:30 am)
-        if (is_numeric($time) and (int) $time == (float) $time) {
+        // hours:   10       -> T10
+        // minutes: 1020     -> T10:20
+        // seconds: 102030   -> T10:20:30
+        // milli:   102030.4 -> T10:20:30.400
+        if (is_numeric($time)) {
+            $args = [];
 
-            // One would naturally expect '1' to make '1am' not '10am'.
             if ($time < 10) {
-                $time = '0' . $time;
+                $format = 'T%02d';
+                $args[] = (int) $time;
+            }
+            else if ($time < 1000) {
+                $format = 'T%02d:%02d';
+                $args[] = floor($time / 100);
+                $args[] = (int) $time % 100;
+            }
+            else {
+                $format = 'T%02d:%02d:%02d';
+                $args[] = floor($time / 10000);
+                $args[] = floor(((int) $time % 10000) / 100);
+                $args[] = (int) $time % 100;
             }
 
-            return 'T' . str_pad($time, 6, '0', STR_PAD_RIGHT);
+            $subsecond = $time - floor($time);
+
+            if ($subsecond) {
+                $format .= '.%03d';
+                $args[] = $subsecond;
+            }
+
+            return vsprintf($format, $args);
         }
 
         if (is_string($time)) {
