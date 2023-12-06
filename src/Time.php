@@ -478,7 +478,7 @@ class Time
      *
      * @param DateTimeInterface $start
      * @param DateTimeInterface $end
-     * @return Generator<DateTimeInterface>
+     * @return iterable<DateTimeInterface>
      */
     public static function between(DateTimeInterface $start, DateTimeInterface $end)
     {
@@ -502,7 +502,7 @@ class Time
      * @param int $year
      * @param int $from 1-indexed, inclusive
      * @param int $to 1-indexed, inclusive
-     * @return Generator<DateTimeInterface[]>
+     * @return iterable<DateTimeInterface[]>
      */
     public static function months(int $year, int $from, int $to)
     {
@@ -543,7 +543,7 @@ class Time
      * @param int $year
      * @param int $from 1-indexed, inclusive
      * @param int $to 1-indexed, inclusive
-     * @return Generator<DateTimeInterface[][]>
+     * @return iterable<DateTimeInterface[][]>
      */
     public static function monthGrid(int $year, int $from, int $to)
     {
