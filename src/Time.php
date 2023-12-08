@@ -132,8 +132,8 @@ class Time
                 return $date;
             }
 
-            $microseconds = ($value - $seconds) * 1000000;
-            $date = $date->modify('+' . $microseconds . ' microseconds');
+            $microseconds = floor(($value - $seconds) * 1000000);
+            $date = $date->modify("+{$microseconds} microseconds");
 
             if ($date === false) {
                 throw new InvalidArgumentException('Invalid date value: '. $value);
