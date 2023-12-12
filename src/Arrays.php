@@ -111,7 +111,7 @@ class Arrays
      * First item in the iterable.
      *
      * @template T
-     * @param T[]|Traversable<T> $iterable
+     * @param T[]|iterable<T> $iterable
      * @return T|null
      */
     public static function first($iterable)
@@ -125,7 +125,7 @@ class Arrays
      * Last item in the iterable.
      *
      * @template T
-     * @param T[]|Traversable<T> $iterable
+     * @param T[]|iterable<T> $iterable
      * @return T|null
      */
     public static function last($iterable)
@@ -147,8 +147,8 @@ class Arrays
      * TBH not entirely sure why I wrote this.
      *
      * @template T
-     * @param T[]|Traversable<T> $array
-     * @return Traversable<T>
+     * @param T[]|iterable<T> $array
+     * @return iterable<T>
      */
     public static function reverse($array)
     {
@@ -282,7 +282,7 @@ class Arrays
      * ```
      *
      * @template T
-     * @param T[]|Traversable<T> $iterable
+     * @param T[]|iterable<T> $iterable
      * @param callable $fn ($value, $key) => bool
      * @return T|null
      */
@@ -545,7 +545,7 @@ class Arrays
      * with key preserving options.
      *
      * @template T
-     * @param T[]|Traversable<T> $array
+     * @param T[]|iterable<T> $array
      * @param bool $preserve_keys
      * @return T[]
      */
