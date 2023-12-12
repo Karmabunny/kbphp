@@ -214,8 +214,9 @@ class Time
             }
 
             $subsecond = $time - floor($time);
+            $subsecond = floor($subsecond * 1000);
 
-            if ($subsecond) {
+            if ($subsecond > 0) {
                 $format .= '.%03d';
                 $args[] = $subsecond;
             }

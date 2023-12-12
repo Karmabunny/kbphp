@@ -354,6 +354,23 @@ final class TimeTest extends TestCase {
         $date = (new DateTime('2020-10-10'))->modify($actual);
         $this->assertEquals($expected, $actual);
         $this->assertEquals('2020-10-10 01:45:57.123123', $date->format('Y-m-d H:i:s.u'));
+
+        // Floats that looks like integers are ok.
+        $actual = Time::parseTimeString(1300.0);
+        $expected = 'T13:00:00';
+
+        $date = (new DateTime('2020-10-10'))->modify($actual);
+        $this->assertEquals($expected, $actual);
+        $this->assertEquals('2020-10-10 13:00:00', $date->format('Y-m-d H:i:s'));
+
+        // Parsing microseconds also works.
+        $actual = Time::parseTimeString(1300.123);
+        $expected = 'T13:00:00.123';
+
+        $date = (new DateTime('2020-10-10'))->modify($actual);
+        $this->assertEquals($expected, $actual);
+        $this->assertEquals('2020-10-10 13:00:00.123', $date->format('Y-m-d H:i:s.v'));
+
     }
 
 
