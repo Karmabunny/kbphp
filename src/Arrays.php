@@ -745,7 +745,6 @@ class Arrays
         // @phpstan-ignore-next-line : Doesn't like all the reference business.
         if ($index !== '' and isset($output[''])) {
             $output = [ $index => $output[''] ] + $output;
-            // @phpstan-ignore-next-line : Yeah dunno.
             unset($output['']);
         }
 

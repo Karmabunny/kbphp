@@ -51,7 +51,7 @@ class CountryZones
 
     /**
      *
-     * @param string $name a country code, either ISO 3166-1 alpha-2 or alpha-3
+     * @param string $country a country code, either ISO 3166-1 alpha-2 or alpha-3
      * @return string[] list of IANA timezones
      */
     public static function getZones(string $country): array

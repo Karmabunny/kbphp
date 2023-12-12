@@ -114,7 +114,7 @@ class Time
      * - classic PHP date parsing
      * - timezones
      *
-     * @param string|int|float|DateTimeInterface $date
+     * @param string|int|float|DateTimeInterface $value
      * @param string|DateTimeZone|null $zone
      * @return DateTimeInterface
      * @throws InvalidArgumentException
@@ -155,6 +155,8 @@ class Time
             $date = clone $value;
         }
 
+        /** @var DateTime|DateTimeImmutable|null $date */
+
         if (!isset($date)) {
             throw new InvalidArgumentException('Invalid date value: '. gettype($value));
         }
@@ -164,8 +166,6 @@ class Time
             if (is_string($zone)) {
                 $zone = new DateTimeZone($zone);
             }
-
-            /** @var DateTime|DateTimeInterface $date */
 
             $date = $date->setTimezone($zone);
         }
