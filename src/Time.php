@@ -261,16 +261,17 @@ class Time
                 list($_, $hour, $minute, $second, $subsecond) = $matches;
                 // We gotta tear up and reconstruct this one. I want it so
                 // a 'T12' will be '12:00:00' with an optional subsecond.
-                $time = 'T';
-                $time .= str_pad(min(24, $hour ?: '0'), 2, '0', STR_PAD_LEFT);
-                $time .= ':' . str_pad(min(60, $minute ?: '0'), 2, '0', STR_PAD_LEFT);
-                $time .= ':' . str_pad(min(60, $second ?: '0'), 2, '0', STR_PAD_LEFT);
+                $format = 'T%02d:%02d:%02d';
+                $args[] = min(24, $hour ?: 0);
+                $args[] = min(60, $minute ?: 0);
+                $args[] = min(60, $second ?: 0);
 
                 if ($subsecond) {
-                    $time .= '.' . str_pad($subsecond, 3, '0', STR_PAD_RIGHT);
+                    $format .= '.%03d';
+                    $args[] = $subsecond;
                 }
 
-                return $time;
+                return vsprintf($format, $args);
             }
         }
 
