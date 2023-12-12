@@ -164,11 +164,6 @@ trait ArrayableTrait
                 continue;
             }
 
-            // We're not piping resources around like idiots here.
-            if (is_resource($item)) {
-                continue;
-            }
-
             // A regular field - look it up.
             if ($item === true) {
                 $item = $this->$key ?? null;
@@ -190,6 +185,11 @@ trait ArrayableTrait
 
             // Limited protection from [$this, 'typo'].
             if (is_array($item) and ($item[0] ?? null) === $this) {
+                continue;
+            }
+
+            // We're not piping resources around like idiots here.
+            if (is_resource($item)) {
                 continue;
             }
 
