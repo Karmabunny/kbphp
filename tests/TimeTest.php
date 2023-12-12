@@ -320,7 +320,7 @@ final class TimeTest extends TestCase {
 
         // Floats that looks like integers are ok.
         $actual = Time::parseTimeString(1300.0);
-        $expected = 'T130000';
+        $expected = 'T13:00:00';
 
         $date = (new DateTime('2020-10-10'))->modify($actual);
         $this->assertEquals($expected, $actual);
@@ -333,7 +333,7 @@ final class TimeTest extends TestCase {
         // Number looking strings are ok.
         // Single digits are padded left before they're padded right.
         $actual = Time::parseTimeString('1');
-        $expected = 'T010000';
+        $expected = 'T01:00:00';
 
         $date = (new DateTime('2020-10-10'))->modify($actual);
         $this->assertEquals($expected, $actual);
