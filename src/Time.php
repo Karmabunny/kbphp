@@ -184,28 +184,51 @@ class Time
      *  - starts with T (24-hour)
      *  - ends with am/pm (12-hour)
      *
+     * When parsing numbers (without a T prefix) the alignment can be either
+     * big endian or little endian.
+     *
+     * - Big endian (left align) means hours first: `1 => T01:00:00`
+     * - Little endian (right align) means seconds first: `1 => T00:00:01`
+     *
+     * Values with a 'T' prefix are _always_ big endian. Such as:
+     *
+     * `T101 => 'T10:10:00'`
+     *
      * @param string|int $time
+     * @param bool $big_endian left or right aligned number parsing
      * @return string|null `T HH:MM:II.SSS`
      */
-    public static function parseTimeString($time)
+    public static function parseTimeString($time, $big_endian = true)
     {
         // 24 hour time.
-        // hours:   10       -> T10
-        // minutes: 1020     -> T10:20
-        // seconds: 102030   -> T10:20:30
-        // milli:   102030.4 -> T10:20:30.400
         if (is_numeric($time)) {
             $args = [];
 
-            if ($time < 10) {
-                $format = 'T%02d';
-                $args[] = (int) $time;
+            // hours:   10       -> T10
+            // minutes: 1020     -> T10:20
+            // seconds: 102030   -> T10:20:30
+            // milli:   102030.4 -> T10:20:30.400
+            if ($big_endian) {
+                if ($time < 24) {
+                    $format = 'T%02d:00:00';
+                    $args[] = (int) $time;
+                }
+                else if ($time < 2400) {
+                    $format = 'T%02d:%02d:00';
+                    $args[] = floor($time / 100);
+                    $args[] = (int) $time % 100;
+                }
+                else {
+                    $format = 'T%02d:%02d:%02d';
+                    $args[] = floor($time / 10000);
+                    $args[] = floor(((int) $time % 10000) / 100);
+                    $args[] = (int) $time % 100;
+                }
             }
-            else if ($time < 1000) {
-                $format = 'T%02d:%02d';
-                $args[] = floor($time / 100);
-                $args[] = (int) $time % 100;
-            }
+            // hours:   100000   -> T10
+            // minutes: 102000   -> T10:20
+            // seconds: 102030   -> T10:20:30
+            // milli:   102030.4 -> T10:20:30.400
             else {
                 $format = 'T%02d:%02d:%02d';
                 $args[] = floor($time / 10000);
