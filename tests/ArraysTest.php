@@ -156,6 +156,29 @@ final class ArraysTest extends TestCase {
     }
 
 
+    public function testFindKey()
+    {
+        $array = [
+            'abc',
+            'found' => '  find this  ',
+            'not this' => 'def',
+            'ghi',
+        ];
+
+        $actual = Arrays::findKey($array, function($item) {
+            return trim($item) === 'find this';
+        });
+
+        $this->assertEquals('found', $actual);
+
+        $actual = Arrays::findKey($array, function($item) {
+            return false;
+        });
+
+        $this->assertNull($actual);
+    }
+
+
     public function testReduce()
     {
         $array = [2 => false, 5 => true, 10 => false, 15 => true];

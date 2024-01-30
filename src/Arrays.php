@@ -297,6 +297,28 @@ class Arrays
 
 
     /**
+     * Find a matching item key.
+     *
+     * Same behaviour as 'find()' only this returns the index/key instead.
+     *
+     * The callable is provided with the value FIRST and the key SECOND.
+     *
+     * @template T
+     * @param T[]|iterable<T> $iterable
+     * @param callable $fn ($value, $key) => bool
+     * @return T|null
+     */
+    public static function findKey($iterable, callable $fn)
+    {
+        foreach ($iterable as $key => $item) {
+            if ($fn($item, $key)) return $key;
+        }
+
+        return null;
+    }
+
+
+    /**
      * Array reduce - with keys.
      *
      * This literally identical to `array_reduce` except it also includes
