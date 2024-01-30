@@ -969,6 +969,67 @@ class Arrays
 
 
     /**
+     * Shift all the root elements from a list of array queries.
+     *
+     * ```
+     * $keys = [
+     *    'one.two.three',
+     *    'def.ghi',
+     *    '**.deep',
+     * ];
+     *
+     * $shift = Arrays::shiftKeys($keys);
+     * // $shift == [ 'one', 'def', 'deep' ]
+     * // $keys == [ 'two.three', 'ghi', '**.deep' ]
+     *
+     * $shift = Arrays::shiftKeys($keys);
+     * // $shift == [ 'two', 'ghi', 'deep' ]
+     * // $keys == [ 'three', '**.deep' ]
+     *
+     * $shift = Arrays::shiftKeys($keys);
+     * // $shift == [ 'three', 'deep' ]
+     * // $keys == [ '**.deep' ]
+     * ```
+     *
+     * @param string[] $keys modified by ref, leaving only children
+     * @return string[] the key roots
+     */
+    public static function shiftKeys(array &$keys): array
+    {
+        $first = [];
+        $numeric = true;
+        $i = 0;
+
+        foreach ($keys as $index => &$key) {
+            if ($index !== $i++) {
+                $numeric = false;
+            }
+
+            $parts = explode('.', $key, 2);
+            $part = array_shift($parts);
+
+            if (empty($parts)) {
+                $first[$index] = $part;
+                unset($keys[$index]);
+            }
+            else {
+                $first[$index] = $part;
+                $key = $parts[0];
+            }
+        }
+
+        unset($key);
+
+        if ($numeric) {
+            $keys = array_values($keys);
+            $first = array_values($first);
+        }
+
+        return $first;
+    }
+
+
+    /**
      * Shorthand for putting together [key => value] maps.
      *
      * This will silently skip over invalid items:

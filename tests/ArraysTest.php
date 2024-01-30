@@ -999,6 +999,71 @@ final class ArraysTest extends TestCase {
     }
 
 
+    public function testShiftKeys()
+    {
+        $keys = [
+            'one.two.three',
+            'def.ghi',
+        ];
+
+        // Round 1.
+        $shift = Arrays::shiftKeys($keys);
+
+        $expected = [ 'one', 'def' ];
+        $this->assertEquals($expected, $shift);
+
+        $expected = [ 'two.three', 'ghi' ];
+        $this->assertEquals($expected, $keys);
+
+        // Round 2.
+        $shift = Arrays::shiftKeys($keys);
+
+        $expected = [ 'two', 'ghi' ];
+        $this->assertEquals($expected, $shift);
+
+        $expected = [ 'three' ];
+        $this->assertEquals($expected, $keys);
+
+        // Round 3.
+        $shift = Arrays::shiftKeys($keys);
+
+        $expected = [ 'three' ];
+        $this->assertEquals($expected, $shift);
+
+        $this->assertEmpty($keys);
+
+        // Round 4.
+        $shift = Arrays::shiftKeys($keys);
+
+        $this->assertEmpty($shift);
+        $this->assertEmpty($keys);
+    }
+
+
+    public function testShiftKeysAssociated()
+    {
+        $keys = [
+            'test1' => 'one.two.three',
+            'test2' => 'def.ghi',
+        ];
+
+        // Round 1.
+        $shift = Arrays::shiftKeys($keys);
+
+        $expected = [
+            'test1' => 'one',
+            'test2' => 'def',
+        ];
+        $this->assertEquals($expected, $shift);
+
+        $expected = [
+            'test1' => 'two.three',
+            'test2' => 'ghi',
+        ];
+        $this->assertEquals($expected, $keys);
+    }
+
+
     public function testCreateMap()
     {
         $objects = [
