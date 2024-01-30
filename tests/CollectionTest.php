@@ -108,6 +108,171 @@ final class CollectionTest extends TestCase {
     }
 
 
+    public function testNestedFields() {
+        $thingo = new ThingoFields([
+            'parent_id' => 111,
+            'description' => 'blah blah blah',
+            'empty' => [
+                'lies' => 'and more lies',
+                'description' => 'test',
+            ],
+            'nested' => new ThingoFields([
+                'parent_id' => 222,
+                'description' => 'etc',
+                'empty' => [
+                    'lies' => 'not these ones',
+                    'description' => 'eyy',
+                ],
+            ])
+        ]);
+
+        $array = $thingo->toArray(['empty.lies']);
+
+        $expected = ['empty' => ['lies' => 'and more lies']];
+        $this->assertEquals($expected, $array);
+
+        // Precise fields.
+        $array = $thingo->toArray([
+            'description',
+            'empty.description',
+            'nested.description',
+            'nested.empty.description',
+        ]);
+
+        $expected = [
+            'description' => 'blah blah blah',
+            'empty' => ['description' => 'test'],
+            'nested' => [
+                'description' => 'etc',
+                'empty' => ['description' => 'eyy'],
+            ],
+        ];
+        $this->assertEquals($expected, $array);
+
+        // a single thing.
+        $array = $thingo->toArray([
+            'empty',
+        ]);
+
+        $expected = [
+            'empty' => [
+                'lies' => 'and more lies',
+                'description' => 'test',
+            ],
+        ];
+        $this->assertEquals($expected, $array);
+
+        // a few things.
+        $array = $thingo->toArray([
+            'empty',
+            'nested',
+        ]);
+
+        $expected = [
+            'empty' => [
+                'lies' => 'and more lies',
+                'description' => 'test',
+            ],
+            'nested' => [
+                'empty' => [
+                    'lies' => 'not these ones',
+                    'description' => 'eyy',
+                ],
+                'id' => 1,
+                'parent_id' => 222,
+                'description' => 'etc',
+                'thing' => '1234567890',
+            ],
+        ];
+        $this->assertEquals($expected, $array);
+
+        // a single nested thing.
+        $array = $thingo->toArray([
+            'nested.empty',
+        ]);
+
+        $expected = [
+            'nested' => [
+                'empty' => [
+                    'lies' => 'not these ones',
+                    'description' => 'eyy',
+                ],
+            ],
+        ];
+        $this->assertEquals($expected, $array);
+
+        // lots of things.
+        $array = $thingo->toArray([
+            'parent_id',
+            'empty',
+            'nested.empty',
+        ]);
+
+        $expected = [
+            'parent_id' => 111,
+            'empty' => [
+                'lies' => 'and more lies',
+                'description' => 'test',
+            ],
+            'nested' => [
+                'empty' => [
+                    'lies' => 'not these ones',
+                    'description' => 'eyy',
+                ],
+            ],
+        ];
+        $this->assertEquals($expected, $array);
+
+        // filtering on extras.
+        $array = $thingo->toArray([
+            'parent_id',
+            'virtual.abc',
+            'nested.parent_id',
+            'nested.virtual',
+        ], [
+            'virtual',
+        ]);
+
+        $expected = [
+            'parent_id' => 111,
+            'virtual' => [
+                'abc' => '123',
+            ],
+            'nested' => [
+                'parent_id' => 222,
+                // missing because not in extras.
+            ]
+        ];
+
+        $this->assertEquals($expected, $array);
+
+        // wildcard extras.
+        $array = $thingo->toArray([
+            'parent_id',
+            'virtual.abc',
+            'nested.parent_id',
+            'nested.virtual',
+        ], [
+            '*.virtual',
+        ]);
+
+        $expected = [
+            'parent_id' => 111,
+            'virtual' => [
+                'abc' => '123',
+            ],
+            'nested' => [
+                'parent_id' => 222,
+                'virtual' => [
+                    'abc' => '123',
+                    'def' => '456',
+                ],
+            ]
+        ];
+
+        $this->assertEquals($expected, $array);
+    }
+
     public function testIterator() {
         $thingo = new Thingo([
             'parent_id' => 123,
@@ -307,6 +472,9 @@ class ThingoFields extends Thingo
     /** @var string */
     public $key = 'kinda-secret';
 
+    /** @var Thingo|null */
+    public $nested;
+
 
     public function fields(): array
     {
@@ -323,6 +491,12 @@ class ThingoFields extends Thingo
             'more_things' => function() {
                 return ['a', 'b', 'c'];
             },
+            'virtual' => function() {
+                return [
+                    'abc' => '123',
+                    'def' => '456',
+                ];
+            }
         ];
     }
 }

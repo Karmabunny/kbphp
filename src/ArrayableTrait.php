@@ -126,7 +126,9 @@ trait ArrayableTrait
 
         // Add extra fields.
         if ($extra) {
-            $extra_keys = array_fill_keys($extra, true);
+            $extra_keys = Arrays::keyRoots($extra, true);
+            $extra_keys = array_fill_keys($extra_keys, true);
+
             $extra_fields = [];
 
             // Extract any virtual fields.
@@ -142,13 +144,14 @@ trait ArrayableTrait
 
         // Apply filters.
         if ($filter) {
-            $filter = array_fill_keys($filter, true);
+            $filter_keys = Arrays::keyRoots($filter);
+            $filter_keys = array_fill_keys($filter_keys, true);
 
             // Extract any virtual fields.
-            $fields = array_intersect_key($fields, $filter);
+            $fields = array_intersect_key($fields, $filter_keys);
 
             // Re-apply any in 'filter' not already in fields().
-            $fields = array_merge($filter, $fields);
+            $fields = array_merge($filter_keys, $fields);
         }
 
         $array = [];
@@ -199,7 +202,14 @@ trait ArrayableTrait
                 or $item instanceof Arrayable
                 or $item instanceof Traversable
             ) {
-                $item = Arrays::toArray($item);
+                $next_filter = $filter ? Arrays::keyChildren($key, $filter) : null;
+                $next_extra = $extra ? Arrays::keyChildren($key, $extra, true) : null;
+
+                $item = Arrays::toArray($item, $next_filter, $next_extra);
+
+                if (empty($item)) {
+                    continue;
+                }
             }
 
             $array[$key] = $item;
