@@ -1064,6 +1064,53 @@ final class ArraysTest extends TestCase {
     }
 
 
+    public function testKeyRoots()
+    {
+        $keys = [
+            'root1.child',
+            'root2.child.deep',
+            'root2.duplicate',
+            'root3.really.really.deep',
+        ];
+
+        $actual = Arrays::keyRoots($keys);
+
+        $expected = [
+            'root1',
+            'root2',
+            'root3',
+        ];
+
+        $this->assertEquals($expected, $actual);
+    }
+
+
+    public function testKeyChildren()
+    {
+        $keys = [
+            'root1.child',
+            'root2.child.deep',
+            'root2.duplicate',
+            'root3.really.really.really.deep',
+        ];
+
+        $actual = Arrays::keyChildren('root1', $keys);
+        $expected = [ 'child' ];
+
+        $this->assertEquals($expected, $actual);
+
+        $actual = Arrays::keyChildren('root2', $keys);
+        $expected = [ 'child.deep', 'duplicate' ];
+
+        $this->assertEquals($expected, $actual);
+
+        $actual = Arrays::keyChildren('root3', $keys);
+        $expected = [ 'really.really.really.deep' ];
+
+        $this->assertEquals($expected, $actual);
+    }
+
+
     public function testCreateMap()
     {
         $objects = [

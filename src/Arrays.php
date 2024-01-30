@@ -1030,6 +1030,67 @@ class Arrays
 
 
     /**
+     * Get root keys from a list of array queries.
+     *
+     * ```
+     * $keys = ['root1.child', 'root2.child.deep'];
+     * $roots = Arrays::keyRoots($keys);
+     * // => [ 'root1', 'root2' ]
+     * ```
+     *
+     * @param string[] $keys
+     * @return string[]
+     */
+    public static function keyRoots(array $keys): array
+    {
+        $roots = [];
+
+        foreach ($keys as $key) {
+            $parts = explode('.', $key, 2);
+            $part = array_shift($parts);
+            $roots[$part] = $part;
+        }
+
+        $roots = array_keys($roots);
+        return $roots;
+    }
+
+
+    /**
+     * Get child keys from a list of array queries.
+     *
+     * ```
+     * $keys = ['root1.child', 'root2.child.deep'];
+     * $children = Arrays::keyChildren($keys);
+     * // => [ 'child', 'child.deep' ]
+     * ```
+     *
+     * @param string $root
+     * @param array $keys
+     * @return array
+     */
+    public static function keyChildren(string $root, array $keys): array
+    {
+        $children = [];
+
+        foreach ($keys as $key) {
+            $parts = explode('.', $key, 2);
+            $part = array_shift($parts);
+
+            if (empty($parts)) {
+                continue;
+            }
+
+            if ($part === $root) {
+                $children[] = $parts[0];
+            }
+        }
+
+        return $children;
+    }
+
+
+    /**
      * Shorthand for putting together [key => value] maps.
      *
      * This will silently skip over invalid items:
