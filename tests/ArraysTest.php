@@ -1071,14 +1071,28 @@ final class ArraysTest extends TestCase {
             'root2.child.deep',
             'root2.duplicate',
             'root3.really.really.deep',
+            '*.wild',
         ];
 
+        // Standard extract - also does dedupe.
         $actual = Arrays::keyRoots($keys);
 
         $expected = [
             'root1',
             'root2',
             'root3',
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        // Wildcards.
+        $actual = Arrays::keyRoots($keys, true);
+
+        $expected = [
+            'root1',
+            'root2',
+            'root3',
+            'wild',
         ];
 
         $this->assertEquals($expected, $actual);
@@ -1091,23 +1105,42 @@ final class ArraysTest extends TestCase {
             'root1.child',
             'root2.child.deep',
             'root2.duplicate',
+            'root2.duplicate',
             'root3.really.really.really.deep',
+            '*.wild.child',
         ];
 
+        // Standard.
         $actual = Arrays::keyChildren('root1', $keys);
         $expected = [ 'child' ];
 
         $this->assertEquals($expected, $actual);
 
+        // Testing dedupe.
         $actual = Arrays::keyChildren('root2', $keys);
         $expected = [ 'child.deep', 'duplicate' ];
 
         $this->assertEquals($expected, $actual);
 
+        // Not sure what this tests.
         $actual = Arrays::keyChildren('root3', $keys);
         $expected = [ 'really.really.really.deep' ];
 
         $this->assertEquals($expected, $actual);
+
+        // Wildcards!
+        $actual = Arrays::keyChildren('root1', $keys, true);
+        $expected = [
+            'child',
+            'wild.child',
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        // Edge-case - everything (not wildcard).
+        $actual = Arrays::keyChildren('*', $keys);
+
+        $this->assertEquals($keys, $actual);
     }
 
 

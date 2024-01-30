@@ -1032,22 +1032,54 @@ class Arrays
     /**
      * Get root keys from a list of array queries.
      *
+     * Wildcards will replace root `*` (star) key with the first child.
+     *
      * ```
-     * $keys = ['root1.child', 'root2.child.deep'];
+     * $keys = [
+     *    'root1.child1',
+     *    'root2.child2.deep',
+     *    '*.child3',
+     * ];
+     *
      * $roots = Arrays::keyRoots($keys);
      * // => [ 'root1', 'root2' ]
+     *
+     * $roots = Arrays::keyRoots($keys, true);
+     * // => [ 'root1', 'root2', 'child3' ]
      * ```
      *
      * @param string[] $keys
+     * @param bool $wildcard
      * @return string[]
      */
-    public static function keyRoots(array $keys): array
+    public static function keyRoots(array $keys, bool $wildcard = false): array
     {
+        // Nothing to see here.
+        if (empty($keys)) {
+            return [];
+        }
+
         $roots = [];
 
         foreach ($keys as $key) {
-            $parts = explode('.', $key, 2);
+            $parts = explode('.', $key, 3);
             $part = array_shift($parts);
+
+            if ($part === '*') {
+                // Drop wildcard keys if not enabled.
+                if (!$wildcard) {
+                    continue;
+                }
+
+                // End of the line.
+                if (empty($parts)) {
+                    continue;
+                }
+
+                // Grab the first child.
+                $part = array_shift($parts);
+            }
+
             $roots[$part] = $part;
         }
 
@@ -1059,18 +1091,47 @@ class Arrays
     /**
      * Get child keys from a list of array queries.
      *
+     * Wildcards permit a root `*` (star) key to exists no matter the target.
+     *
      * ```
-     * $keys = ['root1.child', 'root2.child.deep'];
-     * $children = Arrays::keyChildren($keys);
-     * // => [ 'child', 'child.deep' ]
+     * $keys = [
+     *    'root1.child1',
+     *    'root2.child2',
+     *    'root2.child3.deep',
+     *    '*.child4',
+     * ];
+     *
+     * // No wildcards
+     * $children = Arrays::keyChildren('root2', $keys);
+     * // => [ 'root2.child2', 'root2.child3.deep' ]
+     *
+     * // Wildcards
+     * $children = Arrays::keyChildren('root1', $keys, true);
+     * // => [ 'child1', 'child4' ]
+     *
+     * // Also wildcards:
+     * $children = Arrays::keyChildren('other', $keys, true);
+     * // => [ 'child2' ]
      * ```
      *
      * @param string $root
      * @param array $keys
+     * @param bool $wildcard
      * @return array
      */
-    public static function keyChildren(string $root, array $keys): array
+    public static function keyChildren(string $root, array $keys, bool $wildcard = false): array
     {
+        // Empty keys? boring.
+        // Numeric? can't help.
+        // wildcard root? - you get everything.
+        if (
+            empty($keys)
+            or is_numeric($root)
+            or $root === '*'
+        ) {
+            return $keys;
+        }
+
         $children = [];
 
         foreach ($keys as $key) {
@@ -1081,11 +1142,17 @@ class Arrays
                 continue;
             }
 
-            if ($part === $root) {
-                $children[] = $parts[0];
+            if (
+                $part === $root
+                or ($wildcard and $part === '*')
+            ) {
+                $child = $parts[0];
+                $children[$child] = $child;
             }
         }
 
+        // Don't forget to dedupe.
+        $children = array_keys($children);
         return $children;
     }
 
