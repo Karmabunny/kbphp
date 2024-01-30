@@ -799,39 +799,86 @@ class Arrays
      * This converts any nested arrayables to arrays.
      *
      * @param Arrayable|Traversable|array $array
+     * @param array|null $filter
+     * @param array|null $extra
      * @return array
      */
-    public static function toArray($array): array
+    public static function toArray($array, array $filter = null, array $extra = null): array
     {
-        if ($array instanceof Arrayable) {
-            return $array->toArray();
+        // This performs it's own filtering.
+        if ($array instanceof ArrayableFields) {
+            return $array->toArray($filter, $extra);
         }
 
-        foreach ($array as &$item) {
-            if ($item instanceof Arrayable) {
-                $item = $item->toArray();
-                continue;
-            }
+        if ($array instanceof Arrayable) {
+            $array = $array->toArray();
+        }
 
-            if ($item instanceof Traversable) {
-                $item = iterator_to_array($item);
-                continue;
-            }
+        $filter_roots = null;
 
-            if (is_object($item)) {
-                $item = (array) $item;
+        // Extract filter roots.
+        if ($filter) {
+            $filter_roots = self::keyRoots($filter);
+            $filter_roots = array_fill_keys($filter_roots, true);
+        }
+
+        $items = [];
+
+        foreach ($array as $key => $item) {
+
+            // Do filtering.
+            if (
+                $filter_roots !== null
+                and !is_numeric($key)
+                and !array_key_exists($key, $filter_roots)
+            ) {
                 continue;
             }
 
             // Like, what else would we do here?
             if (is_resource($item)) {
-                $item = '(resource)';
+                $item[$key] = '(resource)';
                 continue;
             }
-        }
-        unset($item);
 
-        return $array;
+            if ($item instanceof ArrayableFields) {
+                $next_filter = self::keyChildren($key, $filter ?? []);
+                $next_extra = self::keyChildren($key, $extra ?? [], true);
+
+                $item = $item->toArray($next_filter, $next_extra);
+
+                // This performs it's own filtering so we can skip the rest.
+                $items[$key] = $item;
+                continue;
+            }
+
+            if ($item instanceof Arrayable) {
+                $item = $item->toArray();
+            }
+
+            if ($item instanceof Traversable) {
+                $item = iterator_to_array($item);
+            }
+
+            if (is_object($item)) {
+                $item = (array) $item;
+            }
+
+            if (is_array($item) and ($filter or $extra)) {
+                $next_filter = self::keyChildren($key, $filter ?? []);
+                $next_extra = self::keyChildren($key, $extra ?? [], true);
+
+                $item = self::toArray($item, $next_filter, $next_extra);
+
+                if (empty($item)) {
+                    continue;
+                }
+            }
+
+            $items[$key] = $item;
+        }
+
+        return $items;
     }
 
 
