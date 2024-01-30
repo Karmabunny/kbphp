@@ -179,6 +179,32 @@ final class ArraysTest extends TestCase {
     }
 
 
+    public function testIndexOf()
+    {
+        $array = [
+            'abc',
+            'found' => '  find this  ',
+            'this one' => 'def',
+            'ghi',
+        ];
+
+        $actual = Arrays::indexOf($array, '0');
+        $this->assertEquals(0, $actual);
+
+        $actual = Arrays::indexOf($array, 'found');
+        $this->assertEquals(1, $actual);
+
+        $actual = Arrays::indexOf($array, 'this one');
+        $this->assertEquals(2, $actual);
+
+        $actual = Arrays::indexOf($array, '1');
+        $this->assertEquals(3, $actual);
+
+        $actual = Arrays::indexOf($array, 'not this');
+        $this->assertNull($actual);
+    }
+
+
     public function testReduce()
     {
         $array = [2 => false, 5 => true, 10 => false, 15 => true];

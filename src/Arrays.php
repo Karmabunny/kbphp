@@ -319,6 +319,25 @@ class Arrays
 
 
     /**
+     * Find the numeric index of an associative item.
+     *
+     * @param array $array
+     * @param string $key
+     * @return null|int
+     */
+    public static function indexOf(array $array, string $key)
+    {
+        $index = array_search($key, array_keys($array));
+
+        if ($index === false) {
+            return null;
+        }
+
+        return (int) $index;
+    }
+
+
+    /**
      * Array reduce - with keys.
      *
      * This literally identical to `array_reduce` except it also includes
