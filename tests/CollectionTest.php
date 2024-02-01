@@ -349,17 +349,36 @@ final class CollectionTest extends TestCase {
             ],
             'nested' => [
                 'virtual' => [
-                    'def' => '123',
+                    'def' => '456',
                 ],
             ]
         ];
 
         $this->assertEquals($expected, $array);
+    }
+
+
+    public function testExtraWildcards() {
+        $thingo = new ThingoFields([
+            'parent_id' => 111,
+            'description' => 'blah blah blah',
+            'empty' => [
+                'lies' => 'and more lies',
+                'description' => 'test',
+            ],
+            'nested' => new ThingoFields([
+                'parent_id' => 222,
+                'description' => 'etc',
+                'empty' => [
+                    'lies' => 'not these ones',
+                    'description' => 'eyy',
+                ],
+            ])
+        ]);
 
         // wildcard extras.
         $array = $thingo->toArray([
             'parent_id',
-            'nested.parent_id',
         ], [
             '*.virtual',
         ]);
@@ -368,9 +387,9 @@ final class CollectionTest extends TestCase {
             'parent_id' => 111,
             'virtual' => [
                 'abc' => '123',
+                'def' => '456',
             ],
             'nested' => [
-                'parent_id' => 222,
                 'virtual' => [
                     'abc' => '123',
                     'def' => '456',
