@@ -107,7 +107,6 @@ trait ArrayableTrait
      * Specify an 'extra' to include additional fields if implementing the
      * ArrayableFields interface. This will add properties that were excluded
      * from `fields()` and includes any virtual fields defined in `extraFields()`.
-     * included in `fields()` and any virtual fields defined in `extraFields()`.
      *
      * @param string[]|null $filter
      * @param string[]|null $extra
@@ -124,24 +123,6 @@ trait ArrayableTrait
             $fields = array_merge($fields, $this->fields());
         }
 
-        // Add extra fields.
-        if ($extra) {
-            $extra_keys = Arrays::keyRoots($extra, true);
-            $extra_keys = array_fill_keys($extra_keys, true);
-
-            $extra_fields = [];
-
-            // Extract any virtual fields.
-            if ($this instanceof ArrayableFields) {
-                $extra_fields = $this->extraFields();
-                $extra_fields = array_intersect_key($extra_fields, $extra_keys);
-            }
-
-            // The 'extras' field can also reference natural fields or those
-            // in fields(), so we layer them all together.
-            $fields = array_merge($fields, $extra_keys, $extra_fields);
-        }
-
         // Apply filters.
         if ($filter) {
             $filter_keys = Arrays::keyRoots($filter);
@@ -152,6 +133,21 @@ trait ArrayableTrait
 
             // Re-apply any in 'filter' not already in fields().
             $fields = array_merge($filter_keys, $fields);
+        }
+
+        // Add extra fields.
+        if ($extra) {
+            $extra_keys = Arrays::keyRoots($extra, true);
+            $extra_keys = array_fill_keys($extra_keys, true);
+
+            $fields = array_merge($fields, $extra_keys);
+
+            if ($this instanceof ArrayableFields) {
+                $extra_fields = $this->extraFields();
+                $extra_fields = array_intersect_key($extra_fields, $extra_keys);
+
+                $fields = array_merge($fields, $extra_fields);
+            }
         }
 
         $array = [];
