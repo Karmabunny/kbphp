@@ -78,6 +78,7 @@ final class CollectionTest extends TestCase {
             'empty' => null,
         ]);
 
+        // Default output.
         $array = $thingo->toArray();
 
         $this->assertEquals(1, $array['id']);
@@ -87,12 +88,14 @@ final class CollectionTest extends TestCase {
 
         $this->assertEquals($thingo->getVirtualThing(), $array['thing']);
 
+        // Standard filtering.
         $array = $thingo->toArray(['id', 'description']);
 
         $this->assertArrayNotHasKey('empty', $array);
         $this->assertArrayNotHasKey('name', $array);
         $this->assertArrayNotHasKey('key', $array);
 
+        // A virtual extra field.
         $array = $thingo->toArray(null, ['more_things']);
 
         $this->assertArrayHasKey('id', $array);
@@ -105,6 +108,22 @@ final class CollectionTest extends TestCase {
 
         $expected = ['a', 'b', 'c'];
         $this->assertEquals($expected, $array['more_things']);
+
+        // A field excluded by fields().
+        $array = $thingo->toArray(null, ['key']);
+
+        $this->assertArrayHasKey('id', $array);
+        $this->assertArrayHasKey('key', $array);
+        $this->assertArrayNotHasKey('more_things', $array);
+
+        // This also works without ArrayableFields.
+        $thing = new Thingo();
+
+        $array = $thing->toArray();
+        $this->assertArrayNotHasKey('hidden', $array);
+
+        $array = $thing->toArray(null, ['hidden']);
+        $this->assertArrayHasKey('hidden', $array);
     }
 
 
@@ -418,6 +437,7 @@ final class CollectionTest extends TestCase {
             ['name', null],
             ['description', 'blah blah blah'],
             ['empty', null],
+            ['hidden', 'nope'],
         ];
 
         $this->assertEquals($expected, $items);
@@ -550,11 +570,14 @@ class Thingo extends Collection {
     /** @var array */
     public $empty = [];
 
+    public $hidden = 'nope';
+
 
     public function fields(): array
     {
         return [
             'thing' => [$this, 'getVirtualThing'],
+            'hidden' => false,
         ];
     }
 
@@ -592,6 +615,7 @@ class ThingoFields extends Thingo
         $fields = Collection::fields();
         $fields['thing'] = [$this, 'getVirtualThing'];
         $fields['key'] = false;
+        $fields['hidden'] = false;
         return $fields;
     }
 
