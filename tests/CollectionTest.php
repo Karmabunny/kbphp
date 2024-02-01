@@ -222,13 +222,31 @@ final class CollectionTest extends TestCase {
             ],
         ];
         $this->assertEquals($expected, $array);
+    }
 
-        // filtering on extras.
+
+    public function testExtraFields() {
+        $thingo = new ThingoFields([
+            'parent_id' => 111,
+            'description' => 'blah blah blah',
+            'empty' => [
+                'lies' => 'and more lies',
+                'description' => 'test',
+            ],
+            'nested' => new ThingoFields([
+                'parent_id' => 222,
+                'description' => 'etc',
+                'empty' => [
+                    'lies' => 'not these ones',
+                    'description' => 'eyy',
+                ],
+            ])
+        ]);
+
+        // extras don't need to be in fields.
         $array = $thingo->toArray([
             'parent_id',
-            'virtual.abc',
             'nested.parent_id',
-            'nested.virtual',
         ], [
             'virtual',
         ]);
@@ -237,10 +255,83 @@ final class CollectionTest extends TestCase {
             'parent_id' => 111,
             'virtual' => [
                 'abc' => '123',
+                'def' => '456',
             ],
             'nested' => [
                 'parent_id' => 222,
-                // missing because not in extras.
+                // Missing because not in extras.
+            ],
+        ];
+
+        $this->assertEquals($expected, $array);
+
+        // nested extras.
+        $array = $thingo->toArray([
+            'parent_id',
+            'nested.parent_id',
+        ], [
+            'virtual',
+            'nested.virtual',
+        ]);
+
+        $expected = [
+            'parent_id' => 111,
+            'virtual' => [
+                'abc' => '123',
+                'def' => '456',
+            ],
+            'nested' => [
+                'parent_id' => 222,
+                'virtual' => [
+                    'abc' => '123',
+                    'def' => '456',
+                ],
+            ],
+        ];
+
+        $this->assertEquals($expected, $array);
+
+        // filtering on extras.
+        $array = $thingo->toArray([
+            'parent_id',
+            'virtual.abc',
+        ], [
+            'virtual',
+            'nested.virtual',
+        ]);
+
+        $expected = [
+            'parent_id' => 111,
+            'virtual' => [
+                'abc' => '123',
+            ],
+            'nested' => [
+                'virtual' => [
+                    'abc' => '123',
+                    'def' => '456',
+                ],
+            ]
+        ];
+
+        $this->assertEquals($expected, $array);
+
+        // alternate filtering on extras.
+        $array = $thingo->toArray([
+            'parent_id',
+        ], [
+            'virtual.abc',
+            'nested.virtual.def',
+        ]);
+
+        $expected = [
+            'parent_id' => 111,
+            'virtual' => [
+                'abc' => '123',
+            ],
+            'nested' => [
+                'virtual' => [
+                    'def' => '123',
+                ],
             ]
         ];
 
@@ -249,9 +340,7 @@ final class CollectionTest extends TestCase {
         // wildcard extras.
         $array = $thingo->toArray([
             'parent_id',
-            'virtual.abc',
             'nested.parent_id',
-            'nested.virtual',
         ], [
             '*.virtual',
         ]);
@@ -271,7 +360,29 @@ final class CollectionTest extends TestCase {
         ];
 
         $this->assertEquals($expected, $array);
+
+        // filtering wildcards
+        $array = $thingo->toArray([
+            'parent_id',
+        ], [
+            '*.virtual.def',
+        ]);
+
+        $expected = [
+            'parent_id' => 111,
+            'virtual' => [
+                'def' => '456',
+            ],
+            'nested' => [
+                'virtual' => [
+                    'def' => '456',
+                ],
+            ]
+        ];
+
+        $this->assertEquals($expected, $array);
     }
+
 
     public function testIterator() {
         $thingo = new Thingo([
