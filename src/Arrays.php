@@ -1196,19 +1196,34 @@ class Arrays
         $children = [];
 
         foreach ($keys as $key) {
-            $parts = explode('.', $key, 2);
+            $parts = explode('.', $key, 3);
             $part = array_shift($parts);
 
             if (empty($parts)) {
                 continue;
             }
 
-            if (
-                $part === $root
-                or ($wildcard and $part === '*')
-            ) {
-                $child = $parts[0];
+            if ($part === $root) {
+                $child = implode('.', $parts);
                 $children[$child] = $child;
+                continue;
+            }
+
+            if ($wildcard and $part === '*') {
+                $child = implode('.', $parts);
+                $children[$child] = $child;
+
+                // If the first child is the root then flatten it.
+                // wild + *.wild.card => card
+                if ($parts[0] === $root) {
+                    $child = $parts[1] ?? false;
+                    $children[$child] = $child;
+                }
+
+                // The wildcard lives forever so it can recurse.
+                $children[$key] = $key;
+
+                continue;
             }
         }
 

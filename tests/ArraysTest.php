@@ -1260,7 +1260,7 @@ final class ArraysTest extends TestCase {
             'root2.duplicate',
             'root2.duplicate',
             'root3.really.really.really.deep',
-            '*.wild.child',
+            '*.wild.card.deep',
         ];
 
         // Standard.
@@ -1285,7 +1285,27 @@ final class ArraysTest extends TestCase {
         $actual = Arrays::keyChildren('root1', $keys, true);
         $expected = [
             'child',
-            'wild.child',
+            'wild.card.deep',
+            '*.wild.card.deep',
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        // Deeper wildcards.
+        $actual = Arrays::keyChildren('wild', $actual, true);
+        $expected = [
+            'card.deep',
+            'wild.card.deep',
+            '*.wild.card.deep',
+        ];
+
+        // Deeper again.
+        $this->assertEquals($expected, $actual);
+        $actual = Arrays::keyChildren('card', $actual, true);
+        $expected = [
+            'deep',
+            'wild.card.deep',
+            '*.wild.card.deep',
         ];
 
         $this->assertEquals($expected, $actual);
