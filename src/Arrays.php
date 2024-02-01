@@ -847,6 +847,10 @@ class Arrays
 
                 $item = $item->toArray($next_filter, $next_extra);
 
+                if (empty($item)) {
+                    continue;
+                }
+
                 // This performs it's own filtering so we can skip the rest.
                 $items[$key] = $item;
                 continue;
@@ -857,7 +861,17 @@ class Arrays
             }
 
             if ($item instanceof Traversable) {
-                $item = iterator_to_array($item);
+                $next_filter = self::keyChildren($key, $filter ?? []);
+                $next_extra = self::keyChildren($key, $extra ?? [], true);
+
+                $item = self::toArray($item, $next_filter, $next_extra);
+
+                if (empty($item)) {
+                    continue;
+                }
+
+                $items[$key] = $item;
+                continue;
             }
 
             if (is_object($item)) {
