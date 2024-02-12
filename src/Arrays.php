@@ -269,6 +269,59 @@ class Arrays
 
 
     /**
+     * Reduce an array in reverse.
+     *
+     * @template T
+     * @param iterable $array
+     * @param callable $fn (carry, value, key)
+     * @param T|null $initial
+     * @return T
+     */
+    public static function reverseReduce($array, $fn, $initial = null)
+    {
+        $reversed = self::reverse($array);
+        $carry = $initial;
+
+        foreach ($reversed as $key => $item) {
+            $carry = $fn($carry, $item, $key);
+        }
+
+        return $carry;
+    }
+
+
+    /**
+     * Merge arrays while preserving keys.
+     *
+     * This uses array concat instead of merge, such that:
+     *
+     * ```
+     * array_merge([3 => 'one'], [3 => 'two'])
+     * // => ['one', two']
+     *
+     * mergeKeyed([3 => 'one'], [3 => 'two'])
+     * // => [3 => 'two']
+     * ```
+     *
+     * @template T
+     * @param T[] $arrays
+     * @return T[]
+     */
+    public static function mergeKeyed(...$arrays)
+    {
+        $reversed = self::reverse($arrays);
+
+        $output = [];
+
+        foreach ($reversed as $item) {
+            $output = $item + $output;
+        }
+
+        return $output;
+    }
+
+
+    /**
      * Find a matching item.
      *
      * The callable is provided with the value FIRST and the key SECOND.
