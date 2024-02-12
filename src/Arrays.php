@@ -303,9 +303,8 @@ class Arrays
      * // => [3 => 'two']
      * ```
      *
-     * @template T
-     * @param T[] $arrays
-     * @return T[]
+     * @param array $arrays
+     * @return array
      */
     public static function mergeKeyed(...$arrays)
     {
