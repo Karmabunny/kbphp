@@ -1218,6 +1218,49 @@ class Arrays
 
 
     /**
+     * Combine a set of sorts into a multisort.
+     *
+     * Each sort can specify their mode using the options syntax.
+     * By default all sorts are ascending.
+     *
+     * Example:
+     *
+     * ```php
+     * // Use default direction for all modes.
+     * $sort = Arrays::createMultisort(['group', 'name']);
+     *
+     * // Explicit directions per mode.
+     * $sort = Arrays::createMultisort([
+     *      'group' => SORT_DESC,
+     *      'name' => SORT_ASC,
+     * ]);
+     * ```
+     *
+     * @param string[] $modes [ name => SORT ]
+     * @return callable(mixed, mixed): int
+     */
+    public static function createMultisort(array $modes)
+    {
+        $modes = self::normalizeOptions($modes, SORT_ASC);
+
+        $sorts = [];
+
+        foreach ($modes as $mode => $dir) {
+            $sorts[] = self::createSort($dir, $mode);
+        }
+
+        return function($a, $b) use ($sorts) {
+            foreach ($sorts as $sort) {
+                $result = $sort($a, $b);
+                if ($result !== 0) return $result;
+            }
+
+            return 0;
+        };
+    }
+
+
+    /**
      * Sort an array using the {@see Sortable} interface.
      *
      * @param array $array
