@@ -1298,4 +1298,44 @@ class Arrays
         return $array;
     }
 
+
+
+    /**
+     * Multisort an array using the {@see Sortable} interface.
+     *
+     * @see createMultisort()
+     * @param array $array
+     * @param bool $preserve_keys
+     * @param string[] $modes [ name => SORT ]
+     * @return void
+     */
+    public static function multisort(array &$array, bool $preserve_keys, array $modes)
+    {
+        $fn = self::createMultisort($modes);
+
+        if ($preserve_keys) {
+            uasort($array, $fn);
+        }
+        else {
+            usort($array, $fn);
+        }
+    }
+
+
+    /**
+     * Multisort an array and return it.
+     *
+     * @see createMultisort()
+     * @template T
+     * @param T[] $array
+     * @param bool $preserve_keys
+     * @param string[] $modes [ name => SORT ]
+     * @return T[]
+     */
+    public static function multisorted(array $array, bool $preserve_keys, array $modes)
+    {
+        self::multisort($array, $preserve_keys, $modes);
+        return $array;
+    }
+
 }
