@@ -6,6 +6,7 @@
 
 use karmabunny\kb\Arrays;
 use karmabunny\kb\Sortable;
+use karmabunny\kb\SortFieldsTrait;
 use PHPUnit\Framework\TestCase;
 
 
@@ -1234,6 +1235,73 @@ final class ArraysTest extends TestCase {
         $actual = Arrays::sorted($items);
         $this->assertEquals($expected, $actual);
     }
+
+
+    public function testMultisort()
+    {
+        $items = [
+            new SortFields(100, 'two'),
+            new SortFields(100, 'one'),
+            new SortFields(50, 'one'),
+            new SortFields(30, 'two'),
+        ];
+
+        // No modes - no sort.
+        $sort = Arrays::createMultisort([]);
+        $actual = $items;
+        usort($actual, $sort);
+
+        $expected = [
+            $items[0],
+            $items[1],
+            $items[2],
+            $items[3],
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        // Default sort (id).
+        $sort = Arrays::createMultisort(['default']);
+        $actual = $items;
+        usort($actual, $sort);
+
+        $expected = [
+            $items[3],
+            $items[2],
+            $items[0],
+            $items[1],
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        // group sorts with default dir.
+        $sort = Arrays::createMultisort(['group', 'id']);
+        $actual = $items;
+        usort($actual, $sort);
+
+        $expected = [
+            $items[2],
+            $items[1],
+            $items[3],
+            $items[0],
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        // group sorts witrh explicit dir.
+        $sort = Arrays::createMultisort(['group' => SORT_DESC, 'id']);
+        $actual = $items;
+        usort($actual, $sort);
+
+        $expected = [
+            $items[3],
+            $items[0],
+            $items[2],
+            $items[1],
+        ];
+
+        $this->assertEquals($expected, $actual);
+    }
 }
 
 
@@ -1241,11 +1309,13 @@ final class ArraysTest extends TestCase {
 abstract class SortBase
 {
     public $id;
+    public $group;
     public $rand;
 
-    public function __construct($id)
+    public function __construct($id, $group = 'default')
     {
         $this->id = $id;
+        $this->group = $group;
         $this->rand = random_int(0, 1000 * 1000);
     }
 }
@@ -1271,4 +1341,15 @@ class SortItem2 extends SortItem1
 // This isn't sortable.
 class SortItem3 extends SortBase
 {
+}
+
+// Field sorter.
+class SortFields extends SortBase implements Sortable
+{
+    use SortFieldsTrait;
+
+    public function getSortKey(): string
+    {
+        return $this->id;
+    }
 }
