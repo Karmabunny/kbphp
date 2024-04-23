@@ -1,13 +1,10 @@
 <?php
 namespace karmabunny\kb;
 
-use karmabunny\kb\ArrayableTrait;
-
 /**
  * JSON builders for models.
  *
- * This builds on the 'Arrayable' interface and very likely could be merged
- * into the upstream kb library.
+ * This builds on the 'Arrayable' interface.
  */
 trait ToJsonTrait
 {
@@ -83,6 +80,7 @@ trait ToJsonTrait
      *
      * @return mixed
      */
+    #[ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return $this->toJson();
