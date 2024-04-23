@@ -1,6 +1,8 @@
 <?php
 namespace karmabunny\kb;
 
+use ReturnTypeWillChange;
+
 /**
  * JSON builders for models.
  *
