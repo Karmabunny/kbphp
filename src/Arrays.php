@@ -1176,11 +1176,15 @@ class Arrays
      *
      * https://www.php.net/manual/en/language.oop5.object-comparison.php#98725
      *
+     * Given scalar values, this will use the natural ordering.
+     *
+     * This compares array fields using `array[mode]` given an non-null mode.
+
      * @param int $dir SORT_ASC|SORT_DESC
-     * @param string $mode 'default'
+     * @param string|null $mode null => 'default'
      * @return callable(mixed, mixed): int
      */
-    public static function createSort(int $dir = SORT_ASC, string $mode = 'default')
+    public static function createSort(int $dir = SORT_ASC, string $mode = null)
     {
         $dir = $dir === SORT_DESC ? -1 : 1;
 
@@ -1191,11 +1195,11 @@ class Arrays
             }
 
             if ($a instanceof Sortable) {
-                return $a->compare($b, $mode) * $dir;
+                return $a->compare($b, $mode ?? 'default') * $dir;
             }
 
             if ($b instanceof Sortable) {
-                return $b->compare($a, $mode) * $dir * -1;
+                return $b->compare($a, $mode ?? 'default') * $dir * -1;
             }
 
             $is_a = is_object($a);
@@ -1209,6 +1213,15 @@ class Arrays
             // Put unsortable objects last.
             if ($is_a or $is_b) {
                 return ($is_a ? 1 : -1) * $dir;
+            }
+
+            // Array sorts only with a non-default mode.
+            // Don't even think about recursive sorts. We don't need that.
+            if ($mode !== null and is_array($a) and is_array($b)) {
+                $a = $a[$mode] ?? null;
+                $b = $b[$mode] ?? null;
+
+                return ($a <=> $b) * $dir;
             }
 
             // Natural scalar sorting.
