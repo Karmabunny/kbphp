@@ -126,7 +126,7 @@ class Encrypt implements EncryptInterface
      *
      * @return void
      */
-    public function DecodeMultipleFields(array &$data, array $fields): void
+    public function decodeMultipleFields(array &$data, array $fields): void
     {
         foreach ($fields as $field) {
             if (isset($data[$field])) {
