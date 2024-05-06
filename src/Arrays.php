@@ -1249,7 +1249,7 @@ class Arrays
      * ]);
      * ```
      *
-     * @param string[] $modes [ name => SORT ]
+     * @param array $modes [ name => SORT ]
      * @return callable(mixed, mixed): int
      */
     public static function createMultisort(array $modes)
