@@ -42,7 +42,7 @@ class Secrets extends DataObject
     const RULE_JWT = '^eyJ[^.]+\..';
     const RULE_SSH_PGP = '^BEGIN.*PRIVATE KEY';
     const RULE_BYCRYPT_HASH = '^\$2[aby]\$.*\$';
-    const RULE_GITHUB = '^(?:ghp|gho|ghu|ghs|ghr)';
+    const RULE_GITHUB = '^(?:ghp|github_pat|gho|ghu|ghs|ghr)';
     const RULE_AWS = '^AKIA[0-9A-Z]{16}';
     const RULE_AWS_KEY = '^aws.{0,20}(?:key|pwd|pw|password|pass|token)';
     const RULE_SENDGRID = '^SG\..{22}\..{43}';
