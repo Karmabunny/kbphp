@@ -103,4 +103,18 @@ class TimeZones
         $tz = new DateTimeZone($name);
         return $tz;
     }
+
+
+    /**
+     * Convert a timezone object into a Windows timezone.
+     *
+     * @param DateTimeZone $zone
+     * @return null|string
+     */
+    public static function toWindows(DateTimeZone $zone): ?string
+    {
+        $name = $zone->getName();
+        $tz = self::fromIana($name);
+        return $tz;
+    }
 }
