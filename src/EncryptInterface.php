@@ -6,32 +6,11 @@
 
 namespace karmabunny\kb;
 
-use Exception;
-
 /**
- * An encryption tooling instance
+ * An encryption tooling instance.
  */
 interface EncryptInterface
 {
-
-
-    /**
-     * Returns a singleton instance of Encrypt.
-     *
-     * @param array $config configuration options
-     * @return EncryptInterface
-     */
-    public static function instance($config = NULL): EncryptInterface;
-
-
-    /**
-     * Loads encryption configuration and validates the data.
-     *
-     * @param array $config Encrypt configuration including key, cipher and iv_size
-     * @throws Exception
-     */
-    public function __construct($config);
-
 
     /**
      * Encrypts a string and returns an encrypted string that can be decoded.
@@ -39,7 +18,7 @@ interface EncryptInterface
      * @param string $data data to be encrypted
      * @return string encrypted data
      */
-    public function encode($data): string;
+    public function encode(string $data): string;
 
 
     /**
@@ -59,7 +38,7 @@ interface EncryptInterface
      * @param string $data encoded string to be decrypted
      * @return string decrypted data
      */
-    public function decode($data): string;
+    public function decode(string $data): string;
 
 
     /**
@@ -71,6 +50,5 @@ interface EncryptInterface
      * @return void
      */
     public function decodeMultipleFields(array &$data, array $fields): void;
-
 
 }

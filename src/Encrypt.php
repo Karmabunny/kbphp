@@ -15,7 +15,7 @@ use Exception;
 class Encrypt implements EncryptInterface
 {
 
-    // Configuration
+    /** @var array */
     protected $config;
 
 
@@ -23,14 +23,16 @@ class Encrypt implements EncryptInterface
      * Returns a singleton instance of Encrypt.
      *
      * @param array $config configuration options
-     * @return EncryptInterface
+     * @return Encrypt
      */
-    public static function instance($config = NULL): EncryptInterface
+    public static function instance(array $config = []): Encrypt
     {
-        static $instance;
+        static $instance = null;
 
         // Create the singleton
-        empty($instance) and $instance = new Encrypt((array) $config);
+        if ($instance === null) {
+            $instance = new Encrypt($config);
+        }
 
         return $instance;
     }
@@ -42,9 +44,8 @@ class Encrypt implements EncryptInterface
      * @param array $config Encrypt configuration including key, cipher and iv_size
      * @throws Exception
      */
-    public function __construct($config)
+    public function __construct(array $config)
     {
-
         if (empty($config['key'])) {
             throw new Exception('No encryption key provided in config');
         }
@@ -66,7 +67,7 @@ class Encrypt implements EncryptInterface
      * @param string $data data to be encrypted
      * @return string encrypted data
      */
-    public function encode($data): string
+    public function encode(string $data): string
     {
         $iv = openssl_random_pseudo_bytes($this->config['iv_size']);
 
@@ -74,7 +75,7 @@ class Encrypt implements EncryptInterface
         $data = openssl_encrypt($data, $this->config['cipher'], $this->config['key'], 0, $iv);
 
         // Use base64 encoding to convert to a string
-        return base64_encode($iv.$data);
+        return base64_encode($iv . $data);
     }
 
 
@@ -102,7 +103,7 @@ class Encrypt implements EncryptInterface
      * @param string $data encoded string to be decrypted
      * @return string decrypted data
      */
-    public function decode($data): string
+    public function decode(string $data): string
     {
         // Convert the data back to binary
         $data = base64_decode($data);
@@ -134,5 +135,4 @@ class Encrypt implements EncryptInterface
             }
         }
     }
-
-} // End Encrypt
+}
