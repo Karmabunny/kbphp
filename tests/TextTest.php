@@ -146,4 +146,37 @@ final class TextTest extends TestCase
         ];
         $this->assertEquals($expected, $actual);
     }
+
+
+    public function testMask()
+    {
+        $word = 'áδćďê';
+
+        $actual = Text::mask($word);
+        $this->assertEquals('*****', $actual);
+
+        $actual = Text::mask($word, '*', 1, 0);
+        $this->assertEquals('á****', $actual);
+
+        $actual = Text::mask($word, '*', 0, 1);
+        $this->assertEquals('****ê', $actual);
+
+        $actual = Text::mask($word, '*', 1, 1);
+        $this->assertEquals('á***ê', $actual);
+
+        $actual = Text::mask($word, '*', 20, 0);
+        $this->assertEquals('*****', $actual);
+
+        $actual = Text::mask($word, '*', -20, 0);
+        $this->assertEquals('*****', $actual);
+
+        $actual = Text::mask($word, '*', 0, 20);
+        $this->assertEquals('*****', $actual);
+
+        $actual = Text::mask($word, '*', 0, -20);
+        $this->assertEquals('*****', $actual);
+
+        $actual = Text::mask($word, '*', -20, -20);
+        $this->assertEquals('*****', $actual);
+    }
 }
