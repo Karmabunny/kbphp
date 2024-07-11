@@ -5,6 +5,7 @@
  */
 
 use karmabunny\kb\Text;
+use karmabunny\kb\TextMaskTypes;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -178,5 +179,27 @@ final class TextTest extends TestCase
 
         $actual = Text::mask($word, '*', -20, -20);
         $this->assertEquals('*****', $actual);
+    }
+
+
+    public function testMaskPreset()
+    {
+        $actual = Text::maskPreset('Jo Anne', '*', TextMaskTypes::FirstName);
+        $this->assertEquals('J* ****', $actual);
+
+        $actual = Text::maskPreset('Van Helsing', '*', TextMaskTypes::LastName);
+        $this->assertEquals('*** ******g', $actual);
+
+        $actual = Text::maskPreset('Jo Anne Van Helsing', '*', TextMaskTypes::FirstLasName);
+        $this->assertEquals('J* **** *** ******g', $actual);
+
+        $actual = Text::maskPreset('email@domain.com', '*', TextMaskTypes::Email);
+        $this->assertEquals('e***l@d********m', $actual);
+
+        $actual = Text::maskPreset('0403123123', '*', TextMaskTypes::Phone);
+        $this->assertEquals('*******123', $actual);
+
+        $actual = Text::maskPreset('Quick down fox', '*', TextMaskTypes::Spaces);
+        $this->assertEquals('***** **** ***', $actual);
     }
 }
