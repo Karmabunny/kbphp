@@ -190,7 +190,7 @@ final class TextTest extends TestCase
         $actual = Text::maskPreset('Van Helsing', '*', TextMaskTypes::LastName);
         $this->assertEquals('*** ******g', $actual);
 
-        $actual = Text::maskPreset('Jo Anne Van Helsing', '*', TextMaskTypes::FirstLasName);
+        $actual = Text::maskPreset('Jo Anne Van Helsing', '*', TextMaskTypes::FirstLastName);
         $this->assertEquals('J* **** *** ******g', $actual);
 
         $actual = Text::maskPreset('email@domain.com', '*', TextMaskTypes::Email);

@@ -11,7 +11,7 @@ use Exception;
 enum TextMaskTypes {
     case FirstName;
     case LastName;
-    case FirstLasName;
+    case FirstLastName;
     case Email;
     case Phone;
     case Spaces;
@@ -420,7 +420,7 @@ class Text {
                 return implode(' ', $strings);
 
             // Keep first and last character, and spaces. F*** **** ***e
-            case TextMaskTypes::FirstLasName:
+            case TextMaskTypes::FirstLastName:
                 $parts = explode(' ', $word);
                 $last = array_key_last($parts);
 
