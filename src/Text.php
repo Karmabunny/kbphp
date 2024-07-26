@@ -7,15 +7,7 @@
 namespace karmabunny\kb;
 
 use Exception;
-
-enum TextMaskTypes {
-    case FirstName;
-    case LastName;
-    case FirstLastName;
-    case Email;
-    case Phone;
-    case Spaces;
-}
+use karmabunny\kb\Arrays;
 
 
 /**
@@ -49,6 +41,17 @@ class Text {
      * Perform finds only against the needle length.
      */
     const FIND_STARTS_WITH = 0x1000;
+
+
+    /**
+     * Mask preset types
+     */
+    const MASK_TYPE_FIRSTNAME = 'FIRSTNAME';
+    const MASK_TYPE_LASTNAME = 'LASTNAME';
+    const MASK_TYPE_FIRSTLASTNAME = 'FIRSTLASTNAME';
+    const MASK_TYPE_EMAIL = 'EMAIL';
+    const MASK_TYPE_PHONE = 'PHONE';
+    const MASK_TYPE_SPACES = 'SPACES';
 
 
     /** @var string */
@@ -384,16 +387,17 @@ class Text {
      * Applies preset mask to given string @see `Text::mask`
      *
      * @param string $word
-     * @param string $mask_char Optional masking character. Default of `*`
-     * @param TextMaskTypes $preset
+     * @param string $preset Text::MASK_TYPE_*
+     * @param string|null $mask_char Optional masking character. Default of `*`
      * @return string
+     * @throws Exception Unknown preset
      */
-    public static function maskPreset(string $word, $mask_char = '*', TextMaskTypes $preset)
+    public static function maskPreset(string $word, string $preset, $mask_char = '*')
     {
         switch ($preset)
         {
             // Keep first character and spaces. `F**** ****`
-            case TextMaskTypes::FirstName:
+            case self::MASK_TYPE_FIRSTNAME:
                 $parts = explode(' ', $word);
 
                 $func = function($str, $index) use ($mask_char)
@@ -406,9 +410,9 @@ class Text {
                 return implode(' ', $strings);
 
             // Keep last character and spaces. `**** ***e`
-            case TextMaskTypes::LastName:
+            case self::MASK_TYPE_LASTNAME:
                 $parts = explode(' ', $word);
-                $last = array_key_last($parts);
+                $last = Arrays::lastKey($parts);
 
                 $func = function($str, $index) use ($mask_char, $last)
                 {
@@ -420,9 +424,9 @@ class Text {
                 return implode(' ', $strings);
 
             // Keep first and last character, and spaces. F*** **** ***e
-            case TextMaskTypes::FirstLastName:
+            case self::MASK_TYPE_FIRSTLASTNAME:
                 $parts = explode(' ', $word);
-                $last = array_key_last($parts);
+                $last = Arrays::lastKey($parts);
 
                 $func = function($str, $index) use ($mask_char, $last)
                 {
@@ -434,8 +438,11 @@ class Text {
                 $strings = array_map($func, $parts, array_keys($parts));
                 return implode(' ', $strings);
 
-            // Keep first, last, and @ character of address and domain. `e***l@d********m`
-            case TextMaskTypes::Email:
+            // Keep first, last, and @ character of prefix and domain. `e***l@d********m`
+            case self::MASK_TYPE_EMAIL:
+                // Safely handle non email addresses
+                if (strpos($word, '@') === false) return self::mask($word);
+
                 list($address, $domain) = explode('@', $word);
                 return sprintf(
                     '%s@%s',
@@ -444,11 +451,11 @@ class Text {
                 );
 
             // Keep last 3 characters. `*******123`
-            case TextMaskTypes::Phone:
+            case self::MASK_TYPE_PHONE:
                 return Text::mask($word, $mask_char, 0, 3);
 
             // Keep only spaces. `**** ** *****`
-            case TextMaskTypes::Spaces:
+            case self::MASK_TYPE_SPACES:
                 $parts = explode(' ', $word);
 
                 $func = function($str) use ($mask_char)
@@ -460,7 +467,7 @@ class Text {
                 return implode(' ', $strings);
 
             default:
-                throw new Exception('Unknown TextMaskTypes');
+                throw new Exception('Unknown MASK_TYPE');
         }
     }
 }

@@ -5,7 +5,6 @@
  */
 
 use karmabunny\kb\Text;
-use karmabunny\kb\TextMaskTypes;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -184,22 +183,22 @@ final class TextTest extends TestCase
 
     public function testMaskPreset()
     {
-        $actual = Text::maskPreset('Jo Anne', '*', TextMaskTypes::FirstName);
+        $actual = Text::maskPreset('Jo Anne', Text::MASK_TYPE_FIRSTNAME);
         $this->assertEquals('J* ****', $actual);
 
-        $actual = Text::maskPreset('Van Helsing', '*', TextMaskTypes::LastName);
+        $actual = Text::maskPreset('Van Helsing', Text::MASK_TYPE_LASTNAME);
         $this->assertEquals('*** ******g', $actual);
 
-        $actual = Text::maskPreset('Jo Anne Van Helsing', '*', TextMaskTypes::FirstLastName);
+        $actual = Text::maskPreset('Jo Anne Van Helsing', Text::MASK_TYPE_FIRSTLASTNAME);
         $this->assertEquals('J* **** *** ******g', $actual);
 
-        $actual = Text::maskPreset('email@domain.com', '*', TextMaskTypes::Email);
+        $actual = Text::maskPreset('email@domain.com', Text::MASK_TYPE_EMAIL);
         $this->assertEquals('e***l@d********m', $actual);
 
-        $actual = Text::maskPreset('0403123123', '*', TextMaskTypes::Phone);
+        $actual = Text::maskPreset('0403123123', Text::MASK_TYPE_PHONE);
         $this->assertEquals('*******123', $actual);
 
-        $actual = Text::maskPreset('Quick down fox', '*', TextMaskTypes::Spaces);
+        $actual = Text::maskPreset('Quick down fox', Text::MASK_TYPE_SPACES);
         $this->assertEquals('***** **** ***', $actual);
     }
 }
