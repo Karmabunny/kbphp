@@ -146,4 +146,59 @@ final class TextTest extends TestCase
         ];
         $this->assertEquals($expected, $actual);
     }
+
+
+    public function testMask()
+    {
+        $word = 'áδćďê';
+
+        $actual = Text::mask($word);
+        $this->assertEquals('*****', $actual);
+
+        $actual = Text::mask($word, '*', 1, 0);
+        $this->assertEquals('á****', $actual);
+
+        $actual = Text::mask($word, '*', 0, 1);
+        $this->assertEquals('****ê', $actual);
+
+        $actual = Text::mask($word, '*', 1, 1);
+        $this->assertEquals('á***ê', $actual);
+
+        $actual = Text::mask($word, '*', 20, 0);
+        $this->assertEquals('*****', $actual);
+
+        $actual = Text::mask($word, '*', -20, 0);
+        $this->assertEquals('*****', $actual);
+
+        $actual = Text::mask($word, '*', 0, 20);
+        $this->assertEquals('*****', $actual);
+
+        $actual = Text::mask($word, '*', 0, -20);
+        $this->assertEquals('*****', $actual);
+
+        $actual = Text::mask($word, '*', -20, -20);
+        $this->assertEquals('*****', $actual);
+    }
+
+
+    public function testMaskPreset()
+    {
+        $actual = Text::maskPreset('Jo Anne', Text::MASK_TYPE_FIRSTNAME);
+        $this->assertEquals('J* ****', $actual);
+
+        $actual = Text::maskPreset('Van Helsing', Text::MASK_TYPE_LASTNAME);
+        $this->assertEquals('*** ******g', $actual);
+
+        $actual = Text::maskPreset('Jo Anne Van Helsing', Text::MASK_TYPE_FIRSTLASTNAME);
+        $this->assertEquals('J* **** *** ******g', $actual);
+
+        $actual = Text::maskPreset('email@domain.com', Text::MASK_TYPE_EMAIL);
+        $this->assertEquals('e***l@d********m', $actual);
+
+        $actual = Text::maskPreset('0403123123', Text::MASK_TYPE_PHONE);
+        $this->assertEquals('*******123', $actual);
+
+        $actual = Text::maskPreset('Quick down fox', Text::MASK_TYPE_SPACES);
+        $this->assertEquals('***** **** ***', $actual);
+    }
 }

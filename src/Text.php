@@ -6,6 +6,10 @@
 
 namespace karmabunny\kb;
 
+use Exception;
+use karmabunny\kb\Arrays;
+
+
 /**
  *
  * @package karmabunny\kb
@@ -37,6 +41,17 @@ class Text {
      * Perform finds only against the needle length.
      */
     const FIND_STARTS_WITH = 0x1000;
+
+
+    /**
+     * Mask preset types
+     */
+    const MASK_TYPE_FIRSTNAME = 'FIRSTNAME';
+    const MASK_TYPE_LASTNAME = 'LASTNAME';
+    const MASK_TYPE_FIRSTLASTNAME = 'FIRSTLASTNAME';
+    const MASK_TYPE_EMAIL = 'EMAIL';
+    const MASK_TYPE_PHONE = 'PHONE';
+    const MASK_TYPE_SPACES = 'SPACES';
 
 
     /** @var string */
@@ -328,5 +343,131 @@ class Text {
     {
         $flags |= self::FIND_STARTS_WITH;
         return self::find($needle, $haystack, $max, $flags);
+    }
+
+
+    /**
+     * Returns given string masked by given character, multi-byte safe
+     *
+     * @param string $word The string to mask, Eg `Apple`
+     * @param string $mask_char Optional masking character. Default of `*`
+     * @param int $start Optional number of characters to keep from the start of string. Eg `1` = `A****`
+     * @param int $end Optional number of characters to keep from the end of string. Eg `2` = `***le`
+     * @return string Eg `*****`|`A****`|`****e`|`A***e`
+     */
+    public static function mask(string $word, $mask_char = '*', $start = 0, $end = 0)
+    {
+        if (empty($word)) return '';
+        if (empty($mask_char)) $mask_char = '*';
+        $start = (int) $start;
+        $end = (int) $end;
+
+        if ($start < 0) $start = 0;
+        if ($end < 0) $end = 0;
+
+        $repeat = mb_strlen($word) - ($start + $end);
+
+        // Prevent errors from leaking the original word
+        if ($repeat <= 0)
+        {
+            $repeat = mb_strlen($word);
+            $start = 0;
+            $end = 0;
+        }
+
+        $replacement = str_repeat($mask_char, $repeat);
+        $prefix = mb_substr($word, 0, $start, 'UTF-8');
+        $postfix = $end > 0 ? mb_substr($word, mb_strlen($word) - $end, mb_strlen($word), 'UTF-8') : '';
+
+        return "{$prefix}{$replacement}{$postfix}";
+    }
+
+
+    /**
+     * Applies preset mask to given string @see `Text::mask`
+     *
+     * @param string $word
+     * @param string $preset Text::MASK_TYPE_*
+     * @param string|null $mask_char Optional masking character. Default of `*`
+     * @return string
+     * @throws Exception Unknown preset
+     */
+    public static function maskPreset(string $word, string $preset, $mask_char = '*')
+    {
+        switch ($preset)
+        {
+            // Keep first character and spaces. `F**** ****`
+            case self::MASK_TYPE_FIRSTNAME:
+                $parts = explode(' ', $word);
+
+                $func = function($str, $index) use ($mask_char)
+                {
+                    if ($index == 0) return Text::mask($str, $mask_char, 1, 0);
+                    return Text::mask($str, $mask_char);
+                };
+
+                $strings = array_map($func, $parts, array_keys($parts));
+                return implode(' ', $strings);
+
+            // Keep last character and spaces. `**** ***e`
+            case self::MASK_TYPE_LASTNAME:
+                $parts = explode(' ', $word);
+                $last = Arrays::lastKey($parts);
+
+                $func = function($str, $index) use ($mask_char, $last)
+                {
+                    if ($index == $last) return Text::mask($str, $mask_char, 0, 1);
+                    return Text::mask($str, $mask_char);
+                };
+
+                $strings = array_map($func, $parts, array_keys($parts));
+                return implode(' ', $strings);
+
+            // Keep first and last character, and spaces. F*** **** ***e
+            case self::MASK_TYPE_FIRSTLASTNAME:
+                $parts = explode(' ', $word);
+                $last = Arrays::lastKey($parts);
+
+                $func = function($str, $index) use ($mask_char, $last)
+                {
+                    if ($index == 0) return Text::mask($str, $mask_char, 1, 0);
+                    if ($index == $last) return Text::mask($str, $mask_char, 0, 1);
+                    return Text::mask($str, $mask_char);
+                };
+
+                $strings = array_map($func, $parts, array_keys($parts));
+                return implode(' ', $strings);
+
+            // Keep first, last, and @ character of prefix and domain. `e***l@d********m`
+            case self::MASK_TYPE_EMAIL:
+                // Safely handle non email addresses
+                if (strpos($word, '@') === false) return self::mask($word);
+
+                list($address, $domain) = explode('@', $word);
+                return sprintf(
+                    '%s@%s',
+                    Text::mask($address, $mask_char, 1, 1),
+                    Text::mask($domain, $mask_char, 1, 1)
+                );
+
+            // Keep last 3 characters. `*******123`
+            case self::MASK_TYPE_PHONE:
+                return Text::mask($word, $mask_char, 0, 3);
+
+            // Keep only spaces. `**** ** *****`
+            case self::MASK_TYPE_SPACES:
+                $parts = explode(' ', $word);
+
+                $func = function($str) use ($mask_char)
+                {
+                    return Text::mask($str, $mask_char);
+                };
+
+                $strings = array_map($func, $parts);
+                return implode(' ', $strings);
+
+            default:
+                throw new Exception('Unknown MASK_TYPE');
+        }
     }
 }
