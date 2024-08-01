@@ -670,4 +670,30 @@ class Time
 
         return $days;
     }
+
+
+    /**
+     * Get a list of month options for a dropdown as month_num => name
+     *
+     * @param int $length substring length
+     * @param string $format date format AS per DateTime::format
+     * @param int $day day of the month, useful if using a day in the format
+     * @return string[]
+     */
+    public static function monthOptions(int $length = 9, string $format = 'F', int $day = 1)
+    {
+        $options = [];
+
+        for ($i = 1; $i <= 12; $i++) {
+            $num = str_pad((string) $i, 2, '0', STR_PAD_LEFT);
+
+            $name = date($format, mktime(0, 0, 0, $i, $day));
+            $name = substr($name, 0, $length);
+
+            $options[$num] = $name;
+        }
+
+        return $options;
+    }
+
 }
