@@ -696,4 +696,25 @@ class Time
         return $options;
     }
 
+
+    /**
+     * List of years (starting from this year).
+     *
+     * @param int $length number of years to include
+     * @return int[]
+     */
+    public static function years(int $length = 5): array
+    {
+        $years = [];
+
+        $now = new DateTimeImmutable();
+        $year = (int) $now->format('Y');
+
+        for ($i = $year - $length; $i <= $year + $length; $i++) {
+            $years[$i] = $i;
+        }
+
+        return $years;
+    }
+
 }
