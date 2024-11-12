@@ -435,4 +435,39 @@ final class TimeTest extends TestCase {
         $actual = Time::toDateTime($date);
         $this->assertEquals($date->format('Y-m-d H:i:s'), $actual->format('Y-m-d H:i:s'));
     }
+
+
+    public function dataTimestamp()
+    {
+        return [
+            ['2024-11-12 04:18:24.227800'],
+            ['2024-10-10 10:15:00.000000'],
+            ['2024-01-01 00:00:00.000000'],
+        ];
+    }
+
+
+    /** @dataProvider dataTimestamp */
+    public function testTimestampFloats($date)
+    {
+        $expected = DateTimeImmutable::createFromFormat('Y-m-d H:i:s.u', $date);
+        $timestamp = (float) $expected->format('U.u');
+
+        $actual = Time::parseFloat($timestamp);
+        $this->assertEquals($expected, $actual);
+
+        $date = $expected;
+
+        $expected = $timestamp;
+        $actual = Time::toTimeFloat($date);
+        $this->assertEquals($expected, $actual);
+
+        $expected = (int) ($timestamp * 1000000);
+        $actual = Time::toTimeMicroseconds($date);
+        $this->assertEquals($expected, $actual);
+
+        $expected = (int) ($timestamp * 1000);
+        $actual = Time::toTimeMilliseconds($date);
+        $this->assertEquals($expected, $actual);
+    }
 }
