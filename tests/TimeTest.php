@@ -470,4 +470,38 @@ final class TimeTest extends TestCase {
         $actual = Time::toTimeMilliseconds($date);
         $this->assertEquals($expected, $actual);
     }
+
+
+    public function dataTimezoneConvert()
+    {
+        return [
+            ['Australia/Adelaide', '2024-11-01 10:30:00', '2024-11-01 00:00:00'],
+            ['Australia/Melbourne', '2024-11-01 11:00:00', '2024-11-01 00:00:00'],
+            ['Australia/Melbourne', '2024-11-01 12:30:00', '2024-11-01 01:30:00'],
+            ['Australia/Brisbane', '2024-11-01 12:30:00', '2024-11-01 02:30:00'],
+        ];
+    }
+
+
+    /** @dataProvider dataTimezoneConvert */
+    public function testTimezoneConvert($timezone, $local, $utc)
+    {
+        $actual = Time::utcDateToLocal($timezone, $utc);
+        $expected = $local;
+        $this->assertEquals($expected, $actual);
+
+        $actual = Time::utcDateToTime($timezone, $local);
+        $expected = strtotime($utc);
+        $this->assertEquals($expected, $actual);
+
+        $actual = Time::utcDateToLocal($timezone, $utc);
+        $expected = $local;
+        $this->assertEquals($expected, $actual);
+
+        $actual = Time::localDateToUtc($timezone, $local);
+        $expected = $utc;
+        $this->assertEquals($expected, $actual);
+
+
+    }
 }
