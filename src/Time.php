@@ -168,19 +168,9 @@ class Time
      * @param DateTimeZone|null $zone
      * @return DateTimeImmutable
      */
-    public static function parseFloat(float $timestamp, ?DateTimeZone $timezone = null): DateTimeImmutable
+    public static function parseFloat(float $timestamp, ?DateTimeZone $zone = null): DateTimeImmutable
     {
-        $seconds = floor($timestamp);
-
-        $date = new DateTimeImmutable('@' . $seconds, $timezone);
-
-        // No microseconds.
-        if ($seconds == $timestamp) {
-            return $date;
-        }
-
-        $microseconds = floor(($timestamp - $seconds) * 1000000);
-        $date = $date->modify("+{$microseconds} microseconds");
+        $date = DateTimeImmutable::createFromFormat('U.u', sprintf('%.6f', $timestamp), $zone);
 
         // This wont likely happen, if ever.
         if ($date === false) {
