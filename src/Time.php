@@ -331,7 +331,7 @@ class Time
      * @param string $format
      * @return string The date string in the requested format
      */
-    public static function utcTimeToDate(string $timezone, int $timestamp, $format = 'Y-m-d H:i:s')
+    public static function utcTimeToDate(string $timezone, int $timestamp, string $format = 'Y-m-d H:i:s'): string
     {
         $timezone_dt = new DateTimeZone($timezone);
         $date = new DateTime('@'.$timestamp);
@@ -348,7 +348,7 @@ class Time
      * @param string $date
      * @return int The timestamp
      */
-    public static function utcDateToTime(string $timezone, string $date)
+    public static function utcDateToTime(string $timezone, string $date): int
     {
         $timezone_dt = new DateTimeZone($timezone);
         $date = new DateTime($date, $timezone_dt);
@@ -366,7 +366,7 @@ class Time
      *
      * @return string The date string in the requested format
      */
-    public static function utcDateToLocal(string $timezone, string $date, $format = 'Y-m-d H:i:s')
+    public static function utcDateToLocal(string $timezone, string $date, string $format = 'Y-m-d H:i:s'): string
     {
         $timezone_dt = new DateTimeZone('UTC');
         $date = new DateTime($date, $timezone_dt);
@@ -385,7 +385,7 @@ class Time
      *
      * @return string The date string in the requested format
      */
-    public static function localDateToUtc(string $timezone, string $date, $format = 'Y-m-d H:i:s')
+    public static function localDateToUtc(string $timezone, string $date, string $format = 'Y-m-d H:i:s'): string
     {
         $timezone_dt = new DateTimeZone($timezone);
         $date = new DateTime($date, $timezone_dt);
@@ -402,7 +402,7 @@ class Time
      * @param string $format
      * @return string The date string in the requested format
      */
-    public static function localNow(string $timezone, $format = 'Y-m-d H:i:s')
+    public static function localNow(string $timezone, string $format = 'Y-m-d H:i:s'): string
     {
         return self::utcTimeToDate($timezone, time(), $format);
     }
