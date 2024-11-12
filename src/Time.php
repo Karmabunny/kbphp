@@ -121,11 +121,16 @@ class Time
      */
     public static function parse($value, $zone = null): DateTimeInterface
     {
+        // Also parse timezones while we're here.
+        if (is_string($zone)) {
+            $zone = new DateTimeZone($zone);
+        }
+
         // Parse integer/floats as timestamps with microseconds.
         if (is_numeric($value)) {
             $seconds = floor($value);
 
-            $date = new DateTimeImmutable('@' . $seconds);
+            $date = new DateTimeImmutable('@' . $seconds, $zone);
 
             // No microseconds.
             if ($seconds == $value) {
@@ -142,7 +147,7 @@ class Time
 
         // Classic timey-wimey parsing.
         else if (is_string($value)) {
-            $date = new DateTimeImmutable($value);
+            $date = new DateTimeImmutable($value, $zone);
         }
 
         // Pass-through these ones, it's safe.
@@ -161,12 +166,8 @@ class Time
             throw new InvalidArgumentException('Invalid date value: '. gettype($value));
         }
 
-        if ($zone) {
-            // Also parse timezones while we're here.
-            if (is_string($zone)) {
-                $zone = new DateTimeZone($zone);
-            }
-
+        // TODO This seems wrong for pass-through objects.
+        if ($zone !== null) {
             $date = $date->setTimezone($zone);
         }
 
