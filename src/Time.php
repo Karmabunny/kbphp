@@ -128,21 +128,7 @@ class Time
 
         // Parse integer/floats as timestamps with microseconds.
         if (is_numeric($value)) {
-            $seconds = floor($value);
-
-            $date = new DateTimeImmutable('@' . $seconds, $zone);
-
-            // No microseconds.
-            if ($seconds == $value) {
-                return $date;
-            }
-
-            $microseconds = floor(($value - $seconds) * 1000000);
-            $date = $date->modify("+{$microseconds} microseconds");
-
-            if ($date === false) {
-                throw new InvalidArgumentException('Invalid date value: '. $value);
-            }
+            $date = self::parseFloat($value, $zone);
         }
 
         // Classic timey-wimey parsing.
@@ -169,6 +155,36 @@ class Time
         // TODO This seems wrong for pass-through objects.
         if ($zone !== null) {
             $date = $date->setTimezone($zone);
+        }
+
+        return $date;
+    }
+
+
+    /**
+     * Convert a timestamp (with microseconds) into a date object.
+     *
+     * @param float $timestamp
+     * @param DateTimeZone|null $zone
+     * @return DateTimeImmutable
+     */
+    public static function parseFloat(float $timestamp, ?DateTimeZone $timezone = null): DateTimeImmutable
+    {
+        $seconds = floor($timestamp);
+
+        $date = new DateTimeImmutable('@' . $seconds, $timezone);
+
+        // No microseconds.
+        if ($seconds == $timestamp) {
+            return $date;
+        }
+
+        $microseconds = floor(($timestamp - $seconds) * 1000000);
+        $date = $date->modify("+{$microseconds} microseconds");
+
+        // This wont likely happen, if ever.
+        if ($date === false) {
+            return 0;
         }
 
         return $date;
@@ -324,19 +340,59 @@ class Time
 
 
     /**
+     * Get a unix timestamp in milliseconds.
+     *
+     * @param DateTimeInterface $date
+     * @return int
+     */
+    public static function toTimeMilliseconds(DateTimeInterface $date): int
+    {
+        return (int) $date->format('Uv');
+    }
+
+
+    /**
+     * Get a unix timestamp in microseconds.
+     *
+     * @param DateTimeInterface $date
+     * @return int
+     */
+    public static function toTimeMicroseconds(DateTimeInterface $date): int
+    {
+        return (int) $date->format('Uu');
+    }
+
+
+    /**
+     * Get a unix timestamp as a float that includes microseconds.
+     *
+     * This is more compatible with standard integer based timestamps than
+     * using the millisecond/microsecond helpers.
+     *
+     * @param DateTimeInterface $date
+     * @return float
+     */
+    public static function toTimeFloat(DateTimeInterface $date): float
+    {
+        $timestamp = (int) $date->format('Uu');
+        $timestamp /= 1000000;
+        return $timestamp;
+    }
+
+
+    /**
      * Convert a timestamp to a date string in the given timezone
      *
      * @param string $timezone
-     * @param int $timestamp
+     * @param int|float $timestamp
      * @param string $format
      * @return string The date string in the requested format
+     * @throws InvalidArgumentException
      */
-    public static function utcTimeToDate(string $timezone, int $timestamp, string $format = 'Y-m-d H:i:s'): string
+    public static function utcTimeToDate(string $timezone, $timestamp, string $format = 'Y-m-d H:i:s'): string
     {
         $timezone_dt = new DateTimeZone($timezone);
-        $date = new DateTime('@'.$timestamp);
-        $date->setTimezone($timezone_dt);
-
+        $date = self::parseFloat($timestamp, $timezone_dt);
         return $date->format($format);
     }
 
@@ -354,6 +410,22 @@ class Time
         $date = new DateTime($date, $timezone_dt);
 
         return $date->getTimestamp();
+    }
+
+
+    /**
+     * Convert a date string to a timestamp in the given timezone
+     *
+     * @param string $timezone
+     * @param string $date
+     * @return float The timestamp with microseconds
+     */
+    public static function utcDateToTimeFloat(string $timezone, string $date): float
+    {
+        $timezone_dt = new DateTimeZone($timezone);
+        $date = new DateTime($date, $timezone_dt);
+
+        return self::toTimeFloat($date);
     }
 
 
