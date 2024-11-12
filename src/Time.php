@@ -174,7 +174,7 @@ class Time
 
         // This wont likely happen, if ever.
         if ($date === false) {
-            return 0;
+            throw new InvalidArgumentException('Invalid timestamp: ' . $timestamp);
         }
 
         return $date;
