@@ -7,14 +7,10 @@
 namespace karmabunny\kb;
 
 /**
- * This modifies the behaviour of a DataObject/Collection so that only
- * properties defined in the class are updated.
+ * This is functional the same as {@see UpdateTrait} only it uses the
+ * `getProperties()` helper to determine which fields belong to the class.
  *
- * The default implementation will create _new_ fields that aren't typed. This
- * trait will only update fields that are explicitly defined. Unknown fields
- * are silently ignored.
- *
- * For a more aggressive approach {@see UpdateStrictTrait}.
+ * To raise errors on unknown fields {@see UpdateStrictTrait}.
  *
  * @package karmabunny\kb
  */

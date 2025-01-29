@@ -9,6 +9,11 @@ namespace karmabunny\kb;
 /**
  * This implements basic `update()` behaviour for an object.
  *
+ * Only fields that are defined as properties will be set. Unknown fields
+ * are silently ignored.
+ *
+ * To raise errors on unknown fields {@see UpdateStrictTrait}.
+ *
  * @package karmabunny\kb
  */
 trait UpdateTrait
@@ -21,6 +26,7 @@ trait UpdateTrait
     public function update($config)
     {
         foreach ($config as $key => $item) {
+            if (!property_exists($this, $key)) continue;
             $this->$key = $item;
         }
 
