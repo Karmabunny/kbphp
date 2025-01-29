@@ -162,6 +162,35 @@ final class RulesValidatorTest extends TestCase {
 
 
     /**
+     * Testing multi-check behaviour.
+     */
+    public function testMultiCheck()
+    {
+        $thing = new FieldThing([
+            'id' => 100,
+            'ten_twenty' => 20,
+            'twenty_thirty' => 20,
+            'address' => 'a@b.com',
+        ]);
+
+        try {
+            $thing->validate(FieldThing::SCENARIO_MULTI);
+            $this->fail('Expected ValidationException.');
+        }
+        catch (ValidationException $exception) {
+            $this->assertTrue(empty($exception->errors['required']));
+
+            $this->assertEquals(1, count($exception->errors['ten_twenty']));
+            $this->assertEquals(1, count($exception->errors['twenty_thirty']));
+        }
+
+        // Valid case.
+        $thing->twenty_thirty = 21;
+        $thing->validate();
+    }
+
+
+    /**
      * Testing modifying values.
      */
     // public function testFilterRules()
@@ -178,6 +207,7 @@ class FieldThing extends Collection implements Validates
     const SCENARIO_UPDATE = 'update';
     const SCENARIO_ALL_REQUIRED = 'submit';
     const SCENARIO_CUSTOM = 'custom';
+    const SCENARIO_MULTI = 'multi';
 
     /** @var int*/
     public $id;
@@ -227,6 +257,9 @@ class FieldThing extends Collection implements Validates
                 ['ten_twenty', 'args' => [10, 20]],
                 ['twenty_thirty', 'args' => [20, 30]],
             ];
+        }
+        else if ($scenario === self::SCENARIO_MULTI) {
+            $rules['allUnique'] = ['ten_twenty', 'twenty_thirty', 'multi' => true];
         }
 
         return $rules;

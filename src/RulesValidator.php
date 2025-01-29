@@ -262,38 +262,62 @@ class RulesValidator implements Validator
                 throw new Exception("Unknown rule: {$rule}");
             }
 
-            // Big old-loopy-do.
-            foreach ($ruleset as $key => $fieldset) {
-                if (!is_numeric($key)) continue;
-                if (empty($fieldset)) continue;
+            $multi = $ruleset['multi'] ?? false;
 
-                $field = $fieldset;
+            if ($multi) {
+                $fields = [];
+                $vals = [];
+
+                foreach ($ruleset as $key => $field_name) {
+                    if (!is_numeric($key)) continue;
+                    $fields[] = $field_name;
+                    $vals[] = $this->data[$field_name] ?? null;
+                }
+
                 $args = $ruleset['args'] ?? [];
 
-                // Field with args.
-                if (is_array($fieldset)) {
-                    $field = $fieldset[0];
-
-                    if (is_array(@$fieldset['args'])) {
-                        $args = $fieldset['args'];
-                    }
-                }
-
-                $value = $this->data[$field] ?? null;
-
-                // Empty field are valid - these are checked by required.
-                if ($value === null) continue;
-                if (self::isEmpty($value)) continue;
-
                 try {
-                    // We're also re-writing the value if not-null.
-                    // This lets built-ins like 'trim' do their thing.
-                    if ($value = $func($value, ...$args)) {
-                        $this->data[$field] = $value;
-                    }
+                    $func($vals, ...$args);
+                    return true;
+
+                } catch (ValidationException $ex) {
+                    $this->addMultipleFieldError($fields, $ex->getMessage());
                 }
-                catch (ValidationException $ex) {
-                    $this->addFieldError($field, $ex->getMessage());
+            }
+            else {
+                // Big old-loopy-do.
+                foreach ($ruleset as $key => $fieldset) {
+                    if (!is_numeric($key)) continue;
+                    if (empty($fieldset)) continue;
+
+                    $field = $fieldset;
+                    $args = $ruleset['args'] ?? [];
+
+                    // Field with args.
+                    if (is_array($fieldset)) {
+                        $field = $fieldset[0];
+
+                        if (is_array(@$fieldset['args'])) {
+                            $args = $fieldset['args'];
+                        }
+                    }
+
+                    $value = $this->data[$field] ?? null;
+
+                    // Empty field are valid - these are checked by required.
+                    if ($value === null) continue;
+                    if (self::isEmpty($value)) continue;
+
+                    try {
+                        // We're also re-writing the value if not-null.
+                        // This lets built-ins like 'trim' do their thing.
+                        if ($value = $func($value, ...$args)) {
+                            $this->data[$field] = $value;
+                        }
+                    }
+                    catch (ValidationException $ex) {
+                        $this->addFieldError($field, $ex->getMessage());
+                    }
                 }
             }
         }
