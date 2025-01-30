@@ -192,7 +192,7 @@ final class CollectionTest extends TestCase {
         ]);
 
         $this->assertEquals('good', $thingo->name);
-        $this->assertEquals('bad', $thingo->bad_thing);
+        $this->assertArrayNotHasKey('bad_thing', $thingo->toArray());
 
         // Tidy mode - no unknown properties, but you, quietly.
         $other = new ThingoTidy([
