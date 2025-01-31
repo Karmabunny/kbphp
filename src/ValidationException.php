@@ -47,7 +47,7 @@ class ValidationException extends Exception
     {
         foreach ($errors as $name => $messages) {
             if (isset($this->errors[$name])) {
-                array_push($this->errors[$name], ...$messages);
+                $this->errors[$name] = array_merge($this->errors[$name], $messages);
             }
             else {
                 $this->errors[$name] = $messages;
