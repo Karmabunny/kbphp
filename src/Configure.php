@@ -140,9 +140,10 @@ class Configure
     /**
      * Construct a new instance of this class.
      *
-     * @param class-string $class
+     * @template T
+     * @param class-string<T> $class
      * @param class-string|class-string[] $assert
-     * @return object
+     * @return T
      * @throws InvalidArgumentException
      */
     public static function instance(string $class, $assert = null)
@@ -214,9 +215,10 @@ class Configure
     /**
      * Instance a single object.
      *
-     * @param class-string $class
+     * @template T
+     * @param class-string<T> $class
      * @param array $config
-     * @return object
+     * @return T
      */
     public static function create(string $class, array $config)
     {
@@ -229,9 +231,10 @@ class Configure
     /**
      * Create lots of objects with these configs.
      *
-     * @param class-string $class
+     * @template T
+     * @param class-string<T> $class
      * @param array[] $items
-     * @return object[]
+     * @return T[]
      */
     public static function createAll(string $class, array $items)
     {
