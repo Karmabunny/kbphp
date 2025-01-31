@@ -13,7 +13,8 @@ use InvalidArgumentException;
  * Validation class.
  *
  * All methods should give useful errors by throwing a {@see ValidationException}.
- * Used with the {@see RulesValidator} class.
+ *
+ * Used with the {@see RulesStaticValidator} class.
  *
  * @package karmabunny\kb
  */
