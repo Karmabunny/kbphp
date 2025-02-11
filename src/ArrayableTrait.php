@@ -111,9 +111,10 @@ trait ArrayableTrait
      *
      * @param string[]|null $filter
      * @param string[]|null $extra
+     * @param bool $nulls - include null fields in the output
      * @return array
      */
-    public function toArray(array $filter = null, array $extra = null): array
+    public function toArray(array $filter = null, array $extra = null, bool $nulls = false): array
     {
         if ($this instanceof ArrayableFields) {
             $fields = $this->fields();
@@ -168,8 +169,8 @@ trait ArrayableTrait
             if ($item === true) {
                 $item = $this->$key ?? null;
 
-                // Keep skipping null fields for compatibility.
-                if ($item === null) {
+                // 'No nulls' by default for compatibility.
+                if ($item === null and !$nulls) {
                     continue;
                 }
             }
@@ -193,8 +194,16 @@ trait ArrayableTrait
                 continue;
             }
 
-            // Recurse into nested arrayables.
+            // Recurse + pass through null flags.
             if (
+                $this instanceof ArrayableFields
+                and $item instanceof ArrayableFields
+            ) {
+                $item = $item->toArray(null, null, $nulls);
+            }
+
+            // Recurse into nested arrays or arrayables.
+            else if (
                 is_array($item)
                 or $item instanceof Arrayable
                 or $item instanceof Traversable
