@@ -11,7 +11,8 @@ use Exception;
 /**
  * Use validator functions to validate properties.
  *
- * @see RulesValidator
+ * @see RulesStaticValidator
+ * @see RulesClassValidator
  * @see Validity
  *
  * @package karmabunny\kb
@@ -81,6 +82,16 @@ trait RulesValidatorTrait
 
 
     /**
+     *
+     * @return RulesValidatorInterface
+     */
+    public function getValidator(): RulesValidatorInterface
+    {
+        return new RulesStaticValidator($this);
+    }
+
+
+    /**
      * Validate this scenario (or default).
      *
      * This will throw if invalid or pass silently if valid.
@@ -107,8 +118,10 @@ trait RulesValidatorTrait
      */
     public function valid(string $scenario = null)
     {
+        $valid = $this->getValidator();
+
         $rules = $this->rules($scenario);
-        $valid = new RulesValidator($this, $rules);
+        $valid->setRules($rules);
 
         if (!$valid->validate()) {
             return $valid->getErrors();

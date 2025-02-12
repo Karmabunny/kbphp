@@ -5,6 +5,8 @@
  */
 
 use karmabunny\kb\Collection;
+use karmabunny\kb\RulesClassValidator;
+use karmabunny\kb\RulesValidatorInterface;
 use karmabunny\kb\RulesValidatorTrait;
 use karmabunny\kb\Validates;
 use karmabunny\kb\ValidationException;
@@ -21,12 +23,26 @@ use PHPUnit\Framework\TestCase;
  *   - is float
  *   - multi-validations - ..how? Reflect on first parameter?
  */
-final class RulesValidatorTest extends TestCase {
+final class RulesValidatorTest extends TestCase
+{
 
-    public function testDefaultScenario()
+    public function dataFields()
+    {
+        return [
+            'old' => [ OldFieldThing::class ],
+            'new' => [ NewFieldThing::class ],
+        ];
+    }
+
+
+    /**
+     * @param class-string<BaseFieldThing> $class
+     * @dataProvider dataFields
+     */
+    public function testDefaultScenario($class)
     {
         // Default required only needs 'id'.
-        $thing = new FieldThing([]);
+        $thing = new $class([]);
 
         try {
             $thing->validate();
@@ -44,9 +60,13 @@ final class RulesValidatorTest extends TestCase {
     }
 
 
-    public function testFieldFailures()
+    /**
+     * @param class-string<BaseFieldThing> $class
+     * @dataProvider dataFields
+     */
+    public function testFieldFailures($class)
     {
-        $thing = new FieldThing([
+        $thing = new $class([
             // positive int
             'id' => -1,
 
@@ -87,10 +107,13 @@ final class RulesValidatorTest extends TestCase {
 
     /**
      * Testing the 'required' scenario.
+     *
+     * @param class-string<BaseFieldThing> $class
+     * @dataProvider dataFields
      */
-    public function testAllRequired()
+    public function testAllRequired($class)
     {
-        $thing = new FieldThing([
+        $thing = new $class([
             'id' => 123,
             // Missing fields
             // - amount
@@ -99,7 +122,7 @@ final class RulesValidatorTest extends TestCase {
         ]);
 
         try {
-            $thing->validate(FieldThing::SCENARIO_ALL_REQUIRED);
+            $thing->validate(BaseFieldThing::SCENARIO_ALL_REQUIRED);
 
             $this->fail('Expected ValidationException.');
         }
@@ -123,10 +146,13 @@ final class RulesValidatorTest extends TestCase {
 
     /**
      * Testing inline validators in the 'custom' scenario.
+     *
+     * @param class-string<BaseFieldThing> $class
+     * @dataProvider dataFields
      */
-    public function testCustomInline()
+    public function testCustomInline($class)
     {
-        $thing = new FieldThing([
+        $thing = new $class([
             'id' => 100,
 
             // even, positive, 10-20
@@ -140,7 +166,7 @@ final class RulesValidatorTest extends TestCase {
         ]);
 
         try {
-            $thing->validate(FieldThing::SCENARIO_CUSTOM);
+            $thing->validate(BaseFieldThing::SCENARIO_CUSTOM);
 
             $this->fail('Expected ValidationException.');
         }
@@ -148,7 +174,7 @@ final class RulesValidatorTest extends TestCase {
             $this->assertTrue(empty($exception->errors['required']));
 
             // MORE errors. yay.
-            $this->assertEquals(3, count($exception->errors['ten_twenty']));
+            $this->assertEquals(3, count($exception->errors['ten_twenty']), print_r($exception->errors, true));
             $this->assertEquals(1, count($exception->errors['address']));
             $this->assertEquals(1, count($exception->errors['twenty_thirty']));
         }
@@ -163,10 +189,13 @@ final class RulesValidatorTest extends TestCase {
 
     /**
      * Testing multi-check behaviour.
+     *
+     * @param class-string<BaseFieldThing> $class
+     * @dataProvider dataFields
      */
-    public function testMultiCheck()
+    public function testMultiCheck($class)
     {
-        $thing = new FieldThing([
+        $thing = new $class([
             'id' => 100,
             'ten_twenty' => 20,
             'twenty_thirty' => 20,
@@ -174,7 +203,7 @@ final class RulesValidatorTest extends TestCase {
         ]);
 
         try {
-            $thing->validate(FieldThing::SCENARIO_MULTI);
+            $thing->validate(BaseFieldThing::SCENARIO_MULTI);
             $this->fail('Expected ValidationException.');
         }
         catch (ValidationException $exception) {
@@ -200,7 +229,7 @@ final class RulesValidatorTest extends TestCase {
 }
 
 
-class FieldThing extends Collection implements Validates
+abstract class BaseFieldThing extends Collection implements Validates
 {
     use RulesValidatorTrait;
 
@@ -228,6 +257,19 @@ class FieldThing extends Collection implements Validates
     public $address;
 
 
+    public static function matchDomain($value)
+    {
+        if (!preg_match('/@karmabunny\.com\.au$/', $value)) {
+            throw new ValidationException('Domain must be karmabunny.com.au.');
+        }
+    }
+}
+
+
+class OldFieldThing extends BaseFieldThing
+{
+
+    /** @inheritdoc */
     public function rules(string $scenario = null): array
     {
         $rules = [
@@ -249,7 +291,6 @@ class FieldThing extends Collection implements Validates
                 if ($value % 2) throw new ValidationException('Not even.');
             }];
 
-            // Non-keyed rules are a thing, but not recommended.
             $rules[] = ['address', 'func' => [self::class, 'matchDomain']];
 
             // Per-field args.
@@ -264,12 +305,53 @@ class FieldThing extends Collection implements Validates
 
         return $rules;
     }
+}
 
 
-    public static function matchDomain($value)
+class NewFieldThing extends BaseFieldThing
+{
+
+    /** @inheritdoc */
+    public function getValidator(): RulesValidatorInterface
     {
-        if (!preg_match('/@karmabunny\.com\.au$/', $value)) {
-            throw new ValidationException('Domain must be karmabunny.com.au.');
-        }
+        return new RulesClassValidator($this);
     }
+
+
+    /** @inheritdoc */
+    public function rules(string $scenario = null): array
+    {
+        $rules = [
+            'required' => ['id'],
+            ['positiveInt' => ['id', 'ten_twenty']],
+            ['numeric' => ['amount']],
+            ['range' => ['ten_twenty', 'between' => [10, 20]]],
+            ['email' => ['address']],
+        ];
+
+        // Different scenario.
+        if ($scenario === self::SCENARIO_ALL_REQUIRED) {
+            $rules['required'] = ['id', 'amount', 'default', 'ten_twenty', 'address'];
+        }
+
+        // Inline rules!
+        else if ($scenario === self::SCENARIO_CUSTOM) {
+            // Keys are ignored.
+            $rules['even'] = ['ten_twenty', 'func' => function($value) {
+                if ($value % 2) throw new ValidationException('Not even.');
+            }];
+
+            // Non-keyed rules.
+            $rules[] = ['address', 'func' => [self::class, 'matchDomain']];
+
+            // Per-field args.
+            $rules[]['range'] = [ 'twenty_thirty', 'between' => [20, 30]];
+        }
+        else if ($scenario === self::SCENARIO_MULTI) {
+            $rules[]['allUnique'] = ['ten_twenty', 'twenty_thirty'];
+        }
+
+        return $rules;
+    }
+
 }
