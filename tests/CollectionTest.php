@@ -83,6 +83,7 @@ final class CollectionTest extends TestCase {
         $this->assertEquals(1, $array['id']);
         $this->assertEquals(123, $array['parent_id']);
         $this->assertEquals('blah blah blah', $array['description']);
+        $this->assertArrayNotHasKey('empty', $array);
         $this->assertArrayNotHasKey('key', $array);
 
         $this->assertEquals($thingo->getVirtualThing(), $array['thing']);
@@ -105,6 +106,23 @@ final class CollectionTest extends TestCase {
 
         $expected = ['a', 'b', 'c'];
         $this->assertEquals($expected, $array['more_things']);
+    }
+
+
+    public function testArrayableFieldsNulls() {
+        $thingo = new ThingoFields([
+            'parent_id' => 123,
+            'description' => 'blah blah blah',
+            'empty' => null,
+        ]);
+
+        $array = $thingo->toArray(null, null, true);
+
+        $this->assertEquals(1, $array['id']);
+        $this->assertEquals(123, $array['parent_id']);
+        $this->assertEquals('blah blah blah', $array['description']);
+        $this->assertEquals(null, $array['empty']);
+        $this->assertArrayNotHasKey('key', $array);
     }
 
 
