@@ -521,6 +521,53 @@ class Arrays
 
 
     /**
+     * An `array_map` that accepts iterables.
+     *
+     * @param iterable $array
+     * @return array
+     */
+    public static function zip(...$arrays): array
+    {
+        $output = [];
+
+        $max = null;
+        $revisit = false;
+
+        foreach ($arrays as $index => $array) {
+            $key = 0;
+
+            foreach ($array as $value) {
+                $output[$key++][$index] = $value;
+            }
+
+            if ($max !== null) {
+                $revisit = $revisit ?: $key > $max;
+
+                for (; $key < $max; $key++) {
+                    $output[$key][$index] = null;
+                }
+            }
+
+            $max = max($key, $max);
+        }
+
+        if ($revisit) {
+            $count = count($arrays);
+
+            foreach ($output as $key => $array) {
+                for ($index = 0; $index < $count; $index++) {
+                    if (!isset($array[$index])) {
+                        $output[$key][$index] = null;
+                    }
+                }
+            }
+        }
+
+        return $output;
+    }
+
+
+    /**
      * Like `array_map` but includes a 'key' argument.
      *
      * Key modification can be done with a reference `&$key` argument.

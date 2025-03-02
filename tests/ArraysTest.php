@@ -359,6 +359,50 @@ final class ArraysTest extends TestCase {
     }
 
 
+    public function testZip()
+    {
+        $arrays = [
+            [1,2],
+            [4,5,6],
+            [7,8,9],
+        ];
+
+        $expected = [
+            [1,4,7],
+            [2,5,8],
+            [null,6,9],
+        ];
+
+        // Builtin behaviour.
+        $actual = array_map(null, ...$arrays);
+        $this->assertEquals($expected, $actual);
+
+        // We match that.
+        $actual = Arrays::zip(...$arrays);
+        $this->assertEquals($expected, $actual);
+
+        $iterables = [
+            (function() {
+                yield 1;
+                yield 2;
+            })(),
+            (function() {
+                yield 4;
+                yield 5;
+                yield 6;
+            })(),
+            (function() {
+                yield 7;
+                yield 8;
+                yield 9;
+            })(),
+        ];
+
+        $actual = Arrays::zip(...$iterables);
+        $this->assertEquals($expected, $actual);
+    }
+
+
     public function testMapKeys()
     {
         $array = [
