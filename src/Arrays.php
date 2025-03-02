@@ -568,6 +568,26 @@ class Arrays
 
 
     /**
+     * A basic `array_map` that accepts iterables.
+     *
+     * @param iterable $array
+     * @param callable $fn (item) => item
+     * @return array
+     */
+    public static function map($array, $fn): array
+    {
+        $items = [];
+
+        foreach ($array as $item) {
+            $item = $fn($item);
+            $items[] = $item;
+        }
+
+        return $items;
+    }
+
+
+    /**
      * Like `array_map` but includes a 'key' argument.
      *
      * Key modification can be done with a reference `&$key` argument.
