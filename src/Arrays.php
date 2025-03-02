@@ -586,11 +586,11 @@ class Arrays
      * Filter callbacks used with this method can be re-used (without key
      * modification) for `array_map` or `mapRecursive`.
      *
-     * @param array $array
+     * @param iterable $array
      * @param callable $fn (item, key) => item
      * @return array
      */
-    public static function mapWithKeys(array $array, $fn): array
+    public static function mapWithKeys($array, $fn): array
     {
         $items = [];
 
@@ -613,11 +613,11 @@ class Arrays
      * ```
      *
      * @deprecated use mapWithKeys() - what a mess.
-     * @param array $array
+     * @param iterable $array
      * @param callable $fn (item, key) => [key, item]
      * @return array
      */
-    public static function mapKeys(array $array, $fn): array
+    public static function mapKeys($array, $fn): array
     {
         $items = [];
 
