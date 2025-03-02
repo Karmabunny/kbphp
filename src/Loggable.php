@@ -22,5 +22,5 @@ interface Loggable {
      * @param int $level default: LEVEL_INFO
      * @return void
      */
-    public function log($message, int $level = null, string $_category = null, int $_timestamp = null);
+    public function log($message, ?int $level = null, ?string $_category = null, ?int $_timestamp = null);
 }

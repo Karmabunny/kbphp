@@ -75,7 +75,7 @@ interface ArrayableFields extends Arrayable
      * @param string[]|null $extra
      * @return array
      */
-    public function toArray(array $filter = null, array $extra = null): array;
+    public function toArray(?array $filter = null, ?array $extra = null): array;
 
 
     /**

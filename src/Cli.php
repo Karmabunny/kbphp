@@ -177,7 +177,7 @@ class Cli
      * @param string|null $prompt
      * @return string
      */
-    public static function input(string $prompt = null): string
+    public static function input(?string $prompt = null): string
     {
         if (self::hasReadline()) {
             return readline($prompt ? $prompt . ': ' : null);
@@ -282,7 +282,7 @@ class Cli
      * @param string|null $prompt
      * @return string
      */
-    public static function masked(string $prompt = null): string
+    public static function masked(?string $prompt = null): string
     {
         self::registerExits();
 
@@ -342,7 +342,7 @@ class Cli
      * @param string|null $prompt
      * @return string
      */
-    public static function invisible(string $prompt = null): string
+    public static function invisible(?string $prompt = null): string
     {
         self::registerExits();
 

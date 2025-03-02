@@ -22,9 +22,10 @@ trait ValidErrorsTrait
     /**
      * Perform validation.
      *
+     * @param string|null $scenario
      * @throws ValidationException
      */
-    public abstract function validate(string $scenario = null);
+    public abstract function validate(?string $scenario = null);
 
 
     /**
@@ -33,7 +34,7 @@ trait ValidErrorsTrait
      * @param string|null $scenario
      * @return bool true if valid, false otherwise.
      */
-    public function valid(string $scenario = null): bool
+    public function valid(?string $scenario = null): bool
     {
         try {
             $this->validate($scenario);

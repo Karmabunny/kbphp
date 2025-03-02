@@ -101,7 +101,7 @@ trait RulesValidatorTrait
      * @throws Exception
      * @throws ValidationException
      */
-    public function validate(string $scenario = null) {
+    public function validate(?string $scenario = null) {
         $errors = $this->valid($scenario);
         if ($errors !== true) {
             throw (new ValidationException)->addErrors($errors);
@@ -116,7 +116,7 @@ trait RulesValidatorTrait
      * @return array|true True if valid, errors array if invalid.
      * @throws Exception
      */
-    public function valid(string $scenario = null)
+    public function valid(?string $scenario = null)
     {
         $valid = $this->getValidator();
 

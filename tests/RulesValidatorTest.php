@@ -270,7 +270,7 @@ class OldFieldThing extends BaseFieldThing
 {
 
     /** @inheritdoc */
-    public function rules(string $scenario = null): array
+    public function rules(?string $scenario = null): array
     {
         $rules = [
             'required' => ['id'],
@@ -319,7 +319,7 @@ class NewFieldThing extends BaseFieldThing
 
 
     /** @inheritdoc */
-    public function rules(string $scenario = null): array
+    public function rules(?string $scenario = null): array
     {
         $rules = [
             'required' => ['id'],

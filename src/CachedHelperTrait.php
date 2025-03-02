@@ -44,7 +44,7 @@ trait CachedHelperTrait
      * @param string|null $key
      * @return void
      */
-    protected function clearCache(string $key = null)
+    protected function clearCache(?string $key = null)
     {
         if ($key) {
             unset($this->_cache[$key]);

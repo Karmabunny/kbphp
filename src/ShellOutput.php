@@ -156,7 +156,7 @@ class ShellOutput
      * @param int|null $chunk_size bytes to read at a time
      * @return Generator<string>
      */
-    public function read($stream = self::STREAM_ALL, int $chunk_size = null): Generator
+    public function read($stream = self::STREAM_ALL, ?int $chunk_size = null): Generator
     {
         $target_out = (
             ($stream & self::STREAM_STDOUT) and
@@ -247,7 +247,7 @@ class ShellOutput
      * @return string|false
      * @throws ShellException
      */
-    public function readRaw($stream = self::STREAM_STDOUT, int $chunk_size = null)
+    public function readRaw($stream = self::STREAM_STDOUT, ?int $chunk_size = null)
     {
         $target = $this->getTarget($stream);
         if ($target !== 'pipe') {

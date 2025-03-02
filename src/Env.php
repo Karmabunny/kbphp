@@ -191,7 +191,7 @@ class Env
      * @param array|null $keys
      * @return string[] [name => value]
      */
-    public static function getConfig(array $keys = null): array
+    public static function getConfig(?array $keys = null): array
     {
         $config = self::load();
         if ($keys === null) return $config;

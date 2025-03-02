@@ -620,7 +620,7 @@ class Time
      * @param string|null $gap A date modifier, a gap between each period
      * @return Generator<int,DateTimeInterface[]> [start, end]
      */
-    public static function periods(DateTimeInterface $start, DateTimeInterface $end, string $period, string $gap = null)
+    public static function periods(DateTimeInterface $start, DateTimeInterface $end, string $period, ?string $gap = null)
     {
         $start = self::toDateTimeImmutable($start);
         $end = self::toDateTimeImmutable($end);

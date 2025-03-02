@@ -49,7 +49,7 @@ class Reflect
      * @params string $filter A full namespaced class name
      * @return Generator<string>
      */
-    public static function loadAllClasses(array $paths, string $filter = null): Generator
+    public static function loadAllClasses(array $paths, ?string $filter = null): Generator
     {
         // Load all the files in each directory.
         foreach ($paths as $dir) {
@@ -73,7 +73,7 @@ class Reflect
      * @param string $filter A full namespaced class name
      * @return Generator<string>
      */
-    public static function loadClasses(string $path, string $filter = null): Generator
+    public static function loadClasses(string $path, ?string $filter = null): Generator
     {
         foreach (glob($path . '/*.php') as $file) {
             // Load it.
@@ -194,7 +194,7 @@ class Reflect
      * @param string|null $filter regex filter
      * @return array
      */
-    public static function getMethods(string $class, string $filter = null): array
+    public static function getMethods(string $class, ?string $filter = null): array
     {
         $names = get_class_methods($class);
         $methods = [];
@@ -225,7 +225,7 @@ class Reflect
      * @param ReflectionFunctionAbstract|string[]|string $function
      * @return array
      */
-    public static function getParameters($function, array $fallbacks = null): array
+    public static function getParameters($function, ?array $fallbacks = null): array
     {
         if (is_array($function)) {
             list($class, $method) = $function;
@@ -265,7 +265,7 @@ class Reflect
      * @param string|null $fallback
      * @return string
      */
-    public static function getTypeName($type, string $fallback = null): string
+    public static function getTypeName($type, ?string $fallback = null): string
     {
         if ($type instanceof ReflectionNamedType) {
             $type = $type->getName();
@@ -289,7 +289,7 @@ class Reflect
      * @param string[] $fallbacks [name => class_name]
      * @return string
      */
-    public static function getMethodDefinition(ReflectionMethod $method, array $fallbacks = null): string
+    public static function getMethodDefinition(ReflectionMethod $method, ?array $fallbacks = null): string
     {
         $modifiers = Reflection::getModifierNames($method->getModifiers());
 
@@ -322,7 +322,7 @@ class Reflect
      * @param string|null $fallback
      * @return string
      */
-    public static function getParameterDefinition(ReflectionParameter $parameter, string $fallback = null): string
+    public static function getParameterDefinition(ReflectionParameter $parameter, ?string $fallback = null): string
     {
         $value = '';
 

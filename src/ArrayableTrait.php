@@ -114,7 +114,7 @@ trait ArrayableTrait
      * @param bool $nulls - include null fields in the output
      * @return array
      */
-    public function toArray(array $filter = null, array $extra = null, bool $nulls = false): array
+    public function toArray(?array $filter = null, ?array $extra = null, bool $nulls = false): array
     {
         if ($this instanceof ArrayableFields) {
             $fields = $this->fields();

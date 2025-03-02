@@ -170,7 +170,7 @@ class Events
      * @param class-string<EventInterface>|null $event
      * @return void
      */
-    public static function off(?string $sender, string $event = null)
+    public static function off(?string $sender, ?string $event = null)
     {
         if ($sender === null) {
             if ($event) {

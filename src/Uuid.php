@@ -232,7 +232,7 @@ class Uuid
      * @param bool $nil empty/NIL values are valid
      * @return bool
      */
-    public static function valid(string $uuid, int $version = null, $variant = 1, bool $nil = true): bool
+    public static function valid(string $uuid, ?int $version = null, $variant = 1, bool $nil = true): bool
     {
         // Strip dashes, validate length.
         $uuid = self::strip($uuid);

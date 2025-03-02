@@ -441,7 +441,7 @@ class Arrays
      * @param int|null $mode LEAVES_ONLY (default), SELF_FIRST, CHILD_FIRST, DISCARD_EMPTY_ARRAYS
      * @return T[]
      */
-    public static function filterRecursive(array $array, callable $callback = null, int $mode = null): array
+    public static function filterRecursive(array $array, ?callable $callback = null, ?int $mode = null): array
     {
         if ($mode === null) {
             $mode = self::LEAVES_ONLY;
@@ -1047,7 +1047,7 @@ class Arrays
      * @param string|null $select Include a 'choose' option
      * @return array
      */
-    public static function createMap($items, string $key, string $name, string $select = null)
+    public static function createMap($items, string $key, string $name, ?string $select = null)
     {
         $map = [];
 
@@ -1184,7 +1184,7 @@ class Arrays
      * @param string|null $mode null => 'default'
      * @return callable(mixed, mixed): int
      */
-    public static function createSort(int $dir = SORT_ASC, string $mode = null)
+    public static function createSort(int $dir = SORT_ASC, ?string $mode = null)
     {
         $dir = $dir === SORT_DESC ? -1 : 1;
 
