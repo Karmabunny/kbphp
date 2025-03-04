@@ -48,9 +48,11 @@ trait LoggerTrait {
      *
      * @param mixed $message
      * @param int $level default: LEVEL_INFO
+     * @param string|null $category default: class name (static)
+     * @param int|float|null $timestamp default: now
      * @return void
      */
-    public function log($message, ?int $level = null, ?string $_category = null, ?int $_timestamp = null)
+    public function log($message, ?int $level = null, ?string $_category = null, $_timestamp = null)
     {
         if ($level === null) $level = Log::LEVEL_INFO;
         if ($_category === null) $_category = static::class;
