@@ -215,7 +215,7 @@ class RulesClassValidator implements RulesValidatorInterface
 
                     // Backward compat - support per-field args.
                     foreach ($ruleset as $subset) {
-                        if (is_array($subset) and isset($subset['args'])) {
+                        if (is_array($subset)) {
                             $nested = true;
                             $this->rules[] = $this->parseRule($name, $subset);
                         }
