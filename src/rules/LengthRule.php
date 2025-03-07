@@ -11,7 +11,13 @@ use karmabunny\kb\BaseRule;
 use karmabunny\kb\ValidationException;
 
 /**
- * Checks the length of a string is within an allowed range
+ * Checks the length of a string is within an allowed range.
+ *
+ * Important:
+ * - Comparisons are done using multi-byte strings.
+ * - The range is inclusive: `min <= len <= max`
+ * - Default min is 0.
+ * - Default max is infinite (PHP_INT_MAX).
  *
  * @package karmabunny\kb\rules
  */
