@@ -78,6 +78,10 @@ final class RulesValidatorTest extends TestCase
 
             // email
             'address' => 'not-an-email',
+
+            'thirty_forty' => 50,
+            'length_one' => 'asdf asdf asdf',
+            'length_two' => 'a',
         ]);
 
         try {
@@ -86,14 +90,24 @@ final class RulesValidatorTest extends TestCase
             $this->fail('Expected ValidationException.');
         }
         catch (ValidationException $exception) {
-            $expected = ['id', 'ten_twenty', 'amount', 'address'];
+            $expected = ['id', 'ten_twenty', 'amount', 'address', 'thirty_forty', 'length_one', 'length_two'];
+            $actual = array_keys($exception->errors);
 
-            $this->assertEquals($expected, array_keys($exception->errors));
+            sort($expected);
+            sort($actual);
+
+            $this->assertEquals($expected, $actual);
             $this->assertEquals(1, count($exception->errors['id']));
             $this->assertEquals(1, count($exception->errors['amount']));
+
             // Two errors here: positiveInt + range.
             $this->assertEquals(2, count($exception->errors['ten_twenty']));
+
+            // And a bunch more.
             $this->assertEquals(1, count($exception->errors['address']));
+            $this->assertEquals(1, count($exception->errors['thirty_forty']));
+            $this->assertEquals(1, count($exception->errors['length_one']));
+            $this->assertEquals(1, count($exception->errors['length_two']));
         }
 
         // Valid case.
@@ -101,6 +115,9 @@ final class RulesValidatorTest extends TestCase
         $thing->amount = "12.34"; // numeric strings are ok.
         $thing->ten_twenty = 15;
         $thing->address = 'a@b.com';
+        $thing->thirty_forty = 35;
+        $thing->length_one = 'asdfasdf';
+        $thing->length_two = 'asdfasdf';
         $thing->validate();
     }
 
@@ -256,6 +273,15 @@ abstract class BaseFieldThing extends Collection implements Validates
     /** @var string */
     public $address;
 
+    /** @var int */
+    public $thirty_forty = 35;
+
+    /** @var string */
+    public $length_one = 'asdfasdf';
+
+    /** @var string */
+    public $length_two = 'asdfasdf';
+
 
     public static function matchDomain($value)
     {
@@ -276,8 +302,15 @@ class OldFieldThing extends BaseFieldThing
             'required' => ['id'],
             'positiveInt' => ['id', 'ten_twenty'],
             'numeric' => ['amount'],
-            'range' => ['ten_twenty', 'args' => [10, 20]],
+            'range' => [
+                ['ten_twenty', 'args' => [10, 20]],
+                ['thirty_forty', 'args' => [30, 40]],
+            ],
             'email' => ['address'],
+            'length' => [
+                ['length_one', 'args' => [0, 10]],
+                ['length_two', 'args' => [5, 20]],
+            ],
         ];
 
         // Different scenario.
@@ -326,7 +359,12 @@ class NewFieldThing extends BaseFieldThing
             ['positiveInt' => ['id', 'ten_twenty']],
             ['numeric' => ['amount']],
             ['range' => ['ten_twenty', 'between' => [10, 20]]],
+            ['range' => ['thirty_forty', 'between' => [30, 40]]],
             ['email' => ['address']],
+            'length' => [
+                ['length_one', 'min' => 0, 'max' => 10],
+                ['length_two', 'min' => 5, 'max' => 20],
+            ],
         ];
 
         // Different scenario.
