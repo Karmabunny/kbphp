@@ -42,7 +42,8 @@ abstract class BaseRule implements RuleInterface
         }
 
         if (empty($this->fields)) {
-            throw new InvalidArgumentException('Invalid rule, missing fields');
+            $name = static::getName();
+            throw new InvalidArgumentException("Invalid rule specification: {$name}, missing fields");
         }
     }
 
