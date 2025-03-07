@@ -18,7 +18,7 @@ use karmabunny\kb\ValidationException;
 class LengthRule extends BaseRule
 {
 
-    public $min = null;
+    public $min = 0;
 
     public $max = PHP_INT_MAX;
 
@@ -28,12 +28,8 @@ class LengthRule extends BaseRule
     {
         parent::parse($ruleset);
 
-        $this->min = $ruleset['min'] ?? null;
+        $this->min = $ruleset['min'] ?? 0;
         $this->max = $ruleset['max'] ?? PHP_INT_MAX;
-
-        if ($this->min === null) {
-            throw new InvalidArgumentException('Invalid rule, missing \'min\' key');
-        }
     }
 
 
