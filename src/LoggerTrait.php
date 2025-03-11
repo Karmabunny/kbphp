@@ -17,6 +17,12 @@ trait LoggerTrait {
     private $loggers = [];
 
 
+    public function clearLoggers()
+    {
+        $this->loggers = [];
+    }
+
+
     /**
      * Register a logger.
      *
