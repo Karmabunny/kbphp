@@ -85,6 +85,8 @@ class Log
             case 'SILENT':
                 return self::LEVEL_SILENT;
         }
+
+        return 0;
     }
 
 
