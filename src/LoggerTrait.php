@@ -6,6 +6,8 @@
 
 namespace karmabunny\kb;
 
+use InvalidArgumentException;
+
 /**
  * Hook logging handlers into a class.
  *
@@ -64,6 +66,10 @@ trait LoggerTrait {
      */
     public function attach(Loggable $parent, ?int $level = null, $category = null)
     {
+        if ($parent === $this) {
+            throw new InvalidArgumentException('Cannot attach to self');
+        }
+
         $filter = [];
 
         $category = (array) $category;
