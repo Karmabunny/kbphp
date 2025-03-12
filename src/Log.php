@@ -91,6 +91,82 @@ class Log
 
 
     /**
+     * Filter a logger.
+     *
+     * This wraps the logger function to filter on level or category.
+     *
+     * ```
+     * // Only permit log levels higher than this:
+     * // (excludes INFO, DEBUG, etc)
+     * $loggable->attach($parent, Log::LEVEL_WARNING);
+     *
+     * // Only permit this category:
+     * $loggable->attach($parent, null, 'progress');
+     *
+     * // Only permit these categories:
+     * $loggable->attach($parent, null, ['log.request', 'log.response']);
+     *
+     * // Exclude these categories:
+     * $loggable->attach($parent, null, ['stats' => false, 'meta' => false]);
+     * ```
+     *
+     * @param callable $logger
+     * @param int|null $level
+     * @param string|array|null $category
+     * @return callable
+     */
+    public static function filter(callable $logger, $level = null, $category = null)
+    {
+        if ($level === null and $category === null) {
+            return $logger;
+        }
+
+        $filter = [];
+        $filter['level'] = $level;
+
+        $category = (array) $category;
+
+        foreach ($category as $key => $item) {
+            $invert = false;
+
+            if (!is_numeric($key)) {
+                $invert = $item === false;
+                $item = $key;
+            }
+
+            if ($invert) {
+                $filter['exclude'][$item] = true;
+            }
+            else {
+                $filter['permit'][$item] = true;
+            }
+        }
+
+        return function($message, $level, $category, $timestamp) use ($logger, $filter) {
+
+            if ($filter) {
+                if (isset($filter['exclude'][$category])) {
+                    return;
+                }
+
+                if (
+                    !empty($filter['permit'])
+                    and !isset($filter['permit'][$category])
+                ) {
+                    return;
+                }
+            }
+
+            if (isset($filter['level']) and $filter['level'] < $level) {
+                return;
+            }
+
+            $logger($message, $level, $category, $timestamp);
+        };
+    }
+
+
+    /**
      *
      * @param mixed $message
      * @param int $level

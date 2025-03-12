@@ -70,47 +70,8 @@ trait LoggerTrait {
             throw new InvalidArgumentException('Cannot attach to self');
         }
 
-        $filter = [];
-
-        $category = (array) $category;
-
-        foreach ($category as $key => $item) {
-            $invert = false;
-
-            if (!is_numeric($key)) {
-                $invert = $item === false;
-                $item = $key;
-            }
-
-            if ($invert) {
-                $filter['exclude'][$item] = true;
-            }
-            else {
-                $filter['permit'][$item] = true;
-            }
-        }
-
-        $this->addLogger(function($message, $_level, $_category, $_timestamp) use ($parent, $filter, $level) {
-
-            if ($filter) {
-                if (isset($filter['exclude'][$_category])) {
-                    return;
-                }
-
-                if (
-                    !empty($filter['permit'])
-                    and !isset($filter['permit'][$_category])
-                ) {
-                    return;
-                }
-            }
-
-            if ($level and $level < $_level) {
-                return;
-            }
-
-            $parent->log($message, $_level, $_category, $_timestamp);
-        });
+        $logger = Log::filter([$parent, 'log'], $level, $category);
+        $this->addLogger($logger);
     }
 
 
