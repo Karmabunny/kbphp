@@ -143,17 +143,15 @@ class Log
 
         return function($message, $level, $category, $timestamp) use ($logger, $filter) {
 
-            if ($filter) {
-                if (isset($filter['exclude'][$category])) {
-                    return;
-                }
+            if (isset($filter['exclude'][$category])) {
+                return;
+            }
 
-                if (
-                    !empty($filter['permit'])
-                    and !isset($filter['permit'][$category])
-                ) {
-                    return;
-                }
+            if (
+                !empty($filter['permit'])
+                and !isset($filter['permit'][$category])
+            ) {
+                return;
             }
 
             if (isset($filter['level']) and $filter['level'] < $level) {
