@@ -105,7 +105,7 @@ class Uuid
 
         // Random mac addresses.
         if ($options & self::V1_RANDOM) {
-            $mac = bindec(random_bytes(6));
+            $mac = hexdec(bin2hex(random_bytes(6)));
         }
         else {
             // 48 bit mac.
@@ -113,7 +113,7 @@ class Uuid
 
             // Random fallback.
             if (!$mac) {
-                $mac = bindec(random_bytes(6));
+                $mac = hexdec(bin2hex(random_bytes(6)));
             }
         }
 
