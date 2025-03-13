@@ -46,7 +46,7 @@ jobs:
     - uses: php-actions/phpunit@v4
       with:
         php_version: 8.2
-        php_extensions: pcntl
+        php_extensions: "pcntl intl"
         version: composer
         configuration: phpunit.xml
         args: '--testdox'
