@@ -80,8 +80,8 @@ trait LoggerTrait {
      *
      * @param mixed $message
      * @param int $level default: LEVEL_INFO
-     * @param string|null $category default: class name (static)
-     * @param int|float|null $timestamp default: now
+     * @param string|null $_category default: class name (static)
+     * @param int|float|null $_timestamp default: now
      * @return void
      */
     public function log($message, ?int $level = null, ?string $_category = null, $_timestamp = null)

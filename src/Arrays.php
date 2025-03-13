@@ -523,7 +523,7 @@ class Arrays
     /**
      * An `array_map` that accepts iterables.
      *
-     * @param iterable $array
+     * @param iterable $arrays
      * @return array
      */
     public static function zip(...$arrays): array
