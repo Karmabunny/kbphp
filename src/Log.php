@@ -72,7 +72,6 @@ class Log
             case 'DEBUG':
                 return self::LEVEL_DEBUG;
 
-            default:
             case 'INFO':
                 return self::LEVEL_INFO;
 
@@ -86,7 +85,7 @@ class Log
                 return self::LEVEL_SILENT;
         }
 
-        return 0;
+        return self::LEVEL_INFO;
     }
 
 
