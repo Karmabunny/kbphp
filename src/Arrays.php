@@ -6,6 +6,7 @@
 
 namespace karmabunny\kb;
 
+use ArrayAccess;
 use Generator;
 use RecursiveIteratorIterator;
 use Throwable;
@@ -1269,8 +1270,21 @@ class Arrays
                 return $b->compare($a, $mode ?? 'default') * $dir * -1;
             }
 
-            $is_a = is_object($a);
-            $is_b = is_object($b);
+            // Array sorts only with a non-default mode.
+            // Don't even think about recursive sorts. We don't need that.
+            if (
+                $mode !== null
+                and (is_array($a) or $a instanceof ArrayAccess)
+                and (is_array($b) or $b instanceof ArrayAccess)
+            ) {
+                $a = $a[$mode] ?? null;
+                $b = $b[$mode] ?? null;
+
+                return ($a <=> $b) * $dir;
+            }
+
+            $is_a = (is_object($a) or is_resource($a));
+            $is_b = (is_object($b) or is_resource($b));
 
             // Disable natural object ordering.
             if ($is_a and $is_b) {
@@ -1282,16 +1296,10 @@ class Arrays
                 return ($is_a ? 1 : -1) * $dir;
             }
 
-            // Array sorts only with a non-default mode.
-            // Don't even think about recursive sorts. We don't need that.
-            if ($mode !== null and is_array($a) and is_array($b)) {
-                $a = $a[$mode] ?? null;
-                $b = $b[$mode] ?? null;
-
-                return ($a <=> $b) * $dir;
-            }
-
-            // Natural scalar sorting.
+            // Natural scalar sorting with natural casts.
+            // Arrays (with a default mode or comparing against a non-array)
+            // will also end up here and they do in fact have a natural sort.
+            // Whether it's actually useful is another question.
             return ($a <=> $b) * $dir;
         };
     }
