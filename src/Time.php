@@ -865,4 +865,36 @@ class Time
         return $years;
     }
 
+
+    /**
+     * Convert an IANA timezone into an offset string.
+     *
+     * The nature of offset strings means they're always relative to a
+     * specific time. If you can use timezone strings instead - you should.
+     *
+     * @param string|DateTimeZone $timezone
+     * @param DateTimeInterface|int|null $now
+     * @return string
+     */
+    public static function getTimezoneOffset($timezone, $now = null): string
+    {
+        if (is_string($timezone)) {
+            $timezone = new DateTimeZone($timezone);
+        }
+
+        $now = $now ?? new DateTimeImmutable();
+
+        if (is_numeric($now)) {
+            $now = new DateTimeImmutable('@' . (int) $now);
+        }
+
+        $offset = $timezone->getOffset($now);
+        $sign = $offset < 0 ? '-' : '+';
+
+        $offset = abs($offset / 3600);
+        $hours = floor($offset);
+        $minutes = floor(($offset * 60) % 60);
+
+        return sprintf('%s%02d:%02d', $sign, $hours, $minutes);
+    }
 }

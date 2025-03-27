@@ -504,4 +504,35 @@ final class TimeTest extends TestCase {
 
 
     }
+
+
+    public function dataTimezoneOffset()
+    {
+        return [
+            // Standard time offsets
+            ['Australia/Adelaide', '+09:30', '2024-06-01'],
+            ['America/New_York', '-05:00', '2024-01-15'],
+            ['Europe/London', '+00:00', '2024-01-15'],
+            ['Asia/Tokyo', '+09:00', '2024-01-15'],
+            ['Pacific/Auckland', '+12:00', '2024-06-01'],
+
+            // Daylight saving time offsets
+            ['Australia/Adelaide', '+10:30', '2024-01-15'],
+            ['America/New_York', '-04:00', '2024-06-01'],
+            ['Europe/London', '+01:00', '2024-06-01'],
+            ['Pacific/Auckland', '+13:00', '2024-01-15'],
+
+            // Non-DST zones for comparison
+            ['Asia/Bangkok', '+07:00', '2024-01-15'],
+            ['UTC', '+00:00', '2024-01-15'],
+        ];
+    }
+
+
+    /** @dataProvider dataTimezoneOffset */
+    public function testTimezoneOffset($timezone, $expected, $testDate)
+    {
+        $actual = Time::getTimezoneOffset($timezone, strtotime($testDate));
+        $this->assertEquals($expected, $actual);
+    }
 }
