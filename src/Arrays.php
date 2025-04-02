@@ -1354,11 +1354,12 @@ class Arrays
      * @param array $array
      * @param bool $preserve_keys
      * @param int $dir SORT_ASC|SORT_DESC
+     * @param string|null $mode null => 'default'
      * @return void
      */
-    public static function sort(array &$array, bool $preserve_keys = false, int $dir = SORT_ASC)
+    public static function sort(array &$array, bool $preserve_keys = false, int $dir = SORT_ASC, ?string $mode = null)
     {
-        $fn = self::createSort($dir);
+        $fn = self::createSort($dir, $mode);
 
         if ($preserve_keys) {
             uasort($array, $fn);
@@ -1378,11 +1379,12 @@ class Arrays
      * @param T[] $array
      * @param bool $preserve_keys
      * @param int $dir SORT_ASC|SORT_DESC
+     * @param string|null $mode null => 'default'
      * @return T[]
      */
-    public static function sorted(array $array, bool $preserve_keys = false, int $dir = SORT_ASC): array
+    public static function sorted(array $array, bool $preserve_keys = false, int $dir = SORT_ASC, ?string $mode = null): array
     {
-        self::sort($array, $preserve_keys, $dir);
+        self::sort($array, $preserve_keys, $dir, $mode);
         return $array;
     }
 
