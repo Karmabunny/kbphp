@@ -167,10 +167,15 @@ class Reflect
                 // Fix private/protected access.
                 $property->setAccessible(true);
 
-                // We need to use getValue() so to bypass any __get() magic.
-                $key = $property->getName();
-                $value = $property->getValue($target);
+                if (PHP_VERSION_ID >= 70400 and !$property->isInitialized($target)) {
+                    $value = null;
+                }
+                else {
+                    // We need to use getValue() so to bypass any __get() magic.
+                    $value = $property->getValue($target);
+                }
 
+                $key = $property->getName();
                 $data[$key] = $value;
             }
 
