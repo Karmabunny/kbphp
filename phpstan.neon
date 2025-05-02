@@ -5,3 +5,5 @@ parameters:
         max: 80400
     paths:
         - src
+    ignoreErrors:
+        - identifier: trait.unused
