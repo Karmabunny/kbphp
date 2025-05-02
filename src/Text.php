@@ -142,15 +142,11 @@ class Text {
      * https://www.php.net/manual/en/function.levenshtein.php#113702
      *
      * @param string $str
-     * @param array|null $map
+     * @param array $map
      * @return string
      */
-    public static function normalizeMultibyte(string $str, &$map = null)
+    public static function normalizeMultibyte(string $str, array &$map = [])
     {
-        if ($map === null) {
-            $map = [];
-        }
-
         $matches = [];
 
         // Find all multi-byte characters (cf. utf-8 encoding specs).
