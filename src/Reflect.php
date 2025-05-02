@@ -169,6 +169,7 @@ class Reflect
                 // Fix private/protected access.
                 $property->setAccessible(true);
 
+                // @phpstan-ignore-next-line : PHP 7.4+
                 if (PHP_VERSION_ID >= 70400 and !$property->isInitialized($target)) {
                     $value = null;
                 }

@@ -148,7 +148,6 @@ class Time
             $date = clone $value;
         }
 
-        /** @var DateTime|DateTimeImmutable|null $date */
 
         if (!isset($date)) {
             throw new InvalidArgumentException('Invalid date value: '. gettype($value));
@@ -156,6 +155,11 @@ class Time
 
         // TODO This seems wrong for pass-through objects.
         if ($zone !== null) {
+            /** @var DateTime|null $date */
+            // DateTimeInterface is a bit dumb. All implementations _must_
+            // derive from either DateTime or DateTimeImmutable and so _always_
+            // has a setTimezone() method.
+            // @phpstan-ignore-next-line
             $date = $date->setTimezone($zone);
         }
 
