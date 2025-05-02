@@ -298,7 +298,7 @@ class XML
      * @return void
      * @throws XMLException
      */
-    public static function processConditionals(DOMNode &$node, array $conditions)
+    public static function processConditionals(DOMNode $node, array $conditions)
     {
         /** @var DOMDocument */
         $document = $node->ownerDocument ?? $node;
@@ -344,25 +344,25 @@ class XML
             // No attributes, it's a block.
             else {
                 $body = [];
+                $endtag = false;
 
-                /** @var DOMProcessingInstruction|null */
                 $element = $condition->nextSibling;
 
                 // Now find an endif tag.
-                while (
-                    ($element = $element->nextSibling) and
-                    ((!($element instanceof DOMProcessingInstruction) or
-                    $element->target !== 'endif'))
-                ) {
+                while ($element = $element->nextSibling) {
+                    if (
+                        $element instanceof DOMProcessingInstruction
+                        and $element->target === 'endif'
+                    ) {
+                        $endtag = true;
+                        break;
+                    }
+
                     $body[] = $element;
                 }
 
                 // Not found, complain real hard.
-                if (
-                    !$element or
-                    !($element instanceof DOMProcessingInstruction) or
-                    $element->target !== 'endif'
-                ) {
+                if (!$endtag) {
                     throw new XMLException('Cannot find endif for condition, line ' . $condition->getLineNo());
                 }
 
