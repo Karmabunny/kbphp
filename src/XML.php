@@ -490,38 +490,49 @@ class XML
 
             case 'element':
                 if (!$results) return null;
-                // @phpstan-ignore-next-line : $current is a DOMElement
-                return self::getNodeIterator($results, true)->current();
+                return self::getElementIterator($results)->current();
 
             case 'list':
-                // @phpstan-ignore-next-line : empty is ok, duh.
                 if (!$results) return [];
-                // @phpstan-ignore-next-line : generic array is a DOMElement[]
-                return iterator_to_array(self::getNodeIterator($results, true));
+                return iterator_to_array(self::getElementIterator($results));
 
             case 'nodes':
             default:
                 if (!$results) return null;
-                return self::getNodeIterator($results, false);
+                return self::getNodeIterator($results);
         }
     }
 
 
     /**
-     * Get an iterator for a DOMNodeList. With optional element filtering.
+     * Get an iterator for a DOMNodeList.
      *
      * The builtin `getIterator()` was only introduced with php8.
      *
      * @param DOMNodeList $list
-     * @param bool $elements_only
      * @return Generator<DOMNode>
      */
-    private static function getNodeIterator(DOMNodeList $list, bool $elements_only)
+    private static function getNodeIterator(DOMNodeList $list)
     {
         for ($i = 0; $i < $list->length; $i++) {
             $item = $list->item($i);
-            if ($elements_only and !($item instanceof DOMElement)) continue;
+            yield $i => $item;
+        }
+    }
 
+
+    /**
+     * Get an iterator for elements in a DOMNodeList.
+     *
+     * The builtin `getIterator()` was only introduced with php8.
+     *
+     * @param DOMNodeList $list
+     * @return Generator<DOMElement>
+     */
+    private static function getElementIterator(DOMNodeList $list)
+    {
+        foreach (self::getNodeIterator($list) as $i => $item) {
+            if (!($item instanceof DOMElement)) continue;
             yield $i => $item;
         }
     }
@@ -664,8 +675,8 @@ class XML
             $parent = $parent->firstChild;
         }
 
-        foreach (self::getNodeIterator($parent->childNodes, true) as $element) {
-            /** @var DOMElement $element */
+        foreach (self::getElementIterator($parent->childNodes) as $element) {
+
             if ($element->nodeName === $tag_name) return $element;
         }
 
@@ -708,7 +719,7 @@ class XML
         $wanted = array_fill_keys($wanted, true);
         $fetched = [];
 
-        foreach (self::getNodeIterator($parent->childNodes, true) as $element) {
+        foreach (self::getElementIterator($parent->childNodes) as $element) {
             /** @var DOMElement $element */
 
             $name = $element->nodeName;
@@ -752,7 +763,7 @@ class XML
      */
     public static function expectOneOf(DOMNode $parent, array $wanted)
     {
-        foreach (self::getNodeIterator($parent->childNodes, true) as $element) {
+        foreach (self::getElementIterator($parent->childNodes) as $element) {
             /** @var DOMElement $element */
             if (!in_array($element->nodeName, $wanted)) continue;
             return $element;
