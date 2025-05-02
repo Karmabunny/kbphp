@@ -121,6 +121,8 @@ class Time
      */
     public static function parse($value, $zone = null): DateTimeInterface
     {
+        /** @var mixed $value */
+
         // Also parse timezones while we're here.
         if (is_string($zone)) {
             $zone = new DateTimeZone($zone);
@@ -207,6 +209,8 @@ class Time
      */
     public static function parseTimeString($time, $big_endian = true)
     {
+        /** @var mixed $time */
+
         // 24 hour time.
         if (is_numeric($time)) {
             $args = [];

@@ -1032,6 +1032,8 @@ class Arrays
      */
     public static function value($array, string $query)
     {
+        /** @var mixed $array */
+
         // Must be an array.
         if (!is_array($array)) return null;
 

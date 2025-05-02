@@ -108,6 +108,8 @@ class Reflect
      */
     public static function isStaticCallable($callable): bool
     {
+        /** @var mixed $callable */
+
         if (is_string($callable)) {
             $callable = explode('::', $callable, 2);
         }

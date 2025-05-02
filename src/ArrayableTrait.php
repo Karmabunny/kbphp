@@ -155,6 +155,8 @@ trait ArrayableTrait
         $array = [];
 
         foreach ($fields as $key => $item) {
+            /** @var mixed $item */
+
             // Invalid config.
             if (is_numeric($key)) {
                 continue;
