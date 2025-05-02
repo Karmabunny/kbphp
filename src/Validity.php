@@ -394,7 +394,7 @@ class Validity
      * @example
      *    $valid->check('active', 'binary')
      *
-     * @param string $val
+     * @param string|int $val
      * @throws ValidationException
      */
     public static function binary($val)

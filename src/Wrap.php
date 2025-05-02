@@ -76,7 +76,6 @@ class Wrap
      *
      * @param string $name a class name
      * @return callable ($item) => bool
-     * @throws InvalidArgumentException
      */
     public static function instanceOf(string $name)
     {
