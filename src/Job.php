@@ -122,7 +122,6 @@ abstract class Job implements Loggable
     {
         $class = static::class;
 
-        /** @var Job $job */
         $job = new $class($config);
 
         $job->addLogger(function($message) {

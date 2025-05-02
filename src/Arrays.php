@@ -1224,8 +1224,6 @@ class Arrays
         if ($output === null) {
             $output = (function($_path) {
                 $alt = @include $_path;
-                //This is literally a defines check. Why are you mad?
-                // @phpstan-ignore-next-line
                 return $config ?? $alt;
             })($path);
         }
