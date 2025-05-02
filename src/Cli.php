@@ -93,7 +93,7 @@ class Cli
     {
         static $yes;
         if ($yes === null) {
-            $yes = posix_isatty(STDIN) and posix_isatty(STDOUT);
+            $yes = (posix_isatty(STDIN) and posix_isatty(STDOUT));
         }
         return $yes;
     }
