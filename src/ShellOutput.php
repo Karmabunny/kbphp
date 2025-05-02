@@ -369,7 +369,7 @@ class ShellOutput
         $length = $length ?? strlen(PHP_EOL);
 
         if (substr_compare($buffer, PHP_EOL, -$length, $length) === 0) {
-            $buffer = substr($buffer, 0, -$length);
+            $buffer = substr($buffer, 0, -$length) ?: '';
             return true;
         }
         else {
