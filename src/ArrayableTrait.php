@@ -107,7 +107,6 @@ trait ArrayableTrait
      * Specify an 'extra' to include additional fields if implementing the
      * ArrayableFields interface. This will add properties that were excluded
      * from `fields()` and includes any virtual fields defined in `extraFields()`.
-     * included in `fields()` and any virtual fields defined in `extraFields()`.
      *
      * @param string[]|null $filter
      * @param string[]|null $extra
@@ -125,31 +124,31 @@ trait ArrayableTrait
             $fields = array_merge($fields, $this->fields());
         }
 
-        // Add extra fields.
-        if ($extra) {
-            $extra_keys = array_fill_keys($extra, true);
-            $extra_fields = [];
+        // Apply filters.
+        if ($filter) {
+            $filter_keys = Arrays::keyRoots($filter);
+            $filter_keys = array_fill_keys($filter_keys, true);
 
             // Extract any virtual fields.
+            $fields = array_intersect_key($fields, $filter_keys);
+
+            // Re-apply any in 'filter' not already in fields().
+            $fields = array_merge($filter_keys, $fields);
+        }
+
+        // Add extra fields.
+        if ($extra) {
+            $extra_keys = Arrays::keyRoots($extra, true);
+            $extra_keys = array_fill_keys($extra_keys, true);
+
+            $fields = array_merge($fields, $extra_keys);
+
             if ($this instanceof ArrayableFields) {
                 $extra_fields = $this->extraFields();
                 $extra_fields = array_intersect_key($extra_fields, $extra_keys);
+
+                $fields = array_merge($fields, $extra_fields);
             }
-
-            // The 'extras' field can also reference natural fields or those
-            // in fields(), so we layer them all together.
-            $fields = array_merge($fields, $extra_keys, $extra_fields);
-        }
-
-        // Apply filters.
-        if ($filter) {
-            $filter = array_fill_keys($filter, true);
-
-            // Extract any virtual fields.
-            $fields = array_intersect_key($fields, $filter);
-
-            // Re-apply any in 'filter' not already in fields().
-            $fields = array_merge($filter, $fields);
         }
 
         $array = [];
@@ -210,7 +209,14 @@ trait ArrayableTrait
                 or $item instanceof Arrayable
                 or $item instanceof Traversable
             ) {
-                $item = Arrays::toArray($item);
+                $next_filter = $filter ? Arrays::keyChildren($key, $filter) : null;
+                $next_extra = $extra ? Arrays::keyChildren($key, $extra, true) : null;
+
+                $item = Arrays::toArray($item, $next_filter, $next_extra);
+
+                if (empty($item)) {
+                    continue;
+                }
             }
 
             $array[$key] = $item;

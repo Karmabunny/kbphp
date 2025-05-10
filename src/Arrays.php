@@ -919,39 +919,100 @@ class Arrays
      * This converts any nested arrayables to arrays.
      *
      * @param Arrayable|Traversable|array $array
+     * @param array|null $filter
+     * @param array|null $extra
      * @return array
      */
-    public static function toArray($array): array
+    public static function toArray($array, array $filter = null, array $extra = null): array
     {
-        if ($array instanceof Arrayable) {
-            return $array->toArray();
+        // This performs it's own filtering.
+        if ($array instanceof ArrayableFields) {
+            return $array->toArray($filter, $extra);
         }
 
-        foreach ($array as &$item) {
-            if ($item instanceof Arrayable) {
-                $item = $item->toArray();
-                continue;
-            }
+        if ($array instanceof Arrayable) {
+            $array = $array->toArray();
+        }
 
-            if ($item instanceof Traversable) {
-                $item = iterator_to_array($item);
-                continue;
-            }
+        $filter_roots = null;
 
-            if (is_object($item)) {
-                $item = (array) $item;
+        // Extract filter roots.
+        if ($filter) {
+            $filter_roots = self::keyRoots($filter);
+            $filter_roots = array_fill_keys($filter_roots, true);
+        }
+
+        $items = [];
+
+        foreach ($array as $key => $item) {
+
+            // Do filtering.
+            if (
+                $filter_roots !== null
+                and !is_numeric($key)
+                and !array_key_exists($key, $filter_roots)
+            ) {
                 continue;
             }
 
             // Like, what else would we do here?
             if (is_resource($item)) {
-                $item = '(resource)';
+                $item[$key] = '(resource)';
                 continue;
             }
-        }
-        unset($item);
 
-        return $array;
+            if ($item instanceof ArrayableFields) {
+                $next_filter = self::keyChildren($key, $filter ?? []);
+                $next_extra = self::keyChildren($key, $extra ?? [], true);
+
+                $item = $item->toArray($next_filter, $next_extra);
+
+                if (empty($item)) {
+                    continue;
+                }
+
+                // This performs it's own filtering so we can skip the rest.
+                $items[$key] = $item;
+                continue;
+            }
+
+            if ($item instanceof Arrayable) {
+                $item = $item->toArray();
+            }
+
+            if ($item instanceof Traversable) {
+                $next_filter = self::keyChildren($key, $filter ?? []);
+                $next_extra = self::keyChildren($key, $extra ?? [], true);
+
+                $item = self::toArray($item, $next_filter, $next_extra);
+
+                if (empty($item)) {
+                    continue;
+                }
+
+                $items[$key] = $item;
+                continue;
+            }
+
+            if (is_object($item)) {
+                $item = (array) $item;
+            }
+
+            if (is_array($item) and ($filter or $extra)) {
+                $next_filter = self::keyChildren($key, $filter ?? []);
+                $next_extra = self::keyChildren($key, $extra ?? [], true);
+
+                $item = self::toArray($item, $next_filter, $next_extra);
+
+                if (empty($item)) {
+                    continue;
+                }
+            }
+
+            $items[$key] = $item;
+        }
+
+        return $items;
     }
 
 
@@ -1087,6 +1148,210 @@ class Arrays
         // Recurse on.
         // The value must be a value or associated array.
         return self::value($value, $query);
+    }
+
+
+    /**
+     * Shift all the root elements from a list of array queries.
+     *
+     * ```
+     * $keys = [
+     *    'one.two.three',
+     *    'def.ghi',
+     *    '**.deep',
+     * ];
+     *
+     * $shift = Arrays::shiftKeys($keys);
+     * // $shift == [ 'one', 'def', 'deep' ]
+     * // $keys == [ 'two.three', 'ghi', '**.deep' ]
+     *
+     * $shift = Arrays::shiftKeys($keys);
+     * // $shift == [ 'two', 'ghi', 'deep' ]
+     * // $keys == [ 'three', '**.deep' ]
+     *
+     * $shift = Arrays::shiftKeys($keys);
+     * // $shift == [ 'three', 'deep' ]
+     * // $keys == [ '**.deep' ]
+     * ```
+     *
+     * @param string[] $keys modified by ref, leaving only children
+     * @return string[] the key roots
+     */
+    public static function shiftKeys(array &$keys): array
+    {
+        $first = [];
+        $numeric = true;
+        $i = 0;
+
+        foreach ($keys as $index => &$key) {
+            if ($index !== $i++) {
+                $numeric = false;
+            }
+
+            $parts = explode('.', $key, 2);
+            $part = array_shift($parts);
+
+            if (empty($parts)) {
+                $first[$index] = $part;
+                unset($keys[$index]);
+            }
+            else {
+                $first[$index] = $part;
+                $key = $parts[0];
+            }
+        }
+
+        unset($key);
+
+        if ($numeric) {
+            $keys = array_values($keys);
+            $first = array_values($first);
+        }
+
+        return $first;
+    }
+
+
+    /**
+     * Get root keys from a list of array queries.
+     *
+     * Wildcards will replace root `*` (star) key with the first child.
+     *
+     * ```
+     * $keys = [
+     *    'root1.child1',
+     *    'root2.child2.deep',
+     *    '*.child3',
+     * ];
+     *
+     * $roots = Arrays::keyRoots($keys);
+     * // => [ 'root1', 'root2' ]
+     *
+     * $roots = Arrays::keyRoots($keys, true);
+     * // => [ 'root1', 'root2', 'child3' ]
+     * ```
+     *
+     * @param string[] $keys
+     * @param bool $wildcard
+     * @return string[]
+     */
+    public static function keyRoots(array $keys, bool $wildcard = false): array
+    {
+        // Nothing to see here.
+        if (empty($keys)) {
+            return [];
+        }
+
+        $roots = [];
+
+        foreach ($keys as $key) {
+            $parts = explode('.', $key, 3);
+            $part = array_shift($parts);
+
+            if ($part === '*') {
+                // Drop wildcard keys if not enabled.
+                if (!$wildcard) {
+                    continue;
+                }
+
+                // End of the line.
+                if (empty($parts)) {
+                    continue;
+                }
+
+                // Grab the first child.
+                $part = array_shift($parts);
+            }
+
+            $roots[$part] = $part;
+        }
+
+        $roots = array_keys($roots);
+        return $roots;
+    }
+
+
+    /**
+     * Get child keys from a list of array queries.
+     *
+     * Wildcards permit a root `*` (star) key to exists no matter the target.
+     *
+     * ```
+     * $keys = [
+     *    'root1.child1',
+     *    'root2.child2',
+     *    'root2.child3.deep',
+     *    '*.child4',
+     * ];
+     *
+     * // No wildcards
+     * $children = Arrays::keyChildren('root2', $keys);
+     * // => [ 'root2.child2', 'root2.child3.deep' ]
+     *
+     * // Wildcards
+     * $children = Arrays::keyChildren('root1', $keys, true);
+     * // => [ 'child1', 'child4' ]
+     *
+     * // Also wildcards:
+     * $children = Arrays::keyChildren('other', $keys, true);
+     * // => [ 'child2' ]
+     * ```
+     *
+     * @param string $root
+     * @param array $keys
+     * @param bool $wildcard
+     * @return array
+     */
+    public static function keyChildren(string $root, array $keys, bool $wildcard = false): array
+    {
+        // Empty keys? boring.
+        // Numeric? can't help.
+        // wildcard root? - you get everything.
+        if (
+            empty($keys)
+            or is_numeric($root)
+            or $root === '*'
+        ) {
+            return $keys;
+        }
+
+        $children = [];
+
+        foreach ($keys as $key) {
+            $parts = explode('.', $key, 3);
+            $part = array_shift($parts);
+
+            if (empty($parts)) {
+                continue;
+            }
+
+            if ($part === $root) {
+                $child = implode('.', $parts);
+                $children[$child] = $child;
+                continue;
+            }
+
+            if ($wildcard and $part === '*') {
+                $child = implode('.', $parts);
+                $children[$child] = $child;
+
+                // If the first child is the root then flatten it.
+                // wild + *.wild.card => card
+                if ($parts[0] === $root) {
+                    $child = $parts[1] ?? false;
+                    $children[$child] = $child;
+                }
+
+                // The wildcard lives forever so it can recurse.
+                $children[$key] = $key;
+
+                continue;
+            }
+        }
+
+        // Don't forget to dedupe.
+        $children = array_keys($children);
+        return $children;
     }
 
 

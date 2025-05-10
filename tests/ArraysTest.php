@@ -820,6 +820,159 @@ final class ArraysTest extends TestCase {
     }
 
 
+    public function testToArray()
+    {
+        $array = [
+            [
+                'child1' => 123,
+                'child2' => 456,
+                'nest1' => [
+                    'child2' => 777,
+                    'child3' => 888,
+                    'list' => [1, 2, 3],
+                    'nest2' => [
+                        'child4' => 999,
+                        'child5' => '!!!',
+                    ],
+                    'nest3' => [
+                        [
+                            'child6' => 'abc',
+                            'child7' => 'def',
+                        ]
+                    ]
+                ],
+            ],
+            [
+                'child1' => 'xxx',
+                'nest1' => [
+                    'child2' => 'yyy',
+                    'nest2' => [
+                        'child3' => 'zzz',
+                    ],
+                ],
+            ],
+        ];
+
+        // A keyed array.
+        $actual = Arrays::toArray($array[0], [
+            'child1',
+            'nest1.child2',
+            'nest1.nest2.child3',
+            'nest1.nest2.child4',
+        ]);
+
+        $expected = [
+            'child1' => 123,
+            'nest1' => [
+                'child2' => 777,
+                'nest2' => [ 'child4' => 999 ],
+            ],
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        // The other one, same query.
+        $actual = Arrays::toArray($array[1], [
+            'child1',
+            'nest1.child2',
+            'nest1.nest2.child3',
+            'nest1.nest2.child4',
+        ]);
+
+        $expected = [
+            'child1' => 'xxx',
+            'nest1' => [
+                'child2' => 'yyy',
+                'nest2' => [ 'child3' => 'zzz' ],
+            ],
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        // Basic filter on a list.
+        $actual = Arrays::toArray($array, [ 'child1', 'child2' ]);
+        $expected = [
+            [
+                'child1' => 123,
+                'child2' => 456,
+            ],
+            [
+                'child1' => 'xxx',
+            ],
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        // Whole objects.
+        $actual = Arrays::toArray($array, [ 'nest1.nest2' ]);
+
+        $expected = [
+            [
+                'nest1' => [
+                    'nest2' => [
+                        'child4' => 999,
+                        'child5' => '!!!',
+                    ],
+                ],
+            ],
+            [
+                'nest1' => [
+                    'nest2' => [
+                        'child3' => 'zzz',
+                    ],
+                ],
+            ],
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        // Some lists.
+        $actual = Arrays::toArray($array, [
+            'nest1.list',
+            'nest1.nest3.child6',
+        ]);
+
+        $expected = [
+            [
+                'nest1' => [
+                    'list' => [ 1, 2, 3 ],
+                    'nest3' => [
+                        [
+                            'child6' => 'abc',
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        // Bunch of things.
+        $actual = Arrays::toArray($array, [
+            'nest1.child2',
+            'nest1.nest2.child3',
+            'nest1.nest2.child4',
+        ]);
+
+        $expected = [
+            [
+                'nest1' => [
+                    'child2' => 777,
+                    'nest2' => [ 'child4' => 999 ],
+                ],
+            ],
+            [
+                'nest1' => [
+                    'child2' => 'yyy',
+                    'nest2' => [ 'child3' => 'zzz' ],
+                ],
+            ],
+        ];
+
+        $this->assertEquals($expected, $actual);
+    }
+
+
     public function testIsNumeric()
     {
         $this->assertTrue(Arrays::isNumeric([
@@ -1041,6 +1194,171 @@ final class ArraysTest extends TestCase {
 
         $actual = Arrays::value($array, 'one.nested.list.0');
         $this->assertNull($actual);
+    }
+
+
+    public function testShiftKeys()
+    {
+        $keys = [
+            'one.two.three',
+            'def.ghi',
+        ];
+
+        // Round 1.
+        $shift = Arrays::shiftKeys($keys);
+
+        $expected = [ 'one', 'def' ];
+        $this->assertEquals($expected, $shift);
+
+        $expected = [ 'two.three', 'ghi' ];
+        $this->assertEquals($expected, $keys);
+
+        // Round 2.
+        $shift = Arrays::shiftKeys($keys);
+
+        $expected = [ 'two', 'ghi' ];
+        $this->assertEquals($expected, $shift);
+
+        $expected = [ 'three' ];
+        $this->assertEquals($expected, $keys);
+
+        // Round 3.
+        $shift = Arrays::shiftKeys($keys);
+
+        $expected = [ 'three' ];
+        $this->assertEquals($expected, $shift);
+
+        $this->assertEmpty($keys);
+
+        // Round 4.
+        $shift = Arrays::shiftKeys($keys);
+
+        $this->assertEmpty($shift);
+        $this->assertEmpty($keys);
+    }
+
+
+    public function testShiftKeysAssociated()
+    {
+        $keys = [
+            'test1' => 'one.two.three',
+            'test2' => 'def.ghi',
+        ];
+
+        // Round 1.
+        $shift = Arrays::shiftKeys($keys);
+
+        $expected = [
+            'test1' => 'one',
+            'test2' => 'def',
+        ];
+        $this->assertEquals($expected, $shift);
+
+        $expected = [
+            'test1' => 'two.three',
+            'test2' => 'ghi',
+        ];
+        $this->assertEquals($expected, $keys);
+    }
+
+
+    public function testKeyRoots()
+    {
+        $keys = [
+            'root1.child',
+            'root2.child.deep',
+            'root2.duplicate',
+            'root3.really.really.deep',
+            '*.wild',
+        ];
+
+        // Standard extract - also does dedupe.
+        $actual = Arrays::keyRoots($keys);
+
+        $expected = [
+            'root1',
+            'root2',
+            'root3',
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        // Wildcards.
+        $actual = Arrays::keyRoots($keys, true);
+
+        $expected = [
+            'root1',
+            'root2',
+            'root3',
+            'wild',
+        ];
+
+        $this->assertEquals($expected, $actual);
+    }
+
+
+    public function testKeyChildren()
+    {
+        $keys = [
+            'root1.child',
+            'root2.child.deep',
+            'root2.duplicate',
+            'root2.duplicate',
+            'root3.really.really.really.deep',
+            '*.wild.card.deep',
+        ];
+
+        // Standard.
+        $actual = Arrays::keyChildren('root1', $keys);
+        $expected = [ 'child' ];
+
+        $this->assertEquals($expected, $actual);
+
+        // Testing dedupe.
+        $actual = Arrays::keyChildren('root2', $keys);
+        $expected = [ 'child.deep', 'duplicate' ];
+
+        $this->assertEquals($expected, $actual);
+
+        // Not sure what this tests.
+        $actual = Arrays::keyChildren('root3', $keys);
+        $expected = [ 'really.really.really.deep' ];
+
+        $this->assertEquals($expected, $actual);
+
+        // Wildcards!
+        $actual = Arrays::keyChildren('root1', $keys, true);
+        $expected = [
+            'child',
+            'wild.card.deep',
+            '*.wild.card.deep',
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        // Deeper wildcards.
+        $actual = Arrays::keyChildren('wild', $actual, true);
+        $expected = [
+            'card.deep',
+            'wild.card.deep',
+            '*.wild.card.deep',
+        ];
+
+        // Deeper again.
+        $this->assertEquals($expected, $actual);
+        $actual = Arrays::keyChildren('card', $actual, true);
+        $expected = [
+            'deep',
+            'wild.card.deep',
+            '*.wild.card.deep',
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        // Edge-case - everything (not wildcard).
+        $actual = Arrays::keyChildren('*', $keys);
+
+        $this->assertEquals($keys, $actual);
     }
 
 
