@@ -43,7 +43,7 @@ class Configure
      * @return object
      * @throws InvalidArgumentException
      */
-    public static function configure($config, string $assert = null, bool $init = true)
+    public static function configure($config, ?string $assert = null, bool $init = true)
     {
         // Mush it into a key-config pair.
         if (is_string($config)) {
@@ -93,7 +93,7 @@ class Configure
      * @param bool $init
      * @return object[]
      */
-    public static function all(array $configs, string $assert = null, bool $init = true): array
+    public static function all(array $configs, ?string $assert = null, bool $init = true): array
     {
         $objects = [];
 
