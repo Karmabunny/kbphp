@@ -23,7 +23,7 @@ trait UpdateTrait
      * @param iterable $config
      * @return void
      */
-    public function update($config)
+    public function update($config): void
     {
         foreach ($config as $key => $item) {
             if (!property_exists($this, $key)) continue;

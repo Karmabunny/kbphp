@@ -30,7 +30,7 @@ class LengthRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function parse(array $ruleset)
+    public function parse(array $ruleset): void
     {
         parent::parse($ruleset);
 

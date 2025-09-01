@@ -14,7 +14,7 @@ use InvalidArgumentException;
  * The function only needs to raise a {@see ValidationException} if the given
  * value is not valid.
  *
- * @package karmabunny\kb\rules
+ * @package karmabunny\kb
  */
 class CallbackRule extends BaseRule
 {
@@ -29,7 +29,7 @@ class CallbackRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function parse(array $ruleset)
+    public function parse(array $ruleset): void
     {
         parent::parse($ruleset);
 
@@ -44,7 +44,7 @@ class CallbackRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function validate($data)
+    public function validate($data): void
     {
         if (!$this->callable or empty($this->fields)) {
             return;

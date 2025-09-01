@@ -6,6 +6,8 @@
 
 namespace karmabunny\kb;
 
+use karmabunny\interfaces\JobInterface;
+
 /**
  * A job. Could be a cron or a worker. You decide.
  *
@@ -13,7 +15,7 @@ namespace karmabunny\kb;
  *
  * @package karmabunny\kb
  */
-abstract class Job implements Loggable
+abstract class Job implements JobInterface, Loggable
 {
     use LoggerTrait;
 
@@ -46,7 +48,7 @@ abstract class Job implements Loggable
      * @return void
      * @throws ValidationException
      */
-    public function update(array $config)
+    public function update(array $config): void
     {
         $this->validate($config);
         $this->config = $config;
@@ -68,16 +70,6 @@ abstract class Job implements Loggable
                 ->addErrors($valid->getErrors());
         }
     }
-
-
-    /**
-     * Run the job.
-     *
-     * Put your job code in here.
-     *
-     * @return void
-     */
-    public abstract function run();
 
 
     /**

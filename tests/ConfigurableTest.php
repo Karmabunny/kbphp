@@ -236,7 +236,7 @@ class ConfigObjectInit implements BaseObject, ConfigurableInit
 
     public $prop5 = 'default';
 
-    public function init()
+    public function init(): void
     {
         $this->prop5 = 'init';
     }

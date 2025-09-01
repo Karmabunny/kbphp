@@ -136,7 +136,7 @@ class Secrets extends DataObject
 
 
     /** @inheritdoc */
-    public function update($config)
+    public function update($config): void
     {
         parent::update($config);
         $this->key_pattern = $this->buildPattern($this->key_rules);

@@ -18,7 +18,7 @@ class OneRequiredRule extends BaseRule
 {
 
     /** @inheritdoc */
-    public function validate($data)
+    public function validate($data): void
     {
         $values = $this->getFieldValues($data);
 

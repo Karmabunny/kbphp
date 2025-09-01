@@ -31,7 +31,7 @@ trait LoggerTrait {
      * @param callable $logger (message, level, category, timestamp)
      * @return int
      */
-    public function addLogger(callable $logger)
+    public function addLogger(callable $logger): int
     {
         $index = count($this->loggers);
         $this->loggers[] = $logger;
@@ -84,7 +84,7 @@ trait LoggerTrait {
      * @param int|float|null $_timestamp default: now
      * @return void
      */
-    public function log($message, ?int $level = null, ?string $_category = null, $_timestamp = null)
+    public function log($message, ?int $level = null, ?string $_category = null, $_timestamp = null): void
     {
         if ($level === null) $level = Log::LEVEL_INFO;
         if ($_category === null) $_category = static::class;
