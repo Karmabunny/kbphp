@@ -79,7 +79,7 @@ trait RulesValidatorTrait
      * @param string|null $scenario
      * @return array
      */
-    public abstract function rules(): array;
+    public abstract function rules(?string $scenario = null): array;
 
 
     /**
