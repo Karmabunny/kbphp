@@ -8,6 +8,7 @@
  */
 namespace karmabunny\kb;
 
+use karmabunny\interfaces\InflectorInterface;
 
 /**
  * Language inflection such as pluralisation.

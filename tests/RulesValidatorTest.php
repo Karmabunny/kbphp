@@ -4,11 +4,11 @@
  * @copyright Copyright (c) 2020 Karmabunny
  */
 
+use karmabunny\interfaces\ValidatesInterface;
 use karmabunny\kb\Collection;
 use karmabunny\kb\RulesClassValidator;
 use karmabunny\kb\RulesValidatorInterface;
 use karmabunny\kb\RulesValidatorTrait;
-use karmabunny\kb\Validates;
 use karmabunny\kb\ValidationException;
 use PHPUnit\Framework\TestCase;
 
@@ -246,7 +246,7 @@ final class RulesValidatorTest extends TestCase
 }
 
 
-abstract class BaseFieldThing extends Collection implements Validates
+abstract class BaseFieldThing extends Collection implements ValidatesInterface
 {
     use RulesValidatorTrait;
 

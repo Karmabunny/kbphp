@@ -4,9 +4,9 @@
  * @copyright Copyright (c) 2020 Karmabunny
  */
 
+use karmabunny\interfaces\ValidatesInterface;
 use karmabunny\kb\Collection;
 use karmabunny\kb\DocValidatorTrait;
-use karmabunny\kb\Validates;
 use karmabunny\kb\ValidationException;
 use PHPUnit\Framework\TestCase;
 
@@ -179,7 +179,7 @@ final class DocValidatorTest extends TestCase {
 class DumbThing extends Collection {}
 
 
-class DocThing extends Collection implements Validates {
+class DocThing extends Collection implements ValidatesInterface {
     use DocValidatorTrait;
 
     /** @var int required */

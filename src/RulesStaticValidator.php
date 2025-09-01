@@ -10,7 +10,7 @@ use ArrayAccess;
 use ArrayObject;
 use Exception;
 use InvalidArgumentException;
-
+use karmabunny\interfaces\RulesValidatorInterface;
 
 /**
  * Rules based validation processor.

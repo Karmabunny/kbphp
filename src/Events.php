@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use InvalidArgumentException;
+use karmabunny\interfaces\EventInterface;
 use ReflectionException;
 use ReflectionFunction;
 use ReflectionNamedType;
