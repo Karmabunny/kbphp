@@ -6,7 +6,11 @@
 
 namespace karmabunny\kb;
 
+use karmabunny\interfaces\ConfigurableInterface;
 use karmabunny\interfaces\JobInterface;
+use karmabunny\interfaces\LoggableInterface;
+use karmabunny\interfaces\RulesValidatorInterface;
+use karmabunny\interfaces\ValidatesInterface;
 
 /**
  * A job. Could be a cron or a worker. You decide.
@@ -15,9 +19,15 @@ use karmabunny\interfaces\JobInterface;
  *
  * @package karmabunny\kb
  */
-abstract class Job implements JobInterface, Loggable
+abstract class Job implements
+    JobInterface,
+    ConfigurableInterface,
+    LoggableInterface,
+    ValidatesInterface
 {
     use LoggerTrait;
+    use RulesValidatorTrait;
+
 
     /** @var int Unix timestamp in seconds. */
     public $start;
@@ -31,54 +41,34 @@ abstract class Job implements JobInterface, Loggable
      *
      * @param array $config
      * @return void
-     * @throws ValidationException
      */
     public function __construct(array $config)
     {
+        $this->update($config);
         $this->start = time();
-        $this->config = $config;
-        $this->validate($config);
+        $this->validate();
     }
 
 
-    /**
-     * Update the job config and validate.
-     *
-     * @param array $config
-     * @return void
-     * @throws ValidationException
-     */
-    public function update(array $config): void
+    /** @inheritdoc */
+    public function update($config): void
     {
-        $this->validate($config);
-        $this->config = $config;
-    }
-
-
-    /**
-     * Validate a config.
-     *
-     * @param array $config
-     * @return void
-     * @throws ValidationException
-     */
-    protected function validate(array $config)
-    {
-        $valid = new RulesValidator($config, $this->rules());
-        if (!$valid->validate()) {
-            throw (new ValidationException)
-                ->addErrors($valid->getErrors());
+        if (!is_array($config)) {
+            $config = iterator_to_array($config, true);
         }
+
+        $this->config = $config;
     }
 
 
     /**
-     * Validate your config, if you like.
      *
-     * @see RulesValidator
-     * @return array
+     * @return RulesValidatorInterface
      */
-    public abstract function rules(): array;
+    public function getValidator(): RulesValidatorInterface
+    {
+        return new RulesStaticValidator($this->config);
+    }
 
 
     /**
