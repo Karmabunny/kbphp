@@ -27,14 +27,15 @@ class Encrypt implements EncryptInterface
      */
     public static function instance(array $config = []): Encrypt
     {
-        static $instance = null;
+        static $instances = [];
+        $config_hash = md5(json_encode($config));
 
         // Create the singleton
-        if ($instance === null) {
-            $instance = new Encrypt($config);
+        if (!isset($instances[$config_hash])) {
+            $instances[$config_hash] = new Encrypt($config);
         }
 
-        return $instance;
+        return $instances[$config_hash];
     }
 
 
