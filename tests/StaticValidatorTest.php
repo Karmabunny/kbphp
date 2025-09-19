@@ -9,7 +9,7 @@ use karmabunny\kb\Validity;
 use PHPUnit\Framework\TestCase;
 
 
-class ValidatorTest extends TestCase
+class StaticValidatorTest extends TestCase
 {
 
     public function dataCheckFailures() {
