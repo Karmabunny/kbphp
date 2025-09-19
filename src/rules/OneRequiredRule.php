@@ -16,6 +16,16 @@ use karmabunny\kb\ValidationException;
  */
 class OneRequiredRule extends BaseRule
 {
+    /** @var string|null */
+    public $group;
+
+    public function parse(array $ruleset)
+    {
+        parent::parse($ruleset);
+
+        $this->group = $ruleset['group'] ?? null;
+    }
+
 
     /** @inheritdoc */
     public function validate($data)
@@ -23,6 +33,10 @@ class OneRequiredRule extends BaseRule
         $values = $this->getFieldValues($data);
 
         if (empty($values)) {
+            if ($this->group) {
+                throw new ValidationException("{$this->group}: At least one of these must be provided");
+            }
+
             throw new ValidationException("At least one of these must be provided");
         }
     }
