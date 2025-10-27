@@ -86,7 +86,9 @@ class Events
             $results[] = $fn($event);
         }
 
-        self::$_log[$sender][get_class($event)][] = microtime(true);
+        if (self::$_log !== null) {
+            self::$_log[$sender][get_class($event)][] = microtime(true);
+        }
 
         return $results;
     }
@@ -199,6 +201,10 @@ class Events
      */
     public static function getLogs(array $filter = []): array
     {
+        if (self::$_log === null) {
+            return [];
+        }
+
         $log = [];
 
         $filter_event = $filter['event'] ?? null;
@@ -244,6 +250,10 @@ class Events
      */
     public static function hasRun(string $sender, string $event): bool
     {
+        if (self::$_log === null) {
+            return false;
+        }
+
         if ($sender === '*') {
             foreach (array_keys(self::$_log) as $sender) {
                 if (isset(self::$_log[$sender][$event])) {
@@ -259,12 +269,31 @@ class Events
 
 
     /**
+     * Disable or enable event logging.
+     *
+     * Default enabled.
+     *
+     * You may want to disable this for long-running processes. But be aware
+     * that the `hasRun()` functionality will also not work.
+     *
+     * @param bool $logging
+     * @return void
+     */
+    public static function setLogging(bool $logging)
+    {
+        self::$_log = $logging ? [] : null;
+    }
+
+
+    /**
      * Clear the event log.
      *
      * @return void
      */
     public static function clearLog()
     {
-        self::$_log = [];
+        if (self::$_log !== null) {
+            self::$_log = [];
+        }
     }
 }
