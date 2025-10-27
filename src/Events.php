@@ -64,7 +64,7 @@ class Events
      * @param EventInterface $event
      * @return array[] event results.
      */
-    public static function trigger(string $sender, EventInterface &$event): array
+    public static function trigger(string $sender, EventInterface $event): array
     {
         // Events are ID'd by their full namespaced class name.
 
