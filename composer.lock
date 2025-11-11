@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "karmabunny/interfaces",
-            "version": "v1.0.0",
+            "version": "v1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Karmabunny/kbinterfaces.git",
-                "reference": "ec4b6a46b55b4449996c006ba5cb500f31848d2e"
+                "reference": "32b0489a5681022be70d37512f28603359ad1fbb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Karmabunny/kbinterfaces/zipball/ec4b6a46b55b4449996c006ba5cb500f31848d2e",
-                "reference": "ec4b6a46b55b4449996c006ba5cb500f31848d2e",
+                "url": "https://api.github.com/repos/Karmabunny/kbinterfaces/zipball/32b0489a5681022be70d37512f28603359ad1fbb",
+                "reference": "32b0489a5681022be70d37512f28603359ad1fbb",
                 "shasum": ""
             },
             "require": {
@@ -53,9 +53,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Karmabunny/kbinterfaces/issues",
-                "source": "https://github.com/Karmabunny/kbinterfaces/tree/v1.0.0"
+                "source": "https://github.com/Karmabunny/kbinterfaces/tree/v1.0.1"
             },
-            "time": "2025-09-01T05:46:40+00:00"
+            "time": "2025-11-11T22:47:53+00:00"
         },
         {
             "name": "symfony/polyfill-php73",
@@ -2129,12 +2129,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": "^7.2|^8"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }
