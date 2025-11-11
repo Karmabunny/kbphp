@@ -55,7 +55,7 @@ trait LoggerTrait {
     {
         if (
             $logger === $this
-            or (is_array($logger) and $logger[0] ?? false === $this)
+            or (is_array($logger) and ($logger[0] ?? false) === $this)
         ) {
             throw new InvalidArgumentException('Cannot attach to self');
         }
