@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use Exception;
+use karmabunny\interfaces\ValidationExceptionInterface;
 
 /**
  * Validator errors.
