@@ -25,7 +25,7 @@ trait ValidErrorsTrait
      * @param string|null $scenario
      * @throws ValidationException
      */
-    public abstract function validate(?string $scenario = null);
+    public abstract function validate(?string $scenario = null): void;
 
 
     /**

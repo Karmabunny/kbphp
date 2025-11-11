@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use ArrayIterator;
+use karmabunny\interfaces\LogSinkInterface;
 
 /**
  * Mostly just level defs.
@@ -109,12 +110,12 @@ class Log
      * $loggable->attach($parent, null, ['stats' => false, 'meta' => false]);
      * ```
      *
-     * @param callable $logger
+     * @param callable|Loggable $logger
      * @param int|null $level
      * @param string|array|null $category
      * @return callable
      */
-    public static function filter(callable $logger, $level = null, $category = null)
+    public static function filter($logger, $level = null, $category = null)
     {
         if ($level === null and $category === null) {
             return $logger;
@@ -158,7 +159,12 @@ class Log
                 return;
             }
 
-            $logger($message, $level, $category, $timestamp);
+            if ($logger instanceof LogSinkInterface) {
+                $logger->log($message, $level, $category, $timestamp);
+            }
+            else {
+                $logger($message, $level, $category, $timestamp);
+            }
         };
     }
 

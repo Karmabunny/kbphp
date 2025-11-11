@@ -26,7 +26,7 @@ class DateRangeRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function parse(array $ruleset)
+    public function parse(array $ruleset): void
     {
         parent::parse($ruleset);
 
@@ -44,7 +44,7 @@ class DateRangeRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function validate($data)
+    public function validate($data): void
     {
         if (count($this->fields) != 2) {
             return;

@@ -8,6 +8,8 @@ namespace karmabunny\kb;
 
 use ArrayAccess;
 use Generator;
+use karmabunny\interfaces\ArrayableInterface;
+use karmabunny\interfaces\SortableInterface;
 use RecursiveIteratorIterator;
 use Throwable;
 use Traversable;
@@ -918,17 +920,17 @@ class Arrays
      *
      * This converts any nested arrayables to arrays.
      *
-     * @param Arrayable|Traversable|array $array
+     * @param ArrayableInterface|Traversable|array $array
      * @return array
      */
     public static function toArray($array): array
     {
-        if ($array instanceof Arrayable) {
+        if ($array instanceof ArrayableInterface) {
             return $array->toArray();
         }
 
         foreach ($array as &$item) {
-            if ($item instanceof Arrayable) {
+            if ($item instanceof ArrayableInterface) {
                 $item = $item->toArray();
                 continue;
             }
@@ -1262,11 +1264,11 @@ class Arrays
                 return 0;
             }
 
-            if ($a instanceof Sortable) {
+            if ($a instanceof SortableInterface) {
                 return $a->compare($b, $mode ?? 'default') * $dir;
             }
 
-            if ($b instanceof Sortable) {
+            if ($b instanceof SortableInterface) {
                 return $b->compare($a, $mode ?? 'default') * $dir * -1;
             }
 

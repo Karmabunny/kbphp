@@ -6,7 +6,7 @@
 namespace karmabunny\kb;
 
 use Exception;
-
+use karmabunny\interfaces\EncryptInterface;
 
 /**
  * The Encrypt library provides two-way encryption of text and binary strings

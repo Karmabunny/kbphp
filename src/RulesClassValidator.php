@@ -9,6 +9,8 @@ namespace karmabunny\kb;
 use ArrayAccess;
 use ArrayObject;
 use InvalidArgumentException;
+use karmabunny\interfaces\RuleInterface;
+use karmabunny\interfaces\RulesValidatorInterface;
 use karmabunny\kb\rules\RequiredRule;
 
 /**

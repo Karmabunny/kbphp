@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use InvalidArgumentException;
+use karmabunny\interfaces\EventInterface;
 
 /**
  * Implements events helpers.
