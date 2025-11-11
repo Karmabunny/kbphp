@@ -63,6 +63,9 @@ trait LoggerTrait {
         if ($level !== null or $category !== null) {
             $logger = Log::filter($logger, $level, $category);
         }
+        else if ($logger instanceof LogSinkInterface) {
+            $logger = [$logger, 'log'];
+        }
 
         $index = count($this->loggers);
         $this->loggers[] = $logger;
@@ -74,18 +77,14 @@ trait LoggerTrait {
      * Forward any logs from this loggable to a parent loggable.
      *
      * @deprecated Use addLogger() instead
-     * @param callable|LogSinkInterface $parent
+     * @param callable|LogSinkInterface $logger
      * @param string|array|null $category filter by category
      * @param int|null $level filter by level
      * @return void
      */
-    public function attach($parent, ?int $level = null, $category = null)
+    public function attach($logger, ?int $level = null, $category = null)
     {
-        if ($level !== null or $category !== null) {
-            $logger = Log::filter($parent, $level, $category);
-        }
-
-        $this->addLogger($logger);
+        $this->addLogger($logger, $level, $category);
     }
 
 
