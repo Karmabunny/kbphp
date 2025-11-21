@@ -66,6 +66,6 @@ abstract class Collection extends DataObject implements
     #[ReturnTypeWillChange]
     public function jsonSerialize()
     {
-        return $this->toArray();
+        return $this->getSerializedProperties();
     }
 }
