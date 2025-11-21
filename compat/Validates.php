@@ -1,7 +1,7 @@
 <?php
 namespace karmabunny\kb;
 
-class_alias(\karmabunny\interfaces\ValidatesInterface::class, Validates::class);
+class_exists(\karmabunny\interfaces\ValidatesInterface::class);
 
 /** @phpstan-ignore-next-line: IDE hints */
 if (false) {

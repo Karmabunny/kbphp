@@ -1,7 +1,7 @@
 <?php
 namespace karmabunny\kb;
 
-class_alias(\karmabunny\interfaces\InflectorInterface::class, InflectorInterface::class);
+class_exists(\karmabunny\interfaces\InflectorInterface::class);
 
 /** @phpstan-ignore-next-line: IDE hints */
 if (false) {

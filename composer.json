@@ -25,7 +25,10 @@
     "autoload": {
         "psr-4": {
             "karmabunny\\kb\\": ["src/", "compat/"]
-        }
+        },
+        "files": [
+            "compat/bootstrap.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

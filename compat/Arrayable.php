@@ -1,7 +1,7 @@
 <?php
 namespace karmabunny\kb;
 
-class_alias(\karmabunny\interfaces\ArrayableInterface::class, Arrayable::class);
+class_exists(\karmabunny\interfaces\ArrayableInterface::class);
 
 /** @phpstan-ignore-next-line: IDE hints */
 if (false) {

@@ -1,7 +1,7 @@
 <?php
 namespace karmabunny\kb;
 
-class_alias(\karmabunny\interfaces\SortableInterface::class, Sortable::class);
+class_exists(\karmabunny\interfaces\SortableInterface::class);
 
 /** @phpstan-ignore-next-line: IDE hints */
 if (false) {

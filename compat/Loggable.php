@@ -1,7 +1,7 @@
 <?php
 namespace karmabunny\kb;
 
-class_alias(\karmabunny\interfaces\LogSinkInterface::class, Loggable::class);
+class_exists(\karmabunny\interfaces\LogSinkInterface::class);
 
 /** @phpstan-ignore-next-line: IDE hints */
 if (false) {

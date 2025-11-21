@@ -1,7 +1,7 @@
 <?php
 namespace karmabunny\kb;
 
-class_alias(\karmabunny\interfaces\ConfigurableInterface::class, Configurable::class);
+class_exists(\karmabunny\interfaces\ConfigurableInterface::class);
 
 /** @phpstan-ignore-next-line: IDE hints */
 if (false) {
