@@ -7,13 +7,14 @@
 namespace karmabunny\kb;
 
 use Exception;
+use karmabunny\interfaces\ValidationExceptionInterface;
 
 /**
  * Validator errors.
  *
  * @package karmabunny\kb
  */
-class ValidationException extends Exception
+class ValidationException extends Exception implements ValidationExceptionInterface
 {
 
     /**

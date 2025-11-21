@@ -14,7 +14,7 @@ use InvalidArgumentException;
  * The function only needs to raise a {@see ValidationException} if the given
  * value is not valid.
  *
- * @package karmabunny\kb\rules
+ * @package karmabunny\kb
  */
 class CallbackRule extends BaseRule
 {

@@ -4,9 +4,9 @@
  * @copyright Copyright (c) 2020 Karmabunny
  */
 
+use karmabunny\interfaces\ConfigurableInitInterface;
+use karmabunny\interfaces\ConfigurableInterface;
 use karmabunny\kb\Configure;
-use karmabunny\kb\Configurable;
-use karmabunny\kb\ConfigurableInit;
 use karmabunny\kb\UpdateTrait;
 use PHPUnit\Framework\TestCase;
 
@@ -220,7 +220,7 @@ class AnonObject2 implements BaseObject
 }
 
 
-class ConfigObject implements BaseObject, Configurable
+class ConfigObject implements BaseObject, ConfigurableInterface
 {
     use UpdateTrait;
 
@@ -230,13 +230,13 @@ class ConfigObject implements BaseObject, Configurable
 }
 
 
-class ConfigObjectInit implements BaseObject, ConfigurableInit
+class ConfigObjectInit implements BaseObject, ConfigurableInitInterface
 {
     use UpdateTrait;
 
     public $prop5 = 'default';
 
-    public function init()
+    public function init(): void
     {
         $this->prop5 = 'init';
     }

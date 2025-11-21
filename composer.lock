@@ -4,8 +4,59 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "556e5b283fd04cdbad38454022fc754a",
+    "content-hash": "4dbe44c2b14e4276e089e5c90c0c73aa",
     "packages": [
+        {
+            "name": "karmabunny/interfaces",
+            "version": "v1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Karmabunny/kbinterfaces.git",
+                "reference": "32b0489a5681022be70d37512f28603359ad1fbb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Karmabunny/kbinterfaces/zipball/32b0489a5681022be70d37512f28603359ad1fbb",
+                "reference": "32b0489a5681022be70d37512f28603359ad1fbb",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2|^8"
+            },
+            "require-dev": {
+                "phpcompatibility/php-compatibility": "^9.3",
+                "phpstan/phpstan": "^2.1",
+                "phpunit/phpunit": "^9.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "karmabunny\\interfaces\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Karmabunny",
+                    "email": "info@karmabunny.com.au"
+                }
+            ],
+            "description": "Base KB interfaces",
+            "keywords": [
+                "interfaces",
+                "karmabunny",
+                "kb",
+                "utilities"
+            ],
+            "support": {
+                "issues": "https://github.com/Karmabunny/kbinterfaces/issues",
+                "source": "https://github.com/Karmabunny/kbinterfaces/tree/v1.0.1"
+            },
+            "time": "2025-11-11T22:47:53+00:00"
+        },
         {
             "name": "symfony/polyfill-php73",
             "version": "v1.28.0",
@@ -1973,12 +2024,12 @@
             "version": "3.7.2",
             "source": {
                 "type": "git",
-                "url": "https://github.com/squizlabs/PHP_CodeSniffer.git",
+                "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
                 "reference": "ed8e00df0a83aa96acf703f8c2979ff33341f879"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/ed8e00df0a83aa96acf703f8c2979ff33341f879",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/ed8e00df0a83aa96acf703f8c2979ff33341f879",
                 "reference": "ed8e00df0a83aa96acf703f8c2979ff33341f879",
                 "shasum": ""
             },
@@ -2078,12 +2129,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": "^7.2|^8"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }

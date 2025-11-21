@@ -6,6 +6,8 @@
 
 namespace karmabunny\kb;
 
+use karmabunny\interfaces\EventInterface;
+
 /**
  * An abstract base event.
  *

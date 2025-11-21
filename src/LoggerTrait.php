@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use InvalidArgumentException;
+use karmabunny\interfaces\LogSinkInterface;
 
 /**
  * Hook logging handlers into a class.
@@ -28,11 +29,44 @@ trait LoggerTrait {
     /**
      * Register a logger.
      *
-     * @param callable $logger (message, level, category, timestamp)
+     * Logs can be filtered by level and category.
+     *
+     * ```
+     * // Only permit log levels higher than this:
+     * // (excludes INFO, DEBUG, etc)
+     * $loggable->addLogger($logger, Log::LEVEL_WARNING);
+     *
+     * // Only permit this category:
+     * $loggable->addLogger($logger, null, 'progress');
+     *
+     * // Only permit these categories:
+     * $loggable->addLogger($logger, null, ['log.request', 'log.response']);
+     *
+     * // Exclude these categories:
+     * $loggable->addLogger($logger, null, ['stats' => false, 'meta' => false]);
+     * ```
+     *
+     * @param callable|LogSinkInterface $logger (message, level, category, timestamp)
+     * @param string|array|null $category filter by category
+     * @param int|null $level filter by level
      * @return int
      */
-    public function addLogger(callable $logger)
+    public function addLogger($logger, ?int $level = null, $category = null): int
     {
+        if (
+            $logger === $this
+            or (is_array($logger) and ($logger[0] ?? false) === $this)
+        ) {
+            throw new InvalidArgumentException('Cannot attach to self');
+        }
+
+        if ($level !== null or $category !== null) {
+            $logger = Log::filter($logger, $level, $category);
+        }
+        else if ($logger instanceof LogSinkInterface) {
+            $logger = [$logger, 'log'];
+        }
+
         $index = count($this->loggers);
         $this->loggers[] = $logger;
         return $index;
@@ -42,36 +76,15 @@ trait LoggerTrait {
     /**
      * Forward any logs from this loggable to a parent loggable.
      *
-     * Logs can be filtered by level and category.
-     *
-     * ```
-     * // Only permit log levels higher than this:
-     * // (excludes INFO, DEBUG, etc)
-     * $loggable->attach($parent, Log::LEVEL_WARNING);
-     *
-     * // Only permit this category:
-     * $loggable->attach($parent, null, 'progress');
-     *
-     * // Only permit these categories:
-     * $loggable->attach($parent, null, ['log.request', 'log.response']);
-     *
-     * // Exclude these categories:
-     * $loggable->attach($parent, null, ['stats' => false, 'meta' => false]);
-     * ```
-     *
-     * @param Loggable $parent
+     * @deprecated Use addLogger() instead
+     * @param callable|LogSinkInterface $logger
      * @param string|array|null $category filter by category
      * @param int|null $level filter by level
      * @return void
      */
-    public function attach(Loggable $parent, ?int $level = null, $category = null)
+    public function attach($logger, ?int $level = null, $category = null)
     {
-        if ($parent === $this) {
-            throw new InvalidArgumentException('Cannot attach to self');
-        }
-
-        $logger = Log::filter([$parent, 'log'], $level, $category);
-        $this->addLogger($logger);
+        $this->addLogger($logger, $level, $category);
     }
 
 

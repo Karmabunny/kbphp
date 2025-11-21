@@ -10,6 +10,7 @@ use ArrayAccess;
 use ArrayIterator;
 use IteratorAggregate;
 use JsonSerializable;
+use karmabunny\interfaces\ArrayableInterface;
 use ReturnTypeWillChange;
 use Serializable;
 use Traversable;
@@ -43,7 +44,7 @@ abstract class Collection extends DataObject implements
         IteratorAggregate,
         Serializable,
         JsonSerializable,
-        Arrayable,
+        ArrayableInterface,
         DirtyObjectInterface
 {
 

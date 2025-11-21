@@ -6,6 +6,8 @@
 
 namespace karmabunny\kb;
 
+use karmabunny\interfaces\ConfigurableInterface;
+
 /**
  * The simplest object.
  *
@@ -19,7 +21,7 @@ namespace karmabunny\kb;
  *
  * @package karmabunny\kb
  */
-abstract class DataObject implements Configurable
+abstract class DataObject implements ConfigurableInterface
 {
     use UpdateTrait;
 

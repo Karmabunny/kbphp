@@ -6,6 +6,8 @@
 
 namespace karmabunny\kb;
 
+use karmabunny\interfaces\ArrayableInterface;
+
 /**
  * This object implements new arrayable behaviours (when using ArrayableTrait).
  *
@@ -60,7 +62,7 @@ namespace karmabunny\kb;
  * @see ArrayableTrait
  * @package karmabunny\kb
  */
-interface ArrayableFields extends Arrayable
+interface ArrayableFields extends ArrayableInterface
 {
 
     /**

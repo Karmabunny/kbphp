@@ -6,6 +6,7 @@
 
 namespace karmabunny\kb;
 
+use karmabunny\interfaces\ArrayableInterface;
 use Traversable;
 
 /**
@@ -207,7 +208,7 @@ trait ArrayableTrait
             // Recurse into nested arrays or arrayables.
             else if (
                 is_array($item)
-                or $item instanceof Arrayable
+                or $item instanceof ArrayableInterface
                 or $item instanceof Traversable
             ) {
                 $item = Arrays::toArray($item);

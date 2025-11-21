@@ -4,8 +4,8 @@
  * @copyright Copyright (c) 2020 Karmabunny
  */
 
+use karmabunny\interfaces\SortableInterface;
 use karmabunny\kb\Arrays;
-use karmabunny\kb\Sortable;
 use karmabunny\kb\SortFieldsTrait;
 use PHPUnit\Framework\TestCase;
 
@@ -1365,7 +1365,7 @@ abstract class SortBase
 }
 
 // This is only sortable against itself.
-class SortItem1 extends SortBase implements Sortable
+class SortItem1 extends SortBase implements SortableInterface
 {
     public function compare($other, $mode = 'default'): int
     {
@@ -1388,7 +1388,7 @@ class SortItem3 extends SortBase
 }
 
 // Field sorter.
-class SortFields extends SortBase implements Sortable
+class SortFields extends SortBase implements SortableInterface
 {
     use SortFieldsTrait;
 

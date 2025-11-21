@@ -7,6 +7,8 @@
 namespace karmabunny\kb;
 
 use InvalidArgumentException;
+use karmabunny\interfaces\ConfigurableInitInterface;
+use karmabunny\interfaces\ConfigurableInterface;
 use ReflectionClass;
 use ReflectionException;
 
@@ -66,7 +68,7 @@ class Configure
                 throw new InvalidArgumentException("{$class} must extend '{$assert}'");
             }
 
-            if ($init and $config instanceof ConfigurableInit) {
+            if ($init and $config instanceof ConfigurableInitInterface) {
                 $config->init();
             }
 
@@ -77,7 +79,7 @@ class Configure
         self::update($object, $config);
 
         // Call the init() function, if present.
-        if ($init and $object instanceof ConfigurableInit) {
+        if ($init and $object instanceof ConfigurableInitInterface) {
             $object->init();
         }
 
@@ -128,7 +130,7 @@ class Configure
     {
         foreach ($objects as $object) {
             if (
-                ($object instanceof ConfigurableInit)
+                ($object instanceof ConfigurableInitInterface)
                 or ($force and method_exists($object, 'init'))
             ) {
                 $object->init();
@@ -200,7 +202,7 @@ class Configure
     public static function update($object, array $config)
     {
         // Do configurable things because we can.
-        if ($object instanceof Configurable) {
+        if ($object instanceof ConfigurableInterface) {
             $object->update($config);
         }
         // Or just the regular.

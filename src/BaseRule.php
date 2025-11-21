@@ -8,6 +8,7 @@ namespace karmabunny\kb;
 
 use ArrayAccess;
 use InvalidArgumentException;
+use karmabunny\interfaces\RuleInterface;
 
 /**
  * A base helper class for rules.
