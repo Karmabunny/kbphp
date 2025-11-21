@@ -20,6 +20,10 @@ use ReflectionException;
 class Configure
 {
 
+    /** @var object[] [ key => object ] */
+    protected static $instances = [];
+
+
     /**
      * Configure an object.
      *
@@ -182,6 +186,62 @@ class Configure
         catch (ReflectionException $ex) {
             throw new InvalidArgumentException("Class '{$class}' cannot be instantiated");
         }
+    }
+
+
+    /**
+     * Get a singleton instance for this class + config.
+     *
+     * Each unique config creates a new instance. If you instead want to re-use the
+     * same global instance but instead update the config, you'll have do that
+     * manually. E.g.
+     *
+     * ```
+     * $instance = Configure::getStaticInstance(MyClass::class);
+     * $instance->update($config);
+     * ```
+     *
+     * IMPORTANT: This will not work if the constructor requires arguments.
+     * The config is applied via {@see Configurable} or dynamic properties.
+     *
+     * ALSO NOTE: This will call the `validate()` method on the object if it
+     * implements {@see Validates}.
+     *
+     * @template T
+     * @param class-string<T> $class
+     * @param array $config
+     * @param string|null $key otherwise generated from the config
+     * @return T
+     * @throws InvalidArgumentException
+     * @throws ValidationException
+     */
+    public static function getStaticInstance(string $class, array $config = [], ?string $key = null)
+    {
+        if ($key) {
+            $key = $class . '.' . $key;
+        }
+        else if ($config) {
+            $sorted = $config;
+            ksort($sorted);
+            $key = $class . '.' . sha1(json_encode($sorted));
+        }
+        else {
+            $key = $class . '.default';
+        }
+
+        if (isset(self::$instances[$key])) {
+            return self::$instances[$key];
+        }
+
+        $object = self::instance($class);
+        self::update($object, $config);
+
+        if ($object instanceof Validates) {
+            $object->validate();
+        }
+
+        self::$instances[$key] = $object;
+        return $object;
     }
 
 
