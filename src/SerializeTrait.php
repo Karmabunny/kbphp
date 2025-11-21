@@ -35,8 +35,8 @@ trait SerializeTrait
      * Override this to modify the behaviour of the serializer.
      *
      * By default, this returns properties that are:
-     * - public or protected
-     * - not private
+     * - public
+     * - not private or protected
      * - not static
      * - not implementing `NotSerializable`
      *
@@ -44,7 +44,7 @@ trait SerializeTrait
      */
     protected function getSerializedProperties(): array
     {
-        $properties = Reflect::getProperties($this, ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PUBLIC);
+        $properties = Reflect::getProperties($this, ReflectionProperty::IS_PUBLIC);
 
         $properties = array_filter($properties, function($value) {
             return !(is_object($value) and $value instanceof NotSerializable);
