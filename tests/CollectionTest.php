@@ -189,7 +189,7 @@ final class CollectionTest extends TestCase {
         $other = unserialize($str);
 
         // 1. The private secret resets, protected is lives through serialize.
-        $this->assertEquals(['a secret', 'nope'], $other->getSecrets());
+        $this->assertEquals(['a secret', 'okay'], $other->getSecrets());
 
         // 2. The static var isn't modified by unserialize.
         $this->assertEquals(888, Thingo::$common);
