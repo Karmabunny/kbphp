@@ -5,14 +5,14 @@
  */
 namespace karmabunny\kb;
 
-use Exception;
 use karmabunny\interfaces\EncryptInterface;
+use karmabunny\interfaces\ValidatesInterface;
 
 /**
  * The Encrypt library provides two-way encryption of text and binary strings
  * using the openSSL extension.
  */
-class Encrypt implements EncryptInterface
+class Encrypt implements EncryptInterface, ValidatesInterface
 {
 
     /** @var array */
@@ -47,22 +47,35 @@ class Encrypt implements EncryptInterface
      * Loads encryption configuration and validates the data.
      *
      * @param array $config Encrypt configuration including key, cipher and iv_size
-     * @throws Exception
+     * @throws ValidationException
      */
     public function __construct(array $config)
     {
-        if (empty($config['key'])) {
-            throw new Exception('No encryption key provided in config');
+        $this->config = $config;
+        $this->validate();
+    }
+
+
+    /** @inheritdoc */
+    public function validate(?string $scenario = null): void
+    {
+        if (empty($this->config['key'])) {
+            throw new ValidationException('No encryption key provided');
+        }
+
+        if (empty($this->config['cipher'])) {
+            throw new ValidationException('No encryption cipher provided');
+        }
+
+        if (empty($this->config['iv_size'])) {
+            throw new ValidationException('No encryption iv_size provided');
         }
 
         $ciphers = openssl_get_cipher_methods(true);
 
-        if (!in_array($config['cipher'], $ciphers)) {
-            throw new Exception("Invalid encrypt cipher '{$config['cipher']}'");
+        if (!in_array($this->config['cipher'], $ciphers)) {
+            throw new ValidationException("Invalid encrypt cipher '{$this->config['cipher']}'");
         }
-
-        // Cache the config in the object
-        $this->config = $config;
     }
 
 
