@@ -28,7 +28,7 @@ trait DocValidatorTrait {
      * @return void
      * @throws ValidationException
      */
-    public function validate(?string $scenario = null): void
+    public function validate(?string $scenario = null)
     {
         $errors = $this->valid($scenario);
         if ($errors !== true) {

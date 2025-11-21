@@ -97,7 +97,7 @@ trait LoggerTrait {
      * @param int|float|null $_timestamp default: now
      * @return void
      */
-    public function log($message, ?int $level = null, ?string $_category = null, $_timestamp = null): void
+    public function log($message, ?int $level = null, ?string $_category = null, $_timestamp = null)
     {
         if ($level === null) $level = Log::LEVEL_INFO;
         if ($_category === null) $_category = static::class;

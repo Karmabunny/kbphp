@@ -20,7 +20,7 @@ class RequiredRule extends BaseRule
 {
 
     /** @inheritdoc */
-    public function validate($data): void
+    public function validate($data)
     {
         if (empty($this->fields)) {
             return;

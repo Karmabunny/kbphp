@@ -26,7 +26,7 @@ class RegexRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function parse(array $ruleset): void
+    public function parse(array $ruleset)
     {
         parent::parse($ruleset);
 

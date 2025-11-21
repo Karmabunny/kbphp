@@ -32,7 +32,7 @@ abstract class BaseRule implements RuleInterface
 
 
     /** @inheritdoc */
-    public function parse(array $ruleset): void
+    public function parse(array $ruleset)
     {
         $this->fields = [];
 
@@ -68,7 +68,7 @@ abstract class BaseRule implements RuleInterface
 
 
     /** @inheritdoc */
-    public function validate($data): void
+    public function validate($data)
     {
         if (empty($this->fields)) {
             return;

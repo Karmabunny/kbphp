@@ -43,7 +43,7 @@ class Inflector extends DataObject implements InflectorInterface
 
 
     /** @inheritdoc */
-    public function update($config): void
+    public function update($config)
     {
         parent::update($config);
         $this->uncountable = array_combine($this->uncountable, $this->uncountable);

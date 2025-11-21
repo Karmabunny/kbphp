@@ -23,7 +23,7 @@ trait UpdateTidyTrait
      * @param iterable $config
      * @return void
      */
-    public function update($config): void
+    public function update($config)
     {
         $fields = array_fill_keys(static::getProperties(), true);
 
