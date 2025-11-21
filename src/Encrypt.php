@@ -5,6 +5,7 @@
  */
 namespace karmabunny\kb;
 
+use karmabunny\interfaces\ConfigurableInterface;
 use karmabunny\interfaces\EncryptInterface;
 use karmabunny\interfaces\ValidatesInterface;
 
@@ -12,35 +13,12 @@ use karmabunny\interfaces\ValidatesInterface;
  * The Encrypt library provides two-way encryption of text and binary strings
  * using the openSSL extension.
  */
-class Encrypt implements EncryptInterface, ValidatesInterface
+class Encrypt implements EncryptInterface, ConfigurableInterface, ValidatesInterface
 {
+    use InstanceTrait;
 
     /** @var array */
     protected $config;
-
-
-    /**
-     * Returns a singleton instance of Encrypt.
-     *
-     * @param array $config configuration options
-     * @return Encrypt
-     */
-    public static function instance(array $config = []): Encrypt
-    {
-        static $instances = [];
-
-        // Sort by key to ensure consistent hash
-        $sorted_config = $config;
-        ksort($sorted_config);
-        $config_hash = hash('sha256', json_encode($sorted_config));
-
-        // Create the singleton
-        if (!isset($instances[$config_hash])) {
-            $instances[$config_hash] = new Encrypt($config);
-        }
-
-        return $instances[$config_hash];
-    }
 
 
     /**
@@ -49,10 +27,21 @@ class Encrypt implements EncryptInterface, ValidatesInterface
      * @param array $config Encrypt configuration including key, cipher and iv_size
      * @throws ValidationException
      */
-    public function __construct(array $config)
+    public function __construct(array $config = [])
     {
-        $this->config = $config;
+        $this->update($config);
         $this->validate();
+    }
+
+
+    /** @inheritdoc */
+    public function update($config): void
+    {
+        if (!is_array($config)) {
+            $config = iterator_to_array($config);
+        }
+
+        $this->config = $config;
     }
 
 
