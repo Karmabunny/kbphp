@@ -64,7 +64,7 @@ trait CachedHelperTrait
     protected function getCachedDate(string $property): DateTimeInterface
     {
         return $this->getCachedValue($property, function() use ($property) {
-            return new DateTimeImmutable($this->$property);
+            return new DateTimeImmutable((string) $this->$property);
         });
     }
 
