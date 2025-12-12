@@ -12,7 +12,6 @@ class EventTest extends TestCase
     public function setUp(): void
     {
         EventsReset::reset();
-        Events::setLogging(true);
     }
 
 
@@ -520,6 +519,7 @@ class EventsReset extends Events
     {
         Events::$_events = [];
         Events::clearLog(true);
+        Events::setLogging(false);
     }
 }
 

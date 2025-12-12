@@ -31,9 +31,9 @@ class Events
     /**
      * [emitter][event] = [ time, time... ]
      *
-     * @var float[][][]
+     * @var null|(float[][][])
      */
-    protected static $_log = [];
+    protected static $_log = null;
 
 
     /**
@@ -280,7 +280,7 @@ class Events
     /**
      * Disable or enable event logging.
      *
-     * Default enabled.
+     * Default disabled.
      *
      * @param bool $logging
      * @return void
