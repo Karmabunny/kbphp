@@ -12,6 +12,7 @@ class EventTest extends TestCase
     public function setUp(): void
     {
         EventsReset::reset();
+        Events::setLogging(true);
     }
 
 
@@ -366,6 +367,8 @@ class EventTest extends TestCase
 
     public function testLogs()
     {
+        Events::setLogging(true);
+
         $this->testNested();
 
         // Get all logs, nested structure.
@@ -388,6 +391,9 @@ class EventTest extends TestCase
         $this->assertCount(2, $logs[SubEmitter::class][TestEvent::class]);
         $this->assertCount(2, $logs[LeafEmitter::class][TestEvent::class]);
 
+        $this->assertCount(0, $logs[NullEmitter::class][TestEvent::class] ?? []);
+        $this->assertCount(0, $logs[NullEmitter::class] ?? []);
+
         Events::clearLog();
         $logs = Events::getLogs();
         $this->assertCount(0, $logs);
@@ -396,6 +402,8 @@ class EventTest extends TestCase
 
     public function testLogsFilter()
     {
+        Events::setLogging(true);
+
         $this->testNested();
 
         $logs = Events::getLogs(['sender' => LeafEmitter::class]);
@@ -425,6 +433,8 @@ class EventTest extends TestCase
 
     public function testLogsFlat()
     {
+        Events::setLogging(true);
+
         $this->testNested();
 
         $logs = Events::getLogs(['flatten' => true]);
@@ -434,6 +444,49 @@ class EventTest extends TestCase
             $this->assertStringStartsWith((string) floor(time() / 10), $item);
             $this->assertStringEndsWith('TestEvent', $item);
         }
+    }
+
+
+    public function testHasRun()
+    {
+        Events::setLogging(true);
+
+        $this->testNested();
+
+        $actual = Events::hasRun(RootEmitter::class, TestEvent::class);
+        $this->assertTrue($actual);
+
+        $actual = Events::hasRun(SubEmitter::class, TestEvent::class);
+        $this->assertTrue($actual);
+
+        $actual = Events::hasRun(LeafEmitter::class, TestEvent::class);
+        $this->assertTrue($actual);
+
+        // Extra event.
+        $actual = Events::hasRun(RootEmitter::class, TestOtherEvent::class);
+        $this->assertFalse($actual);
+
+        $actual = Events::hasRun(LeafEmitter::class, TestOtherEvent::class);
+        $this->assertFalse($actual);
+
+        $event = new TestOtherEvent();
+        Events::trigger(LeafEmitter::class, $event);
+
+        $actual = Events::hasRun(RootEmitter::class, TestOtherEvent::class);
+        $this->assertFalse($actual);
+
+        $actual = Events::hasRun(LeafEmitter::class, TestOtherEvent::class);
+        $this->assertTrue($actual);
+
+        // Never ever triggered.
+        $actual = Events::hasRun(NullEmitter::class, TestEvent::class);
+        $this->assertFalse($actual);
+
+        Events::clearLog();
+
+        // Now empty.
+        $actual = Events::hasRun(RootEmitter::class, TestEvent::class);
+        $this->assertFalse($actual);
     }
 }
 
@@ -521,4 +574,10 @@ class OtherEmitter extends RootEmitter
         $results = $this->trigger(OtherEmitter::class, $event);
         return $results;
     }
+}
+
+
+class NullEmitter
+{
+    use EventableTrait;
 }
