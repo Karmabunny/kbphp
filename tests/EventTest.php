@@ -16,6 +16,15 @@ class EventTest extends TestCase
     }
 
 
+    public function dataWithLogs(): array
+    {
+        return [
+            'with logs' => [true],
+            'without logs' => [false],
+        ];
+    }
+
+
     /**
      * Root listeners receive root events.
      */
@@ -447,9 +456,10 @@ class EventTest extends TestCase
     }
 
 
-    public function testHasRun()
+    /** @dataProvider dataWithLogs */
+    public function testHasRun($withLogs)
     {
-        Events::setLogging(true);
+        Events::setLogging($withLogs);
 
         $this->testNested();
 
@@ -482,7 +492,16 @@ class EventTest extends TestCase
         $actual = Events::hasRun(NullEmitter::class, TestEvent::class);
         $this->assertFalse($actual);
 
-        Events::clearLog();
+        Events::clearLog(false);
+
+        $logs = Events::getLogs();
+        $this->assertCount(0, $logs);
+
+        // Has log remains.
+        $actual = Events::hasRun(RootEmitter::class, TestEvent::class);
+        $this->assertTrue($actual);
+
+        Events::clearLog(true);
 
         // Now empty.
         $actual = Events::hasRun(RootEmitter::class, TestEvent::class);
@@ -500,7 +519,7 @@ class EventsReset extends Events
     public static function reset()
     {
         Events::$_events = [];
-        Events::clearLog();
+        Events::clearLog(true);
     }
 }
 

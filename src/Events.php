@@ -37,6 +37,14 @@ class Events
 
 
     /**
+     * [ emitter, event ] = latest time
+     *
+     * @var float[][]
+     */
+    protected static $_run = [];
+
+
+    /**
      * Fire an event.
      *
      * Given a class tree like:
@@ -80,6 +88,8 @@ class Events
             array_push($handlers, ...$some);
         }
 
+        $time = microtime(true);
+
         $results = [];
 
         // Fire off.
@@ -88,8 +98,10 @@ class Events
         }
 
         if (self::$_log !== null) {
-            self::$_log[$sender][get_class($event)][] = microtime(true);
+            self::$_log[$sender][get_class($event)][] = $time;
         }
+
+        self::$_run[$sender][get_class($event)] = $time;
 
         return $results;
     }
@@ -251,20 +263,16 @@ class Events
      */
     public static function hasRun(string $sender, string $event): bool
     {
-        if (self::$_log === null) {
-            return false;
-        }
-
         if ($sender === '*') {
-            foreach (array_keys(self::$_log) as $sender) {
-                if (isset(self::$_log[$sender][$event])) {
+            foreach (array_keys(self::$_run) as $sender) {
+                if (isset(self::$_run[$sender][$event])) {
                     return true;
                 }
             }
             return false;
         }
         else {
-            return !empty(self::$_log[$sender][$event]);
+            return !empty(self::$_run[$sender][$event]);
         }
     }
 
@@ -273,9 +281,6 @@ class Events
      * Disable or enable event logging.
      *
      * Default enabled.
-     *
-     * You may want to disable this for long-running processes. But be aware
-     * that the `hasRun()` functionality will also not work.
      *
      * @param bool $logging
      * @return void
@@ -289,12 +294,17 @@ class Events
     /**
      * Clear the event log.
      *
+     * @param bool $clearRunLog
      * @return void
      */
-    public static function clearLog()
+    public static function clearLog(bool $clearRunLog = false)
     {
         if (self::$_log !== null) {
             self::$_log = [];
+        }
+
+        if ($clearRunLog) {
+            self::$_run = [];
         }
     }
 }
