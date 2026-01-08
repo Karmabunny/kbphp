@@ -6,6 +6,9 @@
 
 namespace karmabunny\kb;
 
+use JsonException;
+use ReflectionProperty;
+
 /**
  * This implements basic `update()` behaviour for an object.
  *
@@ -19,14 +22,52 @@ namespace karmabunny\kb;
 trait UpdateTrait
 {
     /**
+     * Convert a JSON-encoded string to an array where expected
+     *
+     * @throws JsonException
+     */
+    protected function convertJsonItem(string $key, mixed &$item): void
+    {
+        $type = (new ReflectionProperty($this, $key))->getType();
+        // TODO: use $type?->getName() once required PHP is >= 8.0
+        if (is_array($item) || $type === null || $type->getName() !== 'array') {
+            return;
+        }
+
+        if ($item === '' || $item === null) {
+            if ($property_type->allowsNull()) {
+                $item = null;
+            } else {
+                $item = [];
+            }
+            return;
+        }
+
+        // N.B. a MySQL JSON column will always store valid JSON, so
+        // Json::decode should never throw an exception, outside of
+        // memory/depth constraints
+        $item = Json::decode($item);
+
+        // Gracefully handle change from single value to multi-value column
+        if (is_scalar($item)) {
+            $item = [$item];
+        }
+    }
+
+    /**
      *
      * @param iterable $config
      * @return void
+     * @throws JsonException
      */
     public function update($config)
     {
         foreach ($config as $key => $item) {
-            if (!property_exists($this, $key)) continue;
+            if (!property_exists($this, $key)) {
+                continue;
+            }
+
+            $this->convertJsonItem($key, $item);
             $this->$key = $item;
         }
 
