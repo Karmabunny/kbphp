@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use JsonException;
+use ReflectionNamedType;
 use ReflectionProperty;
 
 /**
@@ -29,8 +30,7 @@ trait UpdateTrait
     protected function convertJsonItem(string $key, mixed &$item): void
     {
         $type = (new ReflectionProperty($this, $key))->getType();
-        // TODO: use $type?->getName() once required PHP is >= 8.0
-        if (is_array($item) || $type === null || $type->getName() !== 'array') {
+        if (is_array($item) || (!$type instanceof ReflectionNamedType) || $type->getName() !== 'array') {
             return;
         }
 
