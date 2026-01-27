@@ -12,6 +12,13 @@ use PHPUnit\Framework\TestCase;
  */
 final class TimeTest extends TestCase {
 
+
+    public function setUp(): void
+    {
+        Time::setTimeTravel(null);
+    }
+
+
     public function testUtime()
     {
         $one = Time::utime(true);
@@ -534,5 +541,76 @@ final class TimeTest extends TestCase {
     {
         $actual = Time::getTimezoneOffset($timezone, strtotime($testDate));
         $this->assertEquals($expected, $actual);
+    }
+
+
+
+    public function testTimeTravel()
+    {
+        // Sanity.
+        $date = Time::getDate();
+        $this->assertEquals(date('Y-m-d H:i:s'), $date->format('Y-m-d H:i:s'));
+
+        // Set time travel.
+        Time::setTimeTravel('2024-01-01 12:00:00');
+
+        $date = Time::getDate('2024-01-01 12:00:00');
+        $this->assertEquals('2024-01-01 12:00:00', $date->format('Y-m-d H:i:s'));
+
+        sleep(1);
+
+        // It moved forward.
+        $date = Time::getDate();
+        $this->assertEquals('2024-01-01 12:00:01', $date->format('Y-m-d H:i:s'));
+
+        // Reset.
+        Time::setTimeTravel(null);
+
+        $now = new DateTimeImmutable();
+        $date = Time::getDate();
+        $this->assertEquals($now->format('Y-m-d H:i:s'), $date->format('Y-m-d H:i:s'));
+    }
+
+
+    public function testTimeTravelPause()
+    {
+        // Sanity.
+        $date = Time::getDate();
+        $this->assertEquals(date('Y-m-d H:i:s'), $date->format('Y-m-d H:i:s'));
+
+        // Pause time.
+        $paused = new DateTimeImmutable();
+        Time::pause();
+
+        $date = Time::getDate();
+        $this->assertEquals($paused->format('Y-m-d H:i:s'), $date->format('Y-m-d H:i:s'));
+
+        // Tick a little.
+        sleep(1);
+
+        // Doesn't change.
+        $date = Time::getDate();
+        $this->assertEquals($paused->format('Y-m-d H:i:s'), $date->format('Y-m-d H:i:s'));
+
+        // Resume time.
+        Time::pause(false);
+
+        // Not immediately different.
+        $date = Time::getDate();
+        $this->assertNotEquals($paused->format('Y-m-d H:i:s'), $date->format('Y-m-d H:i:s'));
+
+        // Tick a little.
+        sleep(1);
+
+        $date = Time::getDate();
+        $now = $paused->modify('+1 second');
+        $this->assertEquals($now->format('Y-m-d H:i:s'), $date->format('Y-m-d H:i:s'));
+
+        // Reset.
+        Time::setTimeTravel(null);
+
+        $now = new DateTimeImmutable();
+        $date = Time::getDate();
+        $this->assertEquals($now->format('Y-m-d H:i:s'), $date->format('Y-m-d H:i:s'));
     }
 }

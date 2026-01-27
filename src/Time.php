@@ -13,6 +13,7 @@ use DateTimeInterface;
 use DateTimeZone;
 use Generator;
 use InvalidArgumentException;
+use SeekableIterator;
 
 /**
  * Various date and time utilities.
@@ -42,6 +43,68 @@ class Time
         6 => null,
         7 => null,
     ];
+
+
+    protected static $time_travel = null;
+
+
+    public static function getDate(string $modifier = 'now'): DateTimeImmutable
+    {
+        $date = new DateTimeImmutable();
+
+        if (self::$time_travel !== null) {
+            $now = microtime(true);
+            [$time, $travel] = self::$time_travel;
+
+            [$seconds, $microseconds] = explode('.', sprintf('%.6f', $travel));
+            $date = $date->setTimestamp($seconds);
+            $date = $date->setMicrosecond($microseconds);
+
+            if ($time > 0 and ($since = ($now - $time) > 0)) {
+                [$seconds, $microseconds] = explode('.', sprintf('%.6f', $since));
+                $date = $date->modify("+{$seconds} seconds");
+                $date = $date->setMicrosecond($microseconds);
+            }
+        }
+
+        if ($modifier != 'now') {
+            $date = $date->modify($modifier);
+        }
+
+        return $date;
+    }
+
+
+    public static function setTimeTravel($date): void
+    {
+        if ($date === null) {
+            self::$time_travel = null;
+        }
+        else {
+            if (!$date instanceof DateTimeImmutable) {
+                $date = self::parse($date);
+            }
+
+            $now = microtime(true);
+            $travel = self::toTimeFloat($date);
+            self::$time_travel = [$now, $travel];
+        }
+    }
+
+
+    public static function pause(bool $pause = true): void
+    {
+        if ($pause) {
+            $time = microtime(true);
+            self::$time_travel = [0, $time];
+        }
+        else if (self::$time_travel !== null and self::$time_travel[0] == 0) {
+            $now = microtime(true);
+            [, $travel] = self::$time_travel;
+
+            self::$time_travel = [$now, $travel];
+        }
+    }
 
 
     /**
@@ -857,13 +920,14 @@ class Time
      * List of years (starting from this year).
      *
      * @param int $length number of years to include
+     * @param int|null $year start year
      * @return int[]
      */
-    public static function years(int $length = 5): array
+    public static function years(int $length = 5, ?int $year = null): array
     {
         $years = [];
 
-        $now = new DateTimeImmutable();
+        $now = new DateTimeImmutable($year ? "{$year}-01-01" : 'now');
         $year = (int) $now->format('Y');
 
         for ($i = $year - $length; $i <= $year + $length; $i++) {
