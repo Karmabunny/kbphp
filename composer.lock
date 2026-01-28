@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4dbe44c2b14e4276e089e5c90c0c73aa",
+    "content-hash": "3250080f6aa48c9395618cd62548d528",
     "packages": [
         {
             "name": "karmabunny/interfaces",
-            "version": "v1.0.1",
+            "version": "v1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Karmabunny/kbinterfaces.git",
-                "reference": "32b0489a5681022be70d37512f28603359ad1fbb"
+                "reference": "dcf87a7013dbdb29c66480d3bdb8561d1167e0fe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Karmabunny/kbinterfaces/zipball/32b0489a5681022be70d37512f28603359ad1fbb",
-                "reference": "32b0489a5681022be70d37512f28603359ad1fbb",
+                "url": "https://api.github.com/repos/Karmabunny/kbinterfaces/zipball/dcf87a7013dbdb29c66480d3bdb8561d1167e0fe",
+                "reference": "dcf87a7013dbdb29c66480d3bdb8561d1167e0fe",
                 "shasum": ""
             },
             "require": {
@@ -53,9 +53,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Karmabunny/kbinterfaces/issues",
-                "source": "https://github.com/Karmabunny/kbinterfaces/tree/v1.0.1"
+                "source": "https://github.com/Karmabunny/kbinterfaces/tree/v1.2.1"
             },
-            "time": "2025-11-11T22:47:53+00:00"
+            "time": "2026-01-28T01:05:13+00:00"
         },
         {
             "name": "symfony/polyfill-php73",
