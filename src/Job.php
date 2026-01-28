@@ -28,6 +28,8 @@ abstract class Job implements
     use LoggerTrait;
     use RulesValidatorTrait;
 
+    /** @var string */
+    public $id;
 
     /** @var int Unix timestamp in seconds. */
     public $start;
@@ -58,6 +60,17 @@ abstract class Job implements
         }
 
         $this->config = $config;
+    }
+
+
+    /** @inheritdoc */
+    public function getId(): string
+    {
+        if (!$this->id) {
+            $this->id = uniqid();
+        }
+
+        return $this->id;
     }
 
 
