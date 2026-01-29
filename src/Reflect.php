@@ -171,7 +171,8 @@ class Reflect
 
                 // @phpstan-ignore-next-line : PHP 7.4+
                 if (PHP_VERSION_ID >= 70400 and !$property->isInitialized($target)) {
-                    $value = null;
+                    // Don't serialize uninitialized properties
+                    continue;
                 }
                 else {
                     // We need to use getValue() so to bypass any __get() magic.
