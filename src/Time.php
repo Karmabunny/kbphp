@@ -57,13 +57,11 @@ class Time
             [$time, $travel] = self::$time_travel;
 
             [$seconds, $microseconds] = explode('.', sprintf('%.6f', $travel));
-            $date = $date->setTimestamp($seconds);
-            $date = $date->setMicrosecond($microseconds);
+            $date = $date->modify("@{$seconds} +{$microseconds} microseconds");
 
             if ($time > 0 and ($since = ($now - $time) > 0)) {
                 [$seconds, $microseconds] = explode('.', sprintf('%.6f', $since));
-                $date = $date->modify("+{$seconds} seconds");
-                $date = $date->setMicrosecond($microseconds);
+                $date = $date->modify("+{$seconds} seconds +{$microseconds} microseconds");
             }
         }
 
