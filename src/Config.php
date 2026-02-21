@@ -223,7 +223,7 @@ class Config
      * @param string $query dot-noted string: foo.bar.baz
      * @return mixed|null
      */
-    protected static function query(array $array, string $query)
+    public static function query(array $array, string $query)
     {
         if (empty($array)) {
             return null;
@@ -268,7 +268,7 @@ class Config
      * @param mixed $value fill value for the key
      * @return mixed
      */
-    protected static function querySet(array &$array, string $query, $value = null)
+    public static function querySet(array &$array, string $query, $value = null)
     {
         // Must always be an array
         if (!is_array($array)) {
