@@ -163,12 +163,12 @@ class Config
             self::$cache[$name] = $config;
 
             foreach (self::$overrides[$name] ?? [] as $key => $value) {
-                self::keyStringSet($config, $key, $value);
+                self::querySet($config, $key, $value);
             }
 
             // Do a key query.
             if ($subkey !== null) {
-                $config = self::keyString($config, $subkey);
+                $config = self::query($config, $subkey);
             }
         }
 
@@ -223,7 +223,7 @@ class Config
      * @param string $query dot-noted string: foo.bar.baz
      * @return mixed|null
      */
-    protected static function keyString(array $array, string $query)
+    protected static function query(array $array, string $query)
     {
         if (empty($array)) {
             return NULL;
@@ -269,7 +269,7 @@ class Config
      * @param mixed $value fill value for the key
      * @return mixed
      */
-    protected static function keyStringSet(array &$array, string $query, $value = NULL)
+    protected static function querySet(array &$array, string $query, $value = null)
     {
         // Must always be an array
         if (!is_array($array)) {
