@@ -226,7 +226,7 @@ class Config
     protected static function query(array $array, string $query)
     {
         if (empty($array)) {
-            return NULL;
+            return null;
         }
 
         // Prepare for loop
@@ -240,24 +240,23 @@ class Config
             // Get the next key
             $key = array_shift($query);
 
-            if (isset($array[$key])) {
-                if (is_array($array[$key]) AND ! empty($query)) {
-                    // Dig down to prepare the next loop
-                    $array = $array[$key];
-                }
-                else {
-                    // Requested key was found
-                    return $array[$key];
-                }
-            }
-            else {
-                // Requested key is not set
+            // Requested key is not set
+            if (!isset($array[$key])) {
                 break;
             }
+
+            // Dig down to prepare the next loop
+            if (is_array($array[$key]) and !empty($query)) {
+                $array = $array[$key];
+                continue;
+            }
+
+            // Requested key was found
+            return $array[$key];
         }
         while (!empty($query));
 
-        return NULL;
+        return null;
     }
 
 
@@ -284,7 +283,7 @@ class Config
         $query = explode('.', $query);
 
         // Create reference to the array
-        $row =& $array;
+        $row = &$array;
 
         for ($i = 0, $end = count($query) - 1; $i <= $end; $i++) {
             // Get the current key
@@ -306,7 +305,7 @@ class Config
             }
 
             // Go down a level, creating a new row reference
-            $row =& $row[$key];
+            $row = &$row[$key];
         }
 
         // Set the value for the final key (overwrites existing values).
