@@ -39,15 +39,16 @@ trait EventableTrait
      *
      * @see Events::trigger()
      * @param EventInterface $event
+     * @param bool $once Don't trigger if the event has already run at least once.
      * @return array handler results
      */
-    protected function trigger(string $class, EventInterface &$event): array
+    protected function trigger(string $class, EventInterface &$event, bool $once = false): array
     {
         if ($event instanceof Event) {
             $event->sender = $this;
         }
 
-        return Events::trigger($class, $event);
+        return Events::trigger($class, $event, $once);
     }
 
 

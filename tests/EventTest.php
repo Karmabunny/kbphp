@@ -506,6 +506,46 @@ class EventTest extends TestCase
         $actual = Events::hasRun(RootEmitter::class, TestEvent::class);
         $this->assertFalse($actual);
     }
+
+
+    public function testTriggerOnce()
+    {
+        $count = 0;
+
+        Events::on(RootEmitter::class, function(TestEvent $event) use (&$count) {
+            $count++;
+            return 'result';
+        });
+
+        $event = new TestEvent();
+
+        // First trigger with once=true should fire.
+        $actual = Events::trigger(RootEmitter::class, $event, true);
+        $this->assertEquals(1, $count);
+        $this->assertCount(1, $actual);
+        $this->assertEquals(['result'], $actual);
+
+        // Second trigger with once=true should NOT fire.
+        $actual = Events::trigger(RootEmitter::class, $event, true);
+        $this->assertEquals(1, $count);
+        $this->assertCount(0, $actual);
+
+        // Third trigger with once=true should still NOT fire.
+        $actual = Events::trigger(RootEmitter::class, $event, true);
+        $this->assertEquals(1, $count);
+        $this->assertCount(0, $actual);
+
+        // Trigger without once should still work.
+        $actual = Events::trigger(RootEmitter::class, $event, false);
+        $this->assertEquals(2, $count);
+        $this->assertCount(1, $actual);
+        $this->assertEquals(['result'], $actual);
+
+        // Another once trigger should still NOT fire (already ran at least once).
+        $actual = Events::trigger(RootEmitter::class, $event, true);
+        $this->assertEquals(2, $count);
+        $this->assertCount(0, $actual);
+    }
 }
 
 

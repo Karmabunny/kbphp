@@ -66,16 +66,22 @@ class Events
      *
      * _Don't_ use dynamic class names, such as:
      * - `static::class`
-     * - `self::class`
      * - `get_class($this)`
      *
      * @param class-string $sender
      * @param EventInterface $event
+     * @param bool $once Don't trigger if the event has already run at least once.
      * @return array[] event results.
      */
-    public static function trigger(string $sender, EventInterface $event): array
+    public static function trigger(string $sender, EventInterface $event, bool $once = false): array
     {
         // Events are ID'd by their full namespaced class name.
+
+        if ($once) {
+            if (isset(self::$_run[$sender][get_class($event)])) {
+                return [];
+            }
+        }
 
         $handlers = [];
 
