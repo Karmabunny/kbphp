@@ -10,6 +10,7 @@ use InvalidArgumentException;
 use karmabunny\interfaces\EventInterface;
 use ReflectionException;
 use ReflectionFunction;
+use ReflectionMethod;
 use ReflectionNamedType;
 
 /**
@@ -147,7 +148,18 @@ class Events
                 $fn = $event;
                 $event = null;
 
-                $reflect = new ReflectionFunction($fn);
+                if (!is_callable($fn)) {
+                    throw new InvalidArgumentException("Invalid event handler");
+                }
+
+                // Convert array callables.
+                if (is_array($fn)) {
+                    list($class, $method) = $fn;
+                    $reflect = new ReflectionMethod($class, $method);
+                }
+                else {
+                    $reflect = new ReflectionFunction($fn);
+                }
 
                 if (
                     ($parameters = $reflect->getParameters())
