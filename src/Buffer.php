@@ -6,6 +6,8 @@
 
 namespace karmabunny\kb;
 
+use RuntimeException;
+
 /**
  * A wrapper for the PHP output buffer.
  *
@@ -18,17 +20,23 @@ class Buffer
 
 
     /**
-     * Create a new buffer.
+     * Open this buffer.
      *
-     * @param callable|null $callback
+     * @param null|callable $callback
      * @param int $chunk_size
      * @param int $flags
-     * @return void
+     * @return bool true on success, false on failure
+     * @throws RuntimeException if already open
      */
-    public function __construct(?callable $callback = null, int $chunk_size = 0, int $flags = PHP_OUTPUT_HANDLER_STDFLAGS)
+    public function start(?callable $callback = null, int $chunk_size = 0, int $flags = PHP_OUTPUT_HANDLER_STDFLAGS)
     {
-        ob_start($callback, $chunk_size, $flags);
+        if ($this->level() > 0) {
+            throw new RuntimeException('Buffer is already open');
+        }
+
+        $ok = ob_start($callback, $chunk_size, $flags);
         $this->buffer_level = ob_get_level();
+        return $ok;
     }
 
 
@@ -36,6 +44,27 @@ class Buffer
     public function __destruct()
     {
         $this->end(true);
+    }
+
+
+    /**
+     * Get the nested level of this buffer.
+     *
+     * @return int
+     */
+    public function level(): int
+    {
+        if ($this->buffer_level == 0) {
+            return 0;
+        }
+
+        // Someone else closed our buffer.
+        if (ob_get_level() == 0) {
+            $this->buffer_level = 0;
+            return 0;
+        }
+
+        return $this->buffer_level;
     }
 
 
@@ -52,6 +81,10 @@ class Buffer
      */
     public function flush(bool $send = true)
     {
+        if (!$this->level()) {
+            return;
+        }
+
         while (ob_get_level() > $this->buffer_level) {
             ob_end_flush();
         }
@@ -71,6 +104,10 @@ class Buffer
      */
     public function discard()
     {
+        if (!$this->level()) {
+            return;
+        }
+
         while (ob_get_level() > $this->buffer_level) {
             ob_end_clean();
         }
@@ -90,6 +127,10 @@ class Buffer
      */
     public function contents(): string
     {
+        if (!$this->level()) {
+            return '' ;
+        }
+
         $this->flush(false);
 
         if (ob_get_level() == $this->buffer_level) {
@@ -109,6 +150,10 @@ class Buffer
      */
     public function clean(): string
     {
+        if (!$this->level()) {
+            return '';
+        }
+
         $contents = $this->contents();
         ob_clean();
         return $contents;
@@ -124,9 +169,14 @@ class Buffer
      */
     public function close(): string
     {
+        if (!$this->level()) {
+            return '';
+        }
+
         $this->flush(false);
 
         if (ob_get_level() == $this->buffer_level) {
+            $this->buffer_level = 0;
             return ob_get_clean() ?: '';
         }
 
@@ -143,6 +193,10 @@ class Buffer
      */
     public function end(bool $flush = true): void
     {
+        if (!$this->level()) {
+            return;
+        }
+
         if ($flush) {
             while (ob_get_level() > $this->buffer_level) {
                 ob_end_flush();
@@ -160,6 +214,8 @@ class Buffer
                 ob_end_clean();
             }
         }
+
+        $this->buffer_level = 0;
     }
 
 

@@ -48,9 +48,12 @@ final class BufferTest extends TestCase
     }
 
 
-    public function testConstructor()
+    public function testStart()
     {
         $buffer = new Buffer();
+        $this->assertEquals($this->temp_level, ob_get_level());
+
+        $buffer->start();
         $this->assertEquals($this->temp_level + 1, ob_get_level());
         $buffer->end();
     }
@@ -59,6 +62,7 @@ final class BufferTest extends TestCase
     public function testEndWithFlush()
     {
         $buffer = new Buffer();
+        $buffer->start();
 
         echo 'end flush';
         ob_start();
@@ -78,6 +82,7 @@ final class BufferTest extends TestCase
     public function testEndWithoutFlush()
     {
         $buffer = new Buffer();
+        $buffer->start();
         echo 'end discard';
 
         ob_start();
@@ -97,6 +102,7 @@ final class BufferTest extends TestCase
     public function testFlushWithSend()
     {
         $buffer = new Buffer();
+        $buffer->start();
 
         echo 'content';
         ob_start();
@@ -123,6 +129,7 @@ final class BufferTest extends TestCase
     public function testFlushWithoutSend()
     {
         $buffer = new Buffer();
+        $buffer->start();
 
         echo 'content';
         ob_start();
@@ -148,6 +155,7 @@ final class BufferTest extends TestCase
     public function testDiscard()
     {
         $buffer = new Buffer();
+        $buffer->start();
 
         echo 'parent';
         ob_start();
@@ -171,6 +179,7 @@ final class BufferTest extends TestCase
     public function testContents()
     {
         $buffer = new Buffer();
+        $buffer->start();
 
         echo 'parent';
 
@@ -196,6 +205,7 @@ final class BufferTest extends TestCase
     public function testClean()
     {
         $buffer = new Buffer();
+        $buffer->start();
 
         echo 'parent';
 
@@ -220,12 +230,15 @@ final class BufferTest extends TestCase
     public function testMultipleBuffers()
     {
         $buffer1 = new Buffer();
+        $buffer1->start();
         echo 'buffer1';
 
         $buffer2 = new Buffer();
+        $buffer2->start();
         echo 'buffer2';
 
         $buffer3 = new Buffer();
+        $buffer3->start();
         echo 'buffer3';
 
         // Should have 3 nested buffers.
@@ -251,11 +264,36 @@ final class BufferTest extends TestCase
     public function testEmptyBuffer()
     {
         $buffer = new Buffer();
+        $buffer->start();
         $contents = $buffer->contents();
         $this->assertEquals('', $contents);
 
         $clean = $buffer->close();
         $this->assertEquals('', $clean);
+    }
+
+
+    public function testCloseAndRestart()
+    {
+        $buffer = new Buffer();
+        $buffer->start();
+
+        echo 'first content';
+        $contents1 = $buffer->close();
+        $this->assertEquals('first content', $contents1);
+        $this->assertEquals($this->temp_level, ob_get_level());
+
+        // Buffer should be closed now.
+        $this->assertEquals(0, $buffer->level());
+
+        // Restart the buffer.
+        $buffer->start();
+        $this->assertEquals($this->temp_level + 1, ob_get_level());
+
+        echo 'second content';
+        $contents2 = $buffer->close();
+        $this->assertEquals('second content', $contents2);
+        $this->assertEquals($this->temp_level, ob_get_level());
     }
 
 }
