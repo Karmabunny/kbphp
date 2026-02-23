@@ -24,22 +24,50 @@ use RuntimeException;
  * ```
  * return [ 'key' => $config['key'] + 1 ];
  * ```
+ *
+ * Implement the `getPaths()` method for your project.
  */
-class Config
+abstract class Config
 {
 
-    /** @var string[] */
-    public static $paths = [];
-
+    /** @var array<string,Config> name => instance */
+    protected static $instances = [];
 
     /** @var array<string,mixed> name => [key => value] */
-    protected static $overrides = [];
+    protected $overrides = [];
 
     /** @var array<string,array> name => config */
-    protected static $cache = [];
+    protected $cache = [];
 
     /** @var array<string,bool[]> name => [paths] */
-    protected static $loaded = [];
+    protected $loaded = [];
+
+
+    /**
+     * Get or create an instance of this config.
+     *
+     * @param bool $refresh
+     * @return static
+     */
+    public static function instance(bool $refresh = false)
+    {
+        $instance = self::$instances[static::class] ?? null;
+
+        if ($instance === null or $refresh) {
+            $instance = new static();
+        }
+
+        self::$instances[static::class] = $instance;
+        return $instance;
+    }
+
+
+    /**
+     * Get the paths to load configs from.
+     *
+     * @return array
+     */
+    public abstract function getPaths(): array;
 
 
     /**
@@ -49,7 +77,7 @@ class Config
      * @return string[]
      * @throws InvalidArgumentException on an invalid config name.
      */
-    public static function find(string $name)
+    public function find(string $name)
     {
         if (preg_match('![^-_a-zA-Z0-9]!', $name)) {
             throw new InvalidArgumentException("Invalid config file '{$name}'");
@@ -57,7 +85,7 @@ class Config
 
         $paths = [];
 
-        foreach (self::$paths as $path) {
+        foreach ($this->getPaths() as $path) {
             $path = rtrim($path, '/') . "/{$name}.php";
             if (is_readable($path)) {
                 $paths[] = $path;
@@ -128,7 +156,7 @@ class Config
     public static function load(string $path, string $name = 'config'): array
     {
         $config = [];
-        self::apply($config, $path, $name);
+        static::apply($config, $path, $name);
         return $config;
     }
 
@@ -144,31 +172,32 @@ class Config
      */
     public static function get(string $key, $required = true)
     {
+        $instance = static::instance();
         [$name, $subkey] = explode('.', $key, 2) + ['', null];
 
-        $paths = self::find($name);
+        $paths = $instance->find($name);
 
         if ($paths) {
-            $config = self::$cache[$name] ?? [];
+            $config = $instance->cache[$name] ?? [];
 
             foreach ($paths as $path) {
-                if (isset(self::$loaded[$name][$path])) {
+                if (isset($instance->loaded[$name][$path])) {
                     continue;
                 }
 
-                self::apply($config, $path);
-                self::$loaded[$name][$path] = true;
+                static::apply($config, $path);
+                $instance->loaded[$name][$path] = true;
             }
 
-            self::$cache[$name] = $config;
+            $instance->cache[$name] = $config;
 
-            foreach (self::$overrides[$name] ?? [] as $key => $value) {
-                self::querySet($config, $key, $value);
+            foreach ($instance->overrides[$name] ?? [] as $key => $value) {
+                static::querySet($config, $key, $value);
             }
 
             // Do a key query.
             if ($subkey !== null) {
-                $config = self::query($config, $subkey);
+                $config = static::query($config, $subkey);
             }
         }
 
@@ -194,25 +223,9 @@ class Config
      */
     public static function set(string $key, $value)
     {
+        $instance = static::instance();
         [$name, $key] = explode('.', $key, 2) + ['', null];
-        self::$overrides[$name][$key] = $value;
-    }
-
-
-    /**
-     * Delete internal caches.
-     *
-     * @param bool $overrides Also delete the override keys.
-     * @return void
-     */
-    public static function reset(bool $overrides = false)
-    {
-        self::$cache = [];
-        self::$loaded = [];
-
-        if ($overrides) {
-            self::$overrides = [];
-        }
+        $instance->overrides[$name][$key] = $value;
     }
 
 

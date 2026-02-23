@@ -4,7 +4,7 @@
  * @copyright Copyright (c) 2026 Karmabunny
  */
 
-use karmabunny\kb\Config;
+use karmabunny\kb\Config as BaseConfig;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -29,7 +29,10 @@ final class ConfigTest extends TestCase
     protected function setUp(): void
     {
         Config::$paths = [];
-        Config::reset(true);
+        Config::instance(true);
+
+        ConfigTwo::$paths = [];
+        ConfigTwo::instance(true);
     }
 
 
@@ -40,7 +43,7 @@ final class ConfigTest extends TestCase
             self::TEST_CONFIG_DIR . '/module',
         ];
 
-        $paths = Config::find('settings');
+        $paths = Config::instance()->find('settings');
 
         $this->assertIsArray($paths);
         $this->assertCount(2, $paths);
@@ -54,7 +57,7 @@ final class ConfigTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Invalid config file 'invalid-name!'");
 
-        Config::find('invalid-name!');
+        Config::instance()->find('invalid-name!');
     }
 
 
@@ -64,7 +67,7 @@ final class ConfigTest extends TestCase
             self::TEST_CONFIG_DIR . '/app',
         ];
 
-        $paths = Config::find('nonexistent');
+        $paths = Config::instance()->find('nonexistent');
 
         $this->assertIsArray($paths);
         $this->assertCount(0, $paths);
@@ -300,9 +303,57 @@ final class ConfigTest extends TestCase
 
         $this->assertEquals($config1['random'], $config2['random']);
 
-        Config::reset();
+        Config::instance(true);
 
         $config3 = Config::get('settings');
         $this->assertNotEquals($config1['random'], $config3['random']);
+    }
+
+
+    public function testSecondConfig()
+    {
+        Config::$paths = [
+            self::TEST_CONFIG_DIR . '/app',
+        ];
+
+        ConfigTwo::$paths = [
+            self::TEST_CONFIG_DIR . '/module',
+        ];
+
+        $paths = Config::instance()->find('settings');
+        $this->assertEquals(self::TEST_CONFIG_DIR . '/app/settings.php', $paths[0]);
+
+        $paths = ConfigTwo::instance()->find('settings');
+        $this->assertEquals(self::TEST_CONFIG_DIR . '/module/settings.php', $paths[0]);
+
+        $config1 = Config::get('settings');
+        $this->assertEquals('1.0.0', $config1['version']);
+
+        $config2 = ConfigTwo::get('settings');
+        $this->assertEquals('2.0.0', $config2['version']);
+    }
+}
+
+
+class Config extends BaseConfig
+{
+    public static $paths = [];
+
+
+    public function getPaths(): array
+    {
+        return self::$paths;
+    }
+}
+
+
+class ConfigTwo extends BaseConfig
+{
+    public static $paths = [];
+
+
+    public function getPaths(): array
+    {
+        return self::$paths;
     }
 }
