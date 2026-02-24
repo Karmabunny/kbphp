@@ -30,7 +30,7 @@ use RuntimeException;
 abstract class Config
 {
 
-    /** @var array<string,Config> name => instance */
+    /** @var array<string,mixed> name => instance */
     protected static $instances = [];
 
     /** @var array<string,mixed> name => [key => value] */
@@ -54,6 +54,7 @@ abstract class Config
         $instance = self::$instances[static::class] ?? null;
 
         if ($instance === null or $refresh) {
+            // @phpstan-ignore-next-line
             $instance = new static();
         }
 
