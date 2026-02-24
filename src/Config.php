@@ -280,12 +280,12 @@ abstract class Config
      * @param array $array array to set keys in (reference)
      * @param string $query dot-noted string: foo.bar.baz
      * @param mixed $value fill value for the key
-     * @return mixed
+     * @return void
      */
     public static function querySet(array &$array, string $query, $value = null)
     {
         if (empty($query)) {
-            return $array;
+            return;
         }
 
         // Create keys
