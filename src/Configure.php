@@ -207,7 +207,13 @@ class Configure
         }
         // Or just the regular.
         else {
+            $vars = get_object_vars($object);
+
             foreach ($config as $key => $value) {
+                if (!array_key_exists($key, $vars)) {
+                    continue;
+                }
+
                 $object->$key = $value;
             }
         }
