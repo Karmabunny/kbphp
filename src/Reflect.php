@@ -112,7 +112,8 @@ class Reflect
         if (is_string($callable)) {
             $callable = explode('::', $callable, 2);
         }
-        if (!is_callable($callable)) return false;
+
+        if (!is_callable($callable, true)) return false;
         if (count($callable) !== 2) return false;
 
         try {
