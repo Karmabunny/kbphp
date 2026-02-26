@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @link      https://github.com/Karmabunny
  * @copyright Copyright (c) 2020 Karmabunny
@@ -51,7 +52,7 @@ class Arrays
      * @param iterable $iterable
      * @return array [ key, item ]
      */
-    public static function firstPair($iterable)
+    public static function firstPair(iterable $iterable): array
     {
         foreach ($iterable as $key => $item) {
             return [$key, $item];
@@ -67,7 +68,7 @@ class Arrays
      * @param iterable $iterable
      * @return array [ key, item ]
      */
-    public static function lastPair($iterable)
+    public static function lastPair(iterable $iterable): array
     {
         if (is_array($iterable)) {
             $item = end($iterable);
@@ -90,7 +91,7 @@ class Arrays
      * @param iterable $iterable
      * @return int|string|null
      */
-    public static function firstKey($iterable)
+    public static function firstKey(iterable $iterable): int|string|null
     {
         list($key) = self::firstPair($iterable);
         return $key;
@@ -103,7 +104,7 @@ class Arrays
      * @param iterable $iterable
      * @return int|string|null
      */
-    public static function lastKey($iterable)
+    public static function lastKey(iterable $iterable): int|string|null
     {
         list($key) = self::lastPair($iterable);
         return $key;
@@ -117,7 +118,7 @@ class Arrays
      * @param T[]|iterable<T> $iterable
      * @return T|null
      */
-    public static function first($iterable)
+    public static function first(iterable $iterable): mixed
     {
         list( , $value) = self::firstPair($iterable);
         return $value;
@@ -131,7 +132,7 @@ class Arrays
      * @param T[]|iterable<T> $iterable
      * @return T|null
      */
-    public static function last($iterable)
+    public static function last(iterable $iterable): mixed
     {
         list( , $value) = self::lastPair($iterable);
         return $value;
@@ -150,10 +151,10 @@ class Arrays
      * TBH not entirely sure why I wrote this.
      *
      * @template T
-     * @param T[]|iterable<T> $array
+     * @param iterable<T> $array
      * @return iterable<T>
      */
-    public static function reverse($array)
+    public static function reverse(iterable $array): iterable
     {
         end($array);
         while (($key = key($array)) !== null)
@@ -185,7 +186,7 @@ class Arrays
      * @param callable $fn (&$index) => $value
      * @return array
      */
-    public static function fill(int $size, callable $fn)
+    public static function fill(int $size, callable $fn): array
     {
         $array = [];
         for ($i = 0; $i < $size; $i++) {
@@ -212,7 +213,7 @@ class Arrays
      * @param callable $fn ($index) => [$key, $value]
      * @return array
      */
-    public static function fillKeyed(int $size, callable $fn)
+    public static function fillKeyed(int $size, callable $fn): array
     {
         $array = [];
         for ($i = 0; $i < $size; $i++) {
@@ -240,7 +241,7 @@ class Arrays
      * @param mixed $fill
      * @return array
      */
-    public static function fillIntersectionKeys(array $keys, array $array, $fill = null)
+    public static function fillIntersectionKeys(array $keys, array $array, mixed $fill = null): array
     {
         $keys = array_fill_keys($keys, $fill);
         $array = array_merge($keys, array_intersect_key($array, $keys));
@@ -259,7 +260,7 @@ class Arrays
      * @param string $inner_glue
      * @return string
      */
-    public static function implodeWithKeys(array $array, string $outer_glue = '', string $inner_glue = '')
+    public static function implodeWithKeys(array $array, string $outer_glue = '', string $inner_glue = ''): string
     {
         $output = '';
 
@@ -280,7 +281,7 @@ class Arrays
      * @param T|null $initial
      * @return T
      */
-    public static function reverseReduce($array, $fn, $initial = null)
+    public static function reverseReduce(iterable $array, callable $fn, mixed $initial = null): mixed
     {
         $reversed = self::reverse($array);
         $carry = $initial;
@@ -309,7 +310,7 @@ class Arrays
      * @param array $arrays
      * @return array
      */
-    public static function mergeKeyed(...$arrays)
+    public static function mergeKeyed(array ...$arrays): array
     {
         $reversed = self::reverse($arrays);
 
@@ -341,7 +342,7 @@ class Arrays
      * @param callable $fn ($value, $key) => bool
      * @return T|null
      */
-    public static function find($iterable, callable $fn)
+    public static function find(iterable $iterable, callable $fn): mixed
     {
         foreach ($iterable as $key => $item) {
             if ($fn($item, $key)) return $item;
@@ -363,7 +364,7 @@ class Arrays
      * @param callable $fn ($value, $key) => bool
      * @return T|null
      */
-    public static function findKey($iterable, callable $fn)
+    public static function findKey(iterable $iterable, callable $fn): mixed
     {
         foreach ($iterable as $key => $item) {
             if ($fn($item, $key)) return $key;
@@ -380,7 +381,7 @@ class Arrays
      * @param string $key
      * @return null|int
      */
-    public static function indexOf(array $array, string $key)
+    public static function indexOf(array $array, string $key): ?int
     {
         $index = array_search($key, array_keys($array));
 
@@ -408,7 +409,7 @@ class Arrays
      * @param mixed|null $initial
      * @return mixed
      */
-    public static function reduce($iterable, callable $fn, $initial = null)
+    public static function reduce(iterable $iterable, callable $fn, mixed $initial = null): mixed
     {
         $carry = $initial;
         foreach ($iterable as $key => $value) {
@@ -510,7 +511,7 @@ class Arrays
      * @param bool $fill Replace missing keys with null.
      * @return T[]
      */
-    public static function filterKeys(array $array, array $keys, $fill = false): array
+    public static function filterKeys(array $array, array $keys, bool $fill = false): array
     {
         $items = [];
 
@@ -529,7 +530,7 @@ class Arrays
      * @param iterable $arrays
      * @return array
      */
-    public static function zip(...$arrays): array
+    public static function zip(iterable ...$arrays): array
     {
         $output = [];
 
@@ -577,7 +578,7 @@ class Arrays
      * @param callable $fn (item) => item
      * @return array
      */
-    public static function map($array, $fn): array
+    public static function map(iterable $array, callable $fn): array
     {
         $items = [];
 
@@ -613,7 +614,7 @@ class Arrays
      * @param callable $fn (item, key) => item
      * @return array
      */
-    public static function mapWithKeys($array, $fn): array
+    public static function mapWithKeys(iterable $array, callable $fn): array
     {
         $items = [];
 
@@ -640,7 +641,7 @@ class Arrays
      * @param callable $fn (item, key) => [key, item]
      * @return array
      */
-    public static function mapKeys($array, $fn): array
+    public static function mapKeys(iterable $array, callable $fn): array
     {
         $items = [];
 
@@ -667,7 +668,7 @@ class Arrays
      * @param int $mode LEAVES_ONLY (default), SELF_FIRST, CHILD_FIRST
      * @return array
      */
-    public static function mapRecursive(array $array, $fn, $mode = self::LEAVES_ONLY): array
+    public static function mapRecursive(array $array, callable $fn, int $mode = self::LEAVES_ONLY): array
     {
         $process = null;
         $process = function($rootkey, array $array, $fn, $mode) use (&$process) {
@@ -712,7 +713,7 @@ class Arrays
      * @param bool $preserve_keys
      * @return T[]
      */
-    public static function shuffle($array, bool $preserve_keys = false): array
+    public static function shuffle(iterable $array, bool $preserve_keys = false): array
     {
         if (!is_array($array)) {
             $array = iterator_to_array($array, $preserve_keys);
@@ -744,7 +745,7 @@ class Arrays
      * @param int $depth
      * @return array
      */
-    public static function flatten($array, $keys = false, int $depth = 25): array
+    public static function flatten(iterable $array, bool $keys = false, int $depth = 25): array
     {
         $return = [];
 
@@ -865,7 +866,7 @@ class Arrays
      * @param string|int $index
      * @return array
      */
-    public static function explodeKeys(array $array, string $glue = '.', $index = ''): array
+    public static function explodeKeys(array $array, string $glue = '.', string|int $index = ''): array
     {
         $output = [];
 
@@ -923,7 +924,7 @@ class Arrays
      * @param ArrayableInterface|Traversable|array $array
      * @return array
      */
-    public static function toArray($array): array
+    public static function toArray(ArrayableInterface|Traversable|array $array): array
     {
         if ($array instanceof ArrayableInterface) {
             return $array->toArray();
@@ -967,7 +968,7 @@ class Arrays
      * @param mixed $array
      * @return bool
      */
-    public static function isNumeric($array): bool
+    public static function isNumeric(mixed $array): bool
     {
         if (!is_array($array)) {
             return false;
@@ -992,7 +993,7 @@ class Arrays
      * @param mixed $array
      * @return bool
      */
-    public static function isAssociated($array): bool
+    public static function isAssociated(mixed $array): bool
     {
         return !self::isNumeric($array);
     }
@@ -1032,7 +1033,7 @@ class Arrays
      * @param array $array
      * @return mixed
      */
-    public static function value($array, string $query)
+    public static function value(mixed $array, string $query): mixed
     {
         /** @var mixed $array */
 
@@ -1119,7 +1120,7 @@ class Arrays
      * @param string|null $select Include a 'choose' option
      * @return array
      */
-    public static function createMap($items, string $key, string $name, ?string $select = null)
+    public static function createMap(iterable $items, string $key, string $name, ?string $select = null): array
     {
         $map = [];
 
@@ -1177,7 +1178,7 @@ class Arrays
      * @param mixed $default
      * @return array
      */
-    public static function normalizeOptions($items, $default): array
+    public static function normalizeOptions(iterable $items, mixed $default): array
     {
         $output = [];
 
@@ -1218,7 +1219,7 @@ class Arrays
      * @param string $path
      * @return array|null `null` if the file is invalid or missing.
      */
-    public static function config(string $path)
+    public static function config(string $path): ?array
     {
         static $cache = [];
         $output = $cache[$path] ?? null;
@@ -1254,7 +1255,7 @@ class Arrays
      * @param string|null $mode null => 'default'
      * @return callable(mixed, mixed): int
      */
-    public static function createSort(int $dir = SORT_ASC, ?string $mode = null)
+    public static function createSort(int $dir = SORT_ASC, ?string $mode = null): callable
     {
         $dir = $dir === SORT_DESC ? -1 : 1;
 
@@ -1329,7 +1330,7 @@ class Arrays
      * @param array $modes [ name => SORT ]
      * @return callable(mixed, mixed): int
      */
-    public static function createMultisort(array $modes)
+    public static function createMultisort(array $modes): callable
     {
         $modes = self::normalizeOptions($modes, SORT_ASC);
 
@@ -1359,7 +1360,7 @@ class Arrays
      * @param string|null $mode null => 'default'
      * @return void
      */
-    public static function sort(array &$array, bool $preserve_keys = false, int $dir = SORT_ASC, ?string $mode = null)
+    public static function sort(array &$array, bool $preserve_keys = false, int $dir = SORT_ASC, ?string $mode = null): void
     {
         $fn = self::createSort($dir, $mode);
 
@@ -1401,7 +1402,7 @@ class Arrays
      * @param string[] $modes [ name => SORT ]
      * @return void
      */
-    public static function multisort(array &$array, bool $preserve_keys, array $modes)
+    public static function multisort(array &$array, bool $preserve_keys, array $modes): void
     {
         $fn = self::createMultisort($modes);
 
@@ -1424,7 +1425,7 @@ class Arrays
      * @param string[] $modes [ name => SORT ]
      * @return T[]
      */
-    public static function multisorted(array $array, bool $preserve_keys, array $modes)
+    public static function multisorted(array $array, bool $preserve_keys, array $modes): array
     {
         self::multisort($array, $preserve_keys, $modes);
         return $array;

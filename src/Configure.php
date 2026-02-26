@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
 * @link      https://github.com/Karmabunny
 * @copyright Copyright (c) 2022 Karmabunny
@@ -45,7 +46,7 @@ class Configure
      * @return object
      * @throws InvalidArgumentException
      */
-    public static function configure($config, ?string $assert = null, bool $init = true)
+    public static function configure(string|array|object $config, ?string $assert = null, bool $init = true): object
     {
         // Mush it into a key-config pair.
         if (is_string($config)) {
@@ -126,7 +127,7 @@ class Configure
      * @param bool $force always init
      * @return void
      */
-    public static function initAll(array $objects, $force = false)
+    public static function initAll(array $objects, bool $force = false): void
     {
         foreach ($objects as $object) {
             if (
@@ -142,13 +143,13 @@ class Configure
     /**
      * Construct a new instance of this class.
      *
-     * @template T
+     * @template T of object
      * @param class-string<T> $class
      * @param class-string|class-string[] $assert
      * @return T
      * @throws InvalidArgumentException
      */
-    public static function instance(string $class, $assert = null)
+    public static function instance(string $class, string|array|null $assert = null): object
     {
         // Check the class exists.
         try {
@@ -199,7 +200,7 @@ class Configure
      * @param array $config
      * @return void
      */
-    public static function update($object, array $config)
+    public static function update(object $object, array $config): void
     {
         // Do configurable things because we can.
         if ($object instanceof ConfigurableInterface) {
@@ -223,12 +224,12 @@ class Configure
     /**
      * Instance a single object.
      *
-     * @template T
+     * @template T of object
      * @param class-string<T> $class
      * @param array $config
      * @return T
      */
-    public static function create(string $class, array $config)
+    public static function create(string $class, array $config): object
     {
         $object = self::instance($class);
         self::update($object, $config);
@@ -244,7 +245,7 @@ class Configure
      * @param array[] $items
      * @return T[]
      */
-    public static function createAll(string $class, array $items)
+    public static function createAll(string $class, array $items): array
     {
         /** @var array $items */
 

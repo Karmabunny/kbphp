@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @link      https://github.com/Karmabunny
  * @copyright Copyright (c) 2023 Karmabunny
@@ -26,7 +27,7 @@ class Events
      *
      * @var callable[][][]
      */
-    protected static $_events = [];
+    protected static array $_events = [];
 
 
     /**
@@ -34,7 +35,7 @@ class Events
      *
      * @var null|(float[][][])
      */
-    protected static $_log = null;
+    protected static ?array $_log = null;
 
 
     /**
@@ -42,7 +43,7 @@ class Events
      *
      * @var float[][]
      */
-    protected static $_run = [];
+    protected static array $_run = [];
 
 
     /**
@@ -203,7 +204,7 @@ class Events
      * @param class-string<EventInterface>|null $event
      * @return void
      */
-    public static function off(?string $sender, ?string $event = null)
+    public static function off(?string $sender, ?string $event = null): void
     {
         if ($sender === null) {
             if ($event) {
@@ -303,7 +304,7 @@ class Events
      * @param bool $logging
      * @return void
      */
-    public static function setLogging(bool $logging)
+    public static function setLogging(bool $logging): void
     {
         self::$_log = $logging ? [] : null;
     }
@@ -315,7 +316,7 @@ class Events
      * @param bool $clearRunLog
      * @return void
      */
-    public static function clearLog(bool $clearRunLog = false)
+    public static function clearLog(bool $clearRunLog = false): void
     {
         if (self::$_log !== null) {
             self::$_log = [];

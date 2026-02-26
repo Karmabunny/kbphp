@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @link      https://github.com/Karmabunny
  * @copyright Copyright (c) 2020 Karmabunny
@@ -50,7 +51,7 @@ class XML
      * @return DOMDocument
      * @throws XMLException
      */
-    public static function parse(string $source, array $config = [])
+    public static function parse(string $source, array $config = []): DOMDocument
     {
         $doc = self::createDocument($config);
 
@@ -96,7 +97,7 @@ class XML
      * @return DOMDocument
      * @throws XMLException
      */
-    public static function parseFile(string $filename, array $config = [])
+    public static function parseFile(string $filename, array $config = []): DOMDocument
     {
         $config['filename'] = $filename;
         $doc = self::createDocument($config);
@@ -125,7 +126,7 @@ class XML
      * @return void
      * @throws XMLException
      */
-    public static function validate(DOMDocument $doc, string $source)
+    public static function validate(DOMDocument $doc, string $source): void
     {
         libxml_use_internal_errors(true);
         @$doc->schemaValidateSource($source);
@@ -139,7 +140,7 @@ class XML
      * @param array $config
      * @return DOMDocument
      */
-    private static function createDocument(array &$config)
+    private static function createDocument(array &$config): DOMDocument
     {
         // Automatic entity loading isn't a thing anymore. Although we still
         // loading for loading schemas and such. Use the 'entities' callback
@@ -168,7 +169,7 @@ class XML
      * @return void
      * @throws XMLException
      */
-    private static function collectLibXmlErrors(string $class, $filename)
+    private static function collectLibXmlErrors(string $class, ?string $filename): void
     {
         $errors = libxml_get_errors();
         if (empty($errors)) return;
@@ -197,7 +198,7 @@ class XML
      *
      * @return void
      */
-    private static function cleanLibXml()
+    private static function cleanLibXml(): void
     {
         libxml_clear_errors();
         libxml_use_internal_errors(false);
@@ -222,7 +223,7 @@ class XML
      * @param array $entities
      * @return callable (public_id, system_id, context) => resource|null
      */
-    public static function allowedEntities(array $entities)
+    public static function allowedEntities(array $entities): callable
     {
         return function ($public_id, $system_id, $context)
             use ($entities)
@@ -250,7 +251,7 @@ class XML
      * @param array $prefixes
      * @return callable (public_id, system_id, context) => resource|null
      */
-    public static function prefixEntities(array $prefixes)
+    public static function prefixEntities(array $prefixes): callable
     {
         return function ($public_id, $system_id, $context)
             use ($prefixes)
@@ -290,7 +291,7 @@ class XML
      * @return void
      * @throws XMLException
      */
-    public static function processConditionals(DOMNode $node, array $conditions)
+    public static function processConditionals(DOMNode $node, array $conditions): void
     {
         /** @var DOMDocument */
         $document = $node->ownerDocument ?? $node;
@@ -445,7 +446,7 @@ class XML
      * @param string $type string|bool|int|float|element|list|nodes
      * @return string|bool|int|float|DOMElement|DOMNode[]|Generator<DOMNode>|null
      */
-    public static function xpath(DOMNode $node, string $query, string $type = 'nodes')
+    public static function xpath(DOMNode $node, string $query, string $type = 'nodes'): mixed
     {
         // If 'ownerDocument' is null, then the node _is_ the document.
         /** @var DOMDocument $document */
@@ -504,7 +505,7 @@ class XML
      * @param DOMNodeList $list
      * @return Generator<DOMNode>
      */
-    private static function getNodeIterator(DOMNodeList $list)
+    private static function getNodeIterator(DOMNodeList $list): Generator
     {
         for ($i = 0; $i < $list->length; $i++) {
             $item = $list->item($i);
@@ -521,7 +522,7 @@ class XML
      * @param DOMNodeList $list
      * @return Generator<DOMElement>
      */
-    private static function getElementIterator(DOMNodeList $list)
+    private static function getElementIterator(DOMNodeList $list): Generator
     {
         foreach (self::getNodeIterator($list) as $i => $item) {
             if (!($item instanceof DOMElement)) continue;
@@ -552,7 +553,7 @@ class XML
      * @param array $params
      * @return mixed
      */
-    public static function enum(DOMNode $xml, string $path, array $params)
+    public static function enum(DOMNode $xml, string $path, array $params): mixed
     {
         $value = self::xpath($xml, $path, 'int') ?: 0;
         $value = $params[$value] ?? null;
@@ -571,7 +572,7 @@ class XML
      * @param DOMNode $thing
      * @return bool true/false and nothing else
      */
-    public static function boolean(DOMNode $thing)
+    public static function boolean(DOMNode $thing): bool
     {
         // No element.
         $thing = self::text($thing);
@@ -626,7 +627,7 @@ class XML
      * @return DOMElement
      * @throws XMLAssertException If there were no nodes with that tag
      */
-    public static function expectFirst(DOMNode $parent, string $tag_name)
+    public static function expectFirst(DOMNode $parent, string $tag_name): DOMElement
     {
         $element = self::first($parent, $tag_name);
 
@@ -647,7 +648,7 @@ class XML
      * @return string
      * @throws XMLAssertException If there were no nodes with that tag name
      */
-    public static function expectFirstText(DOMNode $parent, string $tag_name)
+    public static function expectFirstText(DOMNode $parent, string $tag_name): string
     {
         return self::text(self::expectFirst($parent, $tag_name));
     }
@@ -660,7 +661,7 @@ class XML
      * @param string $tag_name
      * @return DOMElement|null
      */
-    public static function first(DOMNode $parent, string $tag_name)
+    public static function first(DOMNode $parent, string $tag_name): ?DOMElement
     {
         // Get the root element of a document first.
         if ($parent instanceof DOMDocument) {
@@ -684,7 +685,7 @@ class XML
      * @param string $tag_name
      * @return string|null
      */
-    public static function firstText(DOMNode $parent, string $tag_name)
+    public static function firstText(DOMNode $parent, string $tag_name): ?string
     {
         $element = self::first($parent, $tag_name);
         if ($element === null) return null;
@@ -706,7 +707,7 @@ class XML
      * @return DOMElement[] [name => element]
      * @throws XMLAssertException If not all wanted tags are found
      */
-    public static function gatherChildren(DOMNode $parent, array $wanted)
+    public static function gatherChildren(DOMNode $parent, array $wanted): array
     {
         $wanted = array_fill_keys($wanted, true);
         $fetched = [];
@@ -753,7 +754,7 @@ class XML
      * @return DOMElement
      * @throws XMLAssertException If no tag found
      */
-    public static function expectOneOf(DOMNode $parent, array $wanted)
+    public static function expectOneOf(DOMNode $parent, array $wanted): DOMElement
     {
         foreach (self::getElementIterator($parent->childNodes) as $element) {
             /** @var DOMElement $element */
@@ -772,7 +773,7 @@ class XML
      * @param DOMNode $node
      * @return string
      */
-    public static function text(DOMNode $node)
+    public static function text(DOMNode $node): string
     {
         return trim($node->textContent);
     }
@@ -785,7 +786,7 @@ class XML
      * @param string $name
      * @return string|null
      */
-    public static function attr($element, string $name)
+    public static function attr(DOMDocument|DOMElement $element, string $name): ?string
     {
         if ($element instanceof DOMDocument) {
             $element = $element->documentElement;
@@ -818,7 +819,7 @@ class XML
      * @param DOMNode $node
      * @return void echos
      */
-    public static function print(DOMNode $node)
+    public static function print(DOMNode $node): void
     {
         /** @var DOMDocument */
         $document = $node->ownerDocument ?? $node;
