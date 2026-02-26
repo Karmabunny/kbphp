@@ -14,11 +14,6 @@ use DOMProcessingInstruction;
 use DOMXPath;
 use Generator;
 
-// Just to be sure.
-if (PHP_VERSION_ID < 80000) {
-    libxml_disable_entity_loader(true);
-}
-
 /**
  * XML helper methods.
  *
@@ -149,9 +144,6 @@ class XML
         // Automatic entity loading isn't a thing anymore. Although we still
         // loading for loading schemas and such. Use the 'entities' callback
         // and built-in loaders for this, or build you own.
-        if (PHP_VERSION_ID < 80000) {
-            libxml_disable_entity_loader(true);
-        }
 
         if (!isset($config['options'])) $config['options'] = 0;
         if (!isset($config['filename'])) $config['filename'] = '<anonymous>';
