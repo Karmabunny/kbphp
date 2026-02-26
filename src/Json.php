@@ -39,7 +39,6 @@ class Json
 
         $out = json_encode($json, $flags);
 
-        // PHP <= 7.2
         $error = json_last_error();
         if ($error !== JSON_ERROR_NONE) {
             throw new JsonException(json_last_error_msg(), $error);
@@ -66,7 +65,6 @@ class Json
 
         $out = json_decode($str, true, self::RECURSIVE_DEPTH, $flags);
 
-        // PHP <= 7.2
         $error = json_last_error();
         if ($error !== JSON_ERROR_NONE) {
             throw new JsonException(json_last_error_msg(), $error);

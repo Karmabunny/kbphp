@@ -75,8 +75,8 @@ trait PropertiesTrait
     /**
      * Get a list of properties, with respective types (if available).
      *
-     * Beginning with PHP 7.4 object properties can have strict types. If not
-     * typed or running a older PHP all properties will be `mixed`.
+     * Object properties can have strict types. If not typed, all properties
+     * will be `mixed`.
      *
      * @return string[] [ name => type ]
      */
@@ -97,12 +97,10 @@ trait PropertiesTrait
                 $name = $property->getName();
                 $type = null;
 
-                if (PHP_VERSION_ID >= 74000) {
-                    // @phpstan-ignore-next-line
-                    $type = $property->getType();
-                    if ($type !== null) {
-                        $type = $type->getName();
-                    }
+                // @phpstan-ignore-next-line
+                $type = $property->getType();
+                if ($type !== null) {
+                    $type = $type->getName();
                 }
 
                 $fields[$name] = $type ?? 'mixed';
