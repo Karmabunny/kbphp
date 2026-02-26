@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @link      https://github.com/Karmabunny
  * @copyright Copyright (c) 2023 Karmabunny
@@ -26,7 +27,7 @@ class Events
      *
      * @var callable[][][]
      */
-    protected static $_events = [];
+    protected static array $_events = [];
 
 
     /**
@@ -34,7 +35,7 @@ class Events
      *
      * @var null|(float[][][])
      */
-    protected static $_log = null;
+    protected static ?array $_log = null;
 
 
     /**
@@ -42,7 +43,7 @@ class Events
      *
      * @var float[][]
      */
-    protected static $_run = [];
+    protected static array $_run = [];
 
 
     /**
@@ -157,7 +158,7 @@ class Events
      * @return void
      * @throws InvalidArgumentException
      */
-    public static function on($sender, $event, $fn = null, bool $append = true)
+    public static function on(string|object $sender, string|callable $event, callable|bool|null $fn = null, bool $append = true)
     {
         // If no handler is given, assume the second parameter is handler.
         // Using some cheeky reflection we can extract the event type.
@@ -235,7 +236,7 @@ class Events
      * @param class-string<EventInterface>|null $event
      * @return void
      */
-    public static function off($sender, ?string $event = null)
+    public static function off(string|object|null $sender, ?string $event = null): void
     {
         if (is_object($sender)) {
             $sender = get_class($sender);
@@ -349,7 +350,7 @@ class Events
      * @param bool $logging
      * @return void
      */
-    public static function setLogging(bool $logging)
+    public static function setLogging(bool $logging): void
     {
         self::$_log = $logging ? [] : null;
     }
@@ -361,7 +362,7 @@ class Events
      * @param bool $clearRunLog
      * @return void
      */
-    public static function clearLog(bool $clearRunLog = false)
+    public static function clearLog(bool $clearRunLog = false): void
     {
         if (self::$_log !== null) {
             self::$_log = [];

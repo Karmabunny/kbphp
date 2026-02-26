@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @link      https://github.com/Karmabunny
  * @copyright Copyright (c) 2022 Karmabunny
@@ -62,12 +63,8 @@ abstract class AttributeTag
     const MODE_ALL = 3;
 
 
-    /**
-     * The reflection object that this tag was found on.
-     *
-     * @var Reflector|null
-     */
-    public $reflect;
+    /** The reflection object that this tag was found on. */
+    public ?Reflector $reflect = null;
 
 
     /**
@@ -91,7 +88,7 @@ abstract class AttributeTag
      * @param string $content
      * @return static|null
      */
-    protected static function build(string $content)
+    protected static function build(string $content): ?static
     {
         try {
             $args = Json::decode("[{$content}]");
@@ -115,7 +112,7 @@ abstract class AttributeTag
      * @param int $modes
      * @return static[]
      */
-    public static function parse($target, int $modes = self::MODE_ALL): array
+    public static function parse(string|object $target, int $modes = self::MODE_ALL): array
     {
         $reflect = new ReflectionClass($target);
 
@@ -150,7 +147,7 @@ abstract class AttributeTag
      * @param int $modes
      * @return static[]
      */
-    public static function parseFunction($function, int $modes = self::MODE_ALL): array
+    public static function parseFunction(callable $function, int $modes = self::MODE_ALL): array
     {
         $reflect = new ReflectionFunction($function);
         return static::parseReflector($reflect, $modes);
@@ -164,7 +161,7 @@ abstract class AttributeTag
      * @param int $modes
      * @return static[]
      */
-    public static function parseReflector($reflect, int $modes = self::MODE_ALL): array
+    public static function parseReflector(Reflector $reflect, int $modes = self::MODE_ALL): array
     {
         $tags = [];
 
@@ -188,16 +185,10 @@ abstract class AttributeTag
      * @param ReflectionClass|ReflectionFunctionAbstract|ReflectionProperty|ReflectionClassConstant|ReflectionParameter $reflect
      * @return static[]
      */
-    public static function parseReflectorAttributes($reflect): array
+    public static function parseReflectorAttributes(Reflector $reflect): array
     {
-        // Safety net only because we haven't got strong types on '$reflect'.
-        if (!method_exists($reflect, 'getAttributes')) {
-            throw new Error('Cannot parse attributes from: ' . get_class($reflect));
-        }
-
         // We're looking for instances of ourself (the attribute) and any
         // extensions of us.
-        // @phpstan-ignore-next-line : PHP8 only.
         $attributes = $reflect->getAttributes(static::class, ReflectionAttribute::IS_INSTANCEOF);
 
         $tags = [];
@@ -219,7 +210,7 @@ abstract class AttributeTag
      * @param ReflectionClass|ReflectionFunctionAbstract|ReflectionProperty|ReflectionClassConstant|ReflectionParameter $reflect
      * @return static[]
      */
-    public static function parseReflectorDocTags($reflect): array
+    public static function parseReflectorDocTags(Reflector $reflect): array
     {
         // Static store for class metadata. This only needs to be parsed once.
         // A bit of inception here. We're parsing the @doctags of the tag
