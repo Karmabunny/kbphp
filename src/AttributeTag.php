@@ -168,14 +168,6 @@ abstract class AttributeTag
     {
         $tags = [];
 
-        if (PHP_VERSION_ID < 80000) {
-            if ($modes === self::MODE_ATTRIBUTES) {
-                throw new Error('Attributes are not supported in this version of PHP');
-            }
-
-            $modes ^= self::MODE_ATTRIBUTES;
-        }
-
         if ($modes & self::MODE_ATTRIBUTES) {
             $more = static::parseReflectorAttributes($reflect);
             array_push($tags, ...$more);
@@ -198,10 +190,6 @@ abstract class AttributeTag
      */
     public static function parseReflectorAttributes($reflect): array
     {
-        if (PHP_VERSION_ID < 80000) {
-            throw new Error('Attributes are not supported in this version of PHP');
-        }
-
         // Safety net only because we haven't got strong types on '$reflect'.
         if (!method_exists($reflect, 'getAttributes')) {
             throw new Error('Cannot parse attributes from: ' . get_class($reflect));

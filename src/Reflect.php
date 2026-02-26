@@ -169,15 +169,13 @@ class Reflect
                 // Fix private/protected access.
                 $property->setAccessible(true);
 
-                // @phpstan-ignore-next-line : PHP 7.4+
-                if (PHP_VERSION_ID >= 70400 and !$property->isInitialized($target)) {
+                if (!$property->isInitialized($target)) {
                     // Don't serialize uninitialized properties
                     continue;
                 }
-                else {
-                    // We need to use getValue() so to bypass any __get() magic.
-                    $value = $property->getValue($target);
-                }
+
+                // We need to use getValue() so to bypass any __get() magic.
+                $value = $property->getValue($target);
 
                 $key = $property->getName();
                 $data[$key] = $value;

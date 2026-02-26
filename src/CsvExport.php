@@ -298,25 +298,13 @@ class CsvExport
             $items[$key] = $this->_format($key, $value);
         }
 
-        if (PHP_VERSION_ID > 80100) {
-            // @phpstan-ignore-next-line : newer PHP has more fields.
-            fputcsv(
-                $this->handle,
-                $items,
-                $this->delimiter,
-                $this->enclosure,
-                $this->escape,
-                $this->break
-            );
-        }
-        else {
-            fputcsv(
-                $this->handle,
-                $items,
-                $this->delimiter,
-                $this->enclosure,
-                $this->escape
-            );
-        }
+        fputcsv(
+            $this->handle,
+            $items,
+            $this->delimiter,
+            $this->enclosure,
+            $this->escape,
+            $this->break
+        );
     }
 }
