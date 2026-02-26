@@ -415,7 +415,7 @@ class XML
 
         foreach ($args as $key => $value) {
             $subjects[] = '{{' . $key . '}}';
-            $replace[] = htmlspecialchars($value);
+            $replace[] = htmlspecialchars((string) $value);
         }
 
         $xml = str_replace($subjects, $replace, $template);
