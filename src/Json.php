@@ -26,25 +26,23 @@ class Json
      * Encode a json array as a string.
      *
      * @param mixed $json
-     * @param bool|int $flags Applies pretty flags if `true`.
+     * @param bool|int $flags Applies pretty flags if `true`, default: `JSON_THROW_ON_ERROR`
      * @return string
      * @throws JsonException Any parsing error
      */
-    public static function encode(mixed $json, bool|int $flags = 0): string
+    public static function encode(mixed $json, bool|int $flags = -1): string
     {
         if ($flags === true) {
             $flags = 0;
             $flags |= JSON_UNESCAPED_SLASHES;
             $flags |= JSON_PRETTY_PRINT;
         }
-
-        $out = json_encode($json, $flags);
-
-        $error = json_last_error();
-        if ($error !== JSON_ERROR_NONE) {
-            throw new JsonException(json_last_error_msg(), $error);
+        else if ($flags === -1) {
+            $flags = 0;
+            $flags |= JSON_THROW_ON_ERROR;
         }
 
+        $out = json_encode($json, $flags);
         return $out;
     }
 
@@ -54,23 +52,17 @@ class Json
      *
      * @throws JsonException Any parsing error
      * @param string $str A JSON string. As per the spec, this should be UTF-8 encoded
-     * @param int $flags Default JSON_INVALID_UTF8_SUBSTITUTE (if available)
+     * @param int $flags Default: `JSON_INVALID_UTF8_SUBSTITUTE` and `JSON_THROW_ON_ERROR`
      * @return mixed The decoded value
      */
-    public static function decode(string $str, int $flags = 0): mixed
+    public static function decode(string $str, int $flags = -1): mixed
     {
-        if ($flags == 0 and defined('JSON_INVALID_UTF8_SUBSTITUTE')) {
-            // phpcs:ignore
+        if ($flags === -1) {
             $flags |= JSON_INVALID_UTF8_SUBSTITUTE;
+            $flags |= JSON_THROW_ON_ERROR;
         }
 
         $out = json_decode($str, true, self::RECURSIVE_DEPTH, $flags);
-
-        $error = json_last_error();
-        if ($error !== JSON_ERROR_NONE) {
-            throw new JsonException(json_last_error_msg(), $error);
-        }
-
         return $out;
     }
 
