@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use ReflectionClass;
+use ReflectionNamedType;
 use ReflectionProperty;
 
 /**
@@ -95,15 +96,14 @@ trait PropertiesTrait
                 if ($property->isStatic()) continue;
 
                 $name = $property->getName();
-                $type = null;
+                $type_name = null;
 
-                // @phpstan-ignore-next-line
                 $type = $property->getType();
-                if ($type !== null) {
-                    $type = $type->getName();
+                if ($type instanceof ReflectionNamedType) {
+                    $type_name = $type->getName();
                 }
 
-                $fields[$name] = $type ?? 'mixed';
+                $fields[$name] = $type_name ?? 'mixed';
             }
 
             $_FIELDS[static::class] = $fields;

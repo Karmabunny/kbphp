@@ -77,7 +77,7 @@ trait EventableTrait
      * @return void
      * @throws InvalidArgumentException
      */
-    public function on($event, $fn = null, bool $append = true)
+    public function on(string|callable $event, callable|bool|null $fn = null, bool $append = true)
     {
         // Unlike trigger, using dynamic class names here is OK. A user is not
         // surprised (hopefully) that they only receive events appropriate for
@@ -94,7 +94,7 @@ trait EventableTrait
      * @param class-string<EventInterface>|null $event
      * @return void
      */
-    public function off($event)
+    public function off(?string $event = null): void
     {
         Events::off($this, $event);
     }

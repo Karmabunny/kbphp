@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @link      https://github.com/Karmabunny
  * @copyright Copyright (c) 2020 Karmabunny
@@ -29,7 +30,7 @@ class Json
      * @return string
      * @throws JsonException Any parsing error
      */
-    public static function encode($json, $flags = 0): string
+    public static function encode(mixed $json, bool|int $flags = 0): string
     {
         if ($flags === true) {
             $flags = 0;
@@ -56,7 +57,7 @@ class Json
      * @param int $flags Default JSON_INVALID_UTF8_SUBSTITUTE (if available)
      * @return mixed The decoded value
      */
-    public static function decode(string $str, $flags = 0)
+    public static function decode(string $str, int $flags = 0): mixed
     {
         if ($flags == 0 and defined('JSON_INVALID_UTF8_SUBSTITUTE')) {
             // phpcs:ignore
@@ -81,7 +82,7 @@ class Json
      * @param bool $serialized use JsonSerializable if available.
      * @return array
      */
-    public static function error(Throwable $error, $serialized = true): array
+    public static function error(Throwable $error, bool $serialized = true): array
     {
         // Use the serializable interface.
         // This may not be desirable if you're using _this helper_ to implement
