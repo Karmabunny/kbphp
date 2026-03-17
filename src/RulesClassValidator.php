@@ -236,7 +236,21 @@ class RulesClassValidator implements RulesValidatorInterface
                     $ok = 0;
 
                     foreach ($ruleset as $subkey => $subrule) {
-                        if (is_string($subkey) and is_array($subrule)) {
+                        if (!is_array($subrule)) {
+                            continue;
+                        }
+
+                        if (!is_string($subkey)) {
+                            continue;
+                        }
+
+                        if (is_array($subrule[0] ?? null)) {
+                            foreach ($subrule as $subsubrule) {
+                                $this->rules[] = $this->parseRule($subkey, $subsubrule);
+                                $ok++;
+                            }
+                        }
+                        else {
                             $this->rules[] = $this->parseRule($subkey, $subrule);
                             $ok++;
                         }
