@@ -282,6 +282,12 @@ abstract class BaseFieldThing extends Collection implements ValidatesInterface
     /** @var string */
     public $length_two = 'asdfasdf';
 
+    /** @var string */
+    public $regex_one = 'abbbbbbb';
+
+    /** @var string */
+    public $regex_two = 'cd';
+
 
     public static function matchDomain($value)
     {
@@ -310,6 +316,10 @@ class OldFieldThing extends BaseFieldThing
             'length' => [
                 ['length_one', 'args' => [0, 10]],
                 ['length_two', 'args' => [5, 20]],
+            ],
+            'regex' => [
+                ['regex_one', 'args' => ['/ab*/']],
+                ['regex_two', 'args' => ['/cd*/']],
             ],
         ];
 
@@ -365,6 +375,10 @@ class NewFieldThing extends BaseFieldThing
                 ['length_one', 'min' => 0, 'max' => 10],
                 ['length_two', 'min' => 5, 'max' => 20],
             ],
+            ['regex' => [
+                ['regex_one', 'pattern' => '/ab*/'],
+                ['regex_two', 'pattern' => '/cd*/'],
+            ]],
         ];
 
         // Different scenario.
