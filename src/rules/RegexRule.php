@@ -20,10 +20,6 @@ class RegexRule extends BaseRule
 
     public $pattern = null;
 
-    public $max = null;
-
-    public $ordered = true;
-
 
     /** @inheritdoc */
     public function parse(array $ruleset)
