@@ -6,6 +6,7 @@
 
 namespace karmabunny\kb;
 
+use Attribute;
 use Error;
 use InvalidArgumentException;
 use ReflectionException;
@@ -19,6 +20,7 @@ use ReflectionProperty;
  *
  * @package karmabunny\kb
  */
+#[Attribute(Attribute::TARGET_PROPERTY)]
 class VirtualProperty extends VirtualPropertyBase
 {
 
