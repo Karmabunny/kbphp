@@ -6,8 +6,6 @@
 
 namespace karmabunny\kb;
 
-use Closure;
-
 /**
  * This modifies the behaviour of a DataObject/Collection for updating complex
  * properties, such as arrays and objects.

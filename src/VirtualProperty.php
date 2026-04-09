@@ -10,13 +10,12 @@ use Attribute;
 use Error;
 use InvalidArgumentException;
 use ReflectionException;
-use ReflectionProperty;
 
 /**
  * Attach this to a property to tie it to a local method.
  *
- * The object must implement the {@see AttributeVirtualTrait} and use
- * the `applyVirtual()` helper to invoke the virtual methods.
+ * The object must implement the {@see AttributeVirtualTrait} and matching
+ * {@see UpdateVirtualInterface} to enable this for DataObject types.
  *
  * @package karmabunny\kb
  */

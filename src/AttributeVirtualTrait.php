@@ -12,8 +12,11 @@ use ReflectionProperty;
  * This modifies the behaviour of a DataObject/Collection for updating complex
  * properties, such as arrays and objects.
  *
- * Attach a {@see VirtualProperty} or {@see VirtualObject} to a property to
- * enable automatic conversion of these properties.
+ * Attach a virtual attributes to properties to enable automatic conversion.
+ *
+ * - {@see VirtualProperty}
+ * - {@see VirtualObject}
+ * - {@see VirtualArray}
  *
  * Notes:
  * - 'automatic' is a stretch, implementors must call `setVirtual()`, ideally
