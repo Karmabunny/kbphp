@@ -7,7 +7,7 @@
 namespace karmabunny\kb;
 
 use Attribute;
-use Error;
+use BadMethodCallException;
 use InvalidArgumentException;
 use ReflectionException;
 
@@ -50,7 +50,7 @@ class VirtualProperty extends VirtualPropertyBase
             $method->invoke($target, $value);
         }
         catch (ReflectionException $ex) {
-            throw new Error("Virtual method not found: {$this->method}");
+            throw new BadMethodCallException("Virtual method not found: {$this->method}");
         }
 
         return true;
