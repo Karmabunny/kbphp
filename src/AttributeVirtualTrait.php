@@ -46,28 +46,25 @@ trait AttributeVirtualTrait
     public function setVirtual($config): array
     {
         $virtuals = VirtualPropertyBase::parse($this);
-        $properties = [];
+
+        $seen = [];
+        $updated = [];
 
         foreach ($virtuals as $virtual) {
-            if (!($virtual->reflect instanceof ReflectionProperty)) {
-                continue;
-            }
-
-            $name = $virtual->reflect->getName();
+            $name = $virtual->getName();
             $value = $config[$name] ?? null;
 
             if ($value === null) continue;
 
             // Prevent applying things twice.
             // Use the first one and ignore the rest.
-            if (!isset($properties[$name])) {
-                $properties[$name] = $name;
-
-                $virtual->reflect->setAccessible(true);
-                $virtual->apply($this, $value);
+            if (!isset($seen[$name])) {
+                $seen[$name] = true;
+                $ok = $virtual->apply($this, $value);
+                if ($ok) $updated[] = $name;
             }
         }
 
-        return $properties;
+        return $updated;
     }
 }

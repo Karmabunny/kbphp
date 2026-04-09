@@ -23,9 +23,7 @@ use ReflectionProperty;
 class VirtualObject extends VirtualPropertyBase
 {
 
-    /**
-     * @var string
-     */
+    /** @var class-string */
     public $class;
 
 
@@ -46,16 +44,25 @@ class VirtualObject extends VirtualPropertyBase
 
 
     /** @inheritdoc */
-    public function apply(object $target, mixed $value)
+    public function apply(object $target, $value): bool
     {
-        if (!($this->reflect instanceof ReflectionProperty)) {
-            throw new Error('VirtualProperty must be parsed from an object');
+        if (is_array($value)) {
+            $value = Configure::create($this->class, $value);
+        }
+        else if (get_class($value) === $this->class) {
+            $value = $value;
+        }
+        else if ($this->isNullable()) {
+            $value = null;
+        }
+        else {
+            return false;
         }
 
         $this->reflect->setAccessible(true);
-
-        $value = Configure::create($this->class, $value);
         $this->reflect->setValue($target, $value);
+
+        return true;
     }
 
 }

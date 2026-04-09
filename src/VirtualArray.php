@@ -23,10 +23,9 @@ use ReflectionProperty;
 class VirtualArray extends VirtualPropertyBase
 {
 
-    /**
-     * @var string
-     */
+    /** @var class-string */
     public $class;
+
 
     /**
      *
@@ -45,21 +44,31 @@ class VirtualArray extends VirtualPropertyBase
 
 
     /** @inheritdoc */
-    public function apply(object $target, mixed $value)
+    public function apply(object $target, $value): bool
     {
-        if (!($this->reflect instanceof ReflectionProperty)) {
-            throw new Error('VirtualProperty must be parsed from an object');
+        if (is_array($value)) {
+            $items = [];
+
+            foreach ($value as $key => $item) {
+                if (is_array($item)) {
+                    $items[$key] = Configure::create($this->class, $item);
+                }
+                else if (get_class($item) === $this->class) {
+                    $items[$key] = $item;
+                }
+            }
+        }
+        else if ($this->isNullable()) {
+            $items = null;
+        }
+        else {
+            // TODO or overwrite with an empty array?
+            return false;
         }
 
         $this->reflect->setAccessible(true);
-
-        $items = [];
-
-        foreach ($value as $key => $item) {
-            $item = Configure::create($this->class, $item);
-            $items[$key] = $item;
-        }
-
         $this->reflect->setValue($target, $items);
+
+        return true;
     }
 }

@@ -43,12 +43,8 @@ class VirtualProperty extends VirtualPropertyBase
 
 
     /** @inheritdoc */
-    public function apply(object $target, $value)
+    public function apply(object $target, $value): bool
     {
-        if (!($this->reflect instanceof ReflectionProperty)) {
-            throw new Error('VirtualProperty must be parsed from an object');
-        }
-
         try {
             $class = $this->reflect->getDeclaringClass();
             $method = $class->getMethod($this->method);
@@ -57,5 +53,7 @@ class VirtualProperty extends VirtualPropertyBase
         catch (ReflectionException $ex) {
             throw new Error("Virtual method not found: {$this->method}");
         }
+
+        return true;
     }
 }
