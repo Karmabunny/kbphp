@@ -28,12 +28,6 @@ trait UpdateVirtualTrait
      *     // Convert a single object.
      *     'user' => User::class,
      *
-     *     // Convert an array of objects.
-     *     'sites' => [Sites::class],
-     *
-     *     // A local converter method.
-     *     'other' => [$this, 'someMethod'],
-     *
      *     // Some external method.
      *     'some_string_i_guess' => 'trim',
      * ]
@@ -64,37 +58,20 @@ trait UpdateVirtualTrait
         $virtuals = $this->virtual();
         $updated = [];
 
-        foreach ($config as $name => $value) {
-            $virtual = $virtuals[$name] ?? null;
+        foreach ($virtuals as $name => $virtual) {
 
-            // Build objects if present.
-            // do this first incase it's callable.
-            if (is_object($virtual) and !($virtual instanceof Closure)) {
-                $this->{$name} = Configure::configure([$virtual => $value]);
-                $updated[] = $name;
+            if (!is_callable($virtual)) {
                 continue;
             }
 
-            // Mirror behaviour from UpdateVirtualTrait.
-            if (is_callable($virtual)) {
-                $ok = $virtual($value);
-
-                if ($ok !== false) {
-                    $updated[] = $name;
-                }
+            if (!array_key_exists($name, $config)) {
                 continue;
             }
 
-            // Nested array behaviour.
-            if (is_array($virtual) and class_exists($virtual[0] ?? '')) {
-                $this->{$name} = [];
+            $ok = $virtual($config[$name]);
 
-                foreach ($value as $key => $item) {
-                    $this->{$name}[$key] = Configure::configure([$virtual[0] => $item]);
-                }
-
+            if ($ok !== false) {
                 $updated[] = $name;
-                continue;
             }
         }
 
