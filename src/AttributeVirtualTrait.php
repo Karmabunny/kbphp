@@ -43,7 +43,7 @@ trait AttributeVirtualTrait
      * @param iterable $config
      * @return string[]
      */
-    protected function setVirtual($config)
+    public function setVirtual($config): array
     {
         $virtuals = VirtualPropertyBase::parse($this);
         $properties = [];
@@ -61,11 +61,13 @@ trait AttributeVirtualTrait
             // Prevent applying things twice.
             // Use the first one and ignore the rest.
             if (!isset($properties[$name])) {
-                $properties[$name] = true;
+                $properties[$name] = $name;
 
                 $virtual->reflect->setAccessible(true);
                 $virtual->apply($this, $value);
             }
         }
+
+        return $properties;
     }
 }
