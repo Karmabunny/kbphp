@@ -20,14 +20,13 @@ use ReflectionProperty;
  * @package karmabunny\kb
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
-class VirtualObject extends VirtualPropertyBase
+class VirtualArray extends VirtualPropertyBase
 {
 
     /**
      * @var string
      */
     public $class;
-
 
     /**
      *
@@ -54,8 +53,13 @@ class VirtualObject extends VirtualPropertyBase
 
         $this->reflect->setAccessible(true);
 
-        $value = Configure::create($this->class, $value);
-        $this->reflect->setValue($target, $value);
-    }
+        $items = [];
 
+        foreach ($value as $key => $item) {
+            $item = Configure::create($this->class, $item);
+            $items[$key] = $item;
+        }
+
+        $this->reflect->setValue($target, $items);
+    }
 }
