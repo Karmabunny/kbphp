@@ -26,6 +26,10 @@ trait UpdateTidyTrait
      */
     public function update($config)
     {
+        if (!is_array($config)) {
+            $config = iterator_to_array($config);
+        }
+
         $fields = static::getPropertyTypes();
 
         $virtual = [];
