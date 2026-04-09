@@ -58,6 +58,7 @@ trait UpdateVirtualTrait
 
         foreach ($virtuals as $name => $virtual) {
 
+            // @phpstan-ignore-next-line : runtime assertion.
             if (!is_callable($virtual)) {
                 continue;
             }

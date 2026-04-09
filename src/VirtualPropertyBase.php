@@ -54,6 +54,7 @@ abstract class VirtualPropertyBase
      */
     public function isNullable(): bool
     {
+        // @phpstan-ignore-next-line : PHP8 only.
         $type = $this->reflect->getType();
         return ($type and $type->allowsNull());
     }
@@ -73,6 +74,7 @@ abstract class VirtualPropertyBase
 
         foreach ($reflect->getProperties() as $property) {
             $name = $property->getName();
+            // @phpstan-ignore-next-line : PHP8 only.
             $attributes = $property->getAttributes(static::class, ReflectionAttribute::IS_INSTANCEOF);
 
             if (empty($attributes)) {

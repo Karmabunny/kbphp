@@ -8,7 +8,6 @@ namespace karmabunny\kb;
 
 use Attribute;
 use BadMethodCallException;
-use InvalidArgumentException;
 use ReflectionException;
 
 /**
@@ -33,7 +32,6 @@ class VirtualProperty extends VirtualPropertyBase
      *
      * @param string $method
      * @return void
-     * @throws InvalidArgumentException
      */
     public function __construct(string $method)
     {

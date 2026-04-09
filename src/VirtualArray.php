@@ -27,7 +27,7 @@ class VirtualArray extends VirtualPropertyBase
 
     /**
      *
-     * @param string $method
+     * @param class-string $class
      * @return void
      * @throws InvalidArgumentException
      */
