@@ -9,6 +9,7 @@ use karmabunny\kb\ArrayableFields;
 use karmabunny\kb\AttributeVirtualTrait;
 use karmabunny\kb\UpdateStrictTrait;
 use karmabunny\kb\UpdateTidyTrait;
+use karmabunny\kb\UpdateVirtualTrait;
 use karmabunny\kb\VirtualArray;
 use karmabunny\kb\VirtualObject;
 use karmabunny\kb\VirtualProperty;
@@ -374,6 +375,7 @@ class ThingoFields extends Thingo
 
 class ThingoTidy extends Collection {
     use UpdateTidyTrait;
+    use UpdateVirtualTrait;
 
     public $name;
 
@@ -395,6 +397,7 @@ class ThingoTidy extends Collection {
 
 class ThingoStrict extends Collection {
     use UpdateStrictTrait;
+    use UpdateVirtualTrait;
 
     public $name;
 
@@ -416,6 +419,7 @@ class ThingoStrict extends Collection {
 
 
 class ThingoVirtual extends Collection {
+    use UpdateVirtualTrait;
 
     public $name;
 
@@ -437,7 +441,6 @@ class ThingoVirtual extends Collection {
 
 
 class ThingoVirtualAttributes extends Collection {
-    use AttributeVirtualTrait;
 
     public $name;
 

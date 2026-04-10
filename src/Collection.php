@@ -53,7 +53,7 @@ abstract class Collection extends DataObject implements
     use ArrayableTrait;
     use SerializeTrait;
     use DirtyPropertiesTrait;
-    use UpdateVirtualTrait;
+    use AttributeVirtualTrait;
 
 
     /** @inheritdoc */
