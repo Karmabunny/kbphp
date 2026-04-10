@@ -81,5 +81,13 @@ trait UpdateStrictTrait
 
             throw new InvalidArgumentException("Unknown or invalid fields ({$count}): {$errors}");
         }
+
+        // Backwards compatibility.
+        if (
+            !$this instanceof UpdateVirtualInterface
+            and method_exists($this, 'applyVirtual')
+        ) {
+            $this->applyVirtual($config);
+        }
     }
 }

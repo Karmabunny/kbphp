@@ -60,5 +60,13 @@ trait UpdateTidyTrait
 
             $this->$key = $value;
         }
+
+        // Backwards compatibility.
+        if (
+            !$this instanceof UpdateVirtualInterface
+            and method_exists($this, 'applyVirtual')
+        ) {
+            $this->applyVirtual($config);
+        }
     }
 }

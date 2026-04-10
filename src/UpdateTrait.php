@@ -43,5 +43,13 @@ trait UpdateTrait
             if (isset($virtual[$key])) continue;
             $this->$key = $item;
         }
+
+        // Backwards compatibility.
+        if (
+            !$this instanceof UpdateVirtualInterface
+            and method_exists($this, 'applyVirtual')
+        ) {
+            $this->applyVirtual($config);
+        }
     }
 }
