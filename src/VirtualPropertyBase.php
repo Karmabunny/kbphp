@@ -7,7 +7,7 @@
 namespace karmabunny\kb;
 
 use ReflectionAttribute;
-use ReflectionObject;
+use ReflectionClass;
 use ReflectionProperty;
 
 /**
@@ -48,14 +48,14 @@ abstract class VirtualPropertyBase
 
 
     /**
-     * Parse the virtual properties for a target object.
+     * Parse the virtual properties for a target class.
      *
-     * @param object $target
+     * @param class-string $target
      * @return array<string,static> [ property => virtual ]
      */
-    public static function parse(object $target): array
+    public static function parse(string $target): array
     {
-        $reflect = new ReflectionObject($target);
+        $reflect = new ReflectionClass($target);
 
         $virtuals = [];
 

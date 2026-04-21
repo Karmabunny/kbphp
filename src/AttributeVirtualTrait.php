@@ -6,7 +6,6 @@
 
 namespace karmabunny\kb;
 
-use ReflectionProperty;
 
 /**
  * This modifies the behaviour of a DataObject/Collection for updating complex
@@ -48,7 +47,7 @@ trait AttributeVirtualTrait
      */
     public function setVirtual(array $config): array
     {
-        $virtuals = VirtualPropertyBase::parse($this);
+        $virtuals = VirtualPropertyBase::parse(static::class);
 
         $seen = [];
         $updated = [];
