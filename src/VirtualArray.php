@@ -80,17 +80,19 @@ class VirtualArray extends VirtualPropertyBase
 
         // @phpstan-ignore-next-line : PHP8 only.
         $type = $this->reflect->getType();
-        $nullable = ($type and $type->allowsNull());
+        $nullable = (!$type or $type->allowsNull());
 
         // Null is passed though.
-        if ($value === null and ($nullable or !$type)) {
+        if ($value === null and $nullable) {
             $this->reflect->setValue($target, null);
             return true;
         }
 
         // Consume invalid values.
+        // Invalid values are set to empty arrays - if untyped.
+        // This is different to the behaviour in VirtualObject.
         if ($this->squashInvalid) {
-            $value = $nullable ? null : [];
+            $value = ($nullable and $type) ? null : [];
             $this->reflect->setValue($target, $value);
             return true;
         }
