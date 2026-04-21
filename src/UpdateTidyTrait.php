@@ -66,7 +66,7 @@ trait UpdateTidyTrait
             !$this instanceof UpdateVirtualInterface
             and method_exists($this, 'applyVirtual')
         ) {
-            $this->applyVirtual($config);
+            $this->applyVirtual();
         }
     }
 }
