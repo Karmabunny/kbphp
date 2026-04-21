@@ -11,7 +11,7 @@ namespace karmabunny\kb;
  * This modifies the behaviour of a DataObject/Collection for updating complex
  * properties, such as arrays and objects.
  *
- * Attach a virtual attributes to properties to enable automatic conversion.
+ * Attach virtual attributes to properties to enable automatic conversion.
  *
  * - {@see VirtualProperty}
  * - {@see VirtualObject}
@@ -20,7 +20,7 @@ namespace karmabunny\kb;
  * Notes:
  * - 'automatic' is a stretch, implementors must call `setVirtual()`, ideally
  *   alongside any build `update()` methods.
- * - these attributes cannot be used with doc tags and is therefore PHP 8+ only.
+ * - these attributes cannot be used with doc tags and are therefore PHP 8+ only.
  *
  * Example:
  * ```

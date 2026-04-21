@@ -23,8 +23,8 @@ trait UpdateVirtualTrait
      * Example:
      * ```php
      * [
-     *     // Convert a single object.
-     *     'user' => User::class,
+     *     // A local method.
+     *     'user' => [$this, ['setUser'],
      *
      *     // Some external method.
      *     'some_string_i_guess' => 'trim',
