@@ -31,7 +31,7 @@ abstract class VirtualPropertyBase
      *
      * @param object $target
      * @param mixed $value
-     * @return bool
+     * @return bool the property was applied
      */
     public abstract function apply(object $target, $value): bool;
 
@@ -67,6 +67,8 @@ abstract class VirtualPropertyBase
             if (empty($attributes)) {
                 continue;
             }
+
+            $property->setAccessible(true);
 
             $item = $attributes[0]->newInstance();
             $item->reflect = $property;

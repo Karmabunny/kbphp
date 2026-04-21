@@ -24,20 +24,31 @@ class VirtualArray extends VirtualPropertyBase
     /** @var class-string */
     public $class;
 
+    /**
+     * Consume invalid values.
+     *
+     * Invalid values are set to null (if able) or otherwise an empty array.
+     *
+     * @var bool
+     */
+    public $squashInvalid;
 
     /**
+     * Convert array items to objects of the target class.
      *
      * @param class-string $class
+     * @param bool $squashInvalid
      * @return void
      * @throws InvalidArgumentException
      */
-    public function __construct(string $class)
+    public function __construct(string $class, bool $squashInvalid = false)
     {
         if (!class_exists($class)) {
             throw new InvalidArgumentException("Target class does not exist: {$class}");
         }
 
         $this->class = $class;
+        $this->squashInvalid = $squashInvalid;
     }
 
 
@@ -62,22 +73,28 @@ class VirtualArray extends VirtualPropertyBase
                     $items[$key] = $item;
                 }
             }
-        }
-        else if (
-            // @phpstan-ignore-next-line : PHP8 only.
-            ($type = $this->reflect->getType())
-            and $type->allowsNull()
-        ) {
-            $items = null;
-        }
-        else {
-            // Invalid.
-            return false;
+
+            $this->reflect->setValue($target, $items);
+            return true;
         }
 
-        $this->reflect->setAccessible(true);
-        $this->reflect->setValue($target, $items);
+        // @phpstan-ignore-next-line : PHP8 only.
+        $type = $this->reflect->getType();
+        $nullable = ($type and $type->allowsNull());
 
-        return true;
+        // Null is passed though.
+        if ($value === null and ($nullable or !$type)) {
+            $this->reflect->setValue($target, null);
+            return true;
+        }
+
+        // Consume invalid values.
+        if ($this->squashInvalid) {
+            $value = $nullable ? null : [];
+            $this->reflect->setValue($target, $value);
+            return true;
+        }
+
+        return false;
     }
 }
