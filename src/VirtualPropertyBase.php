@@ -55,6 +55,11 @@ abstract class VirtualPropertyBase
      */
     public static function parse(string $target): array
     {
+        // No-op on 7.x.
+        if (PHP_VERSION_ID < 80000) {
+            return [];
+        }
+
         $reflect = new ReflectionClass($target);
 
         $virtuals = [];
