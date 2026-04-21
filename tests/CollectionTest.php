@@ -6,7 +6,6 @@
 
 use karmabunny\kb\Collection;
 use karmabunny\kb\ArrayableFields;
-use karmabunny\kb\AttributeVirtualTrait;
 use karmabunny\kb\UpdateStrictTrait;
 use karmabunny\kb\UpdateTidyTrait;
 use karmabunny\kb\UpdateVirtualTrait;
