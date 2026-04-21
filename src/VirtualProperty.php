@@ -7,8 +7,6 @@
 namespace karmabunny\kb;
 
 use Attribute;
-use BadMethodCallException;
-use ReflectionException;
 
 /**
  * Attach this to a property to tie it to a local method.
@@ -42,15 +40,11 @@ class VirtualProperty extends VirtualPropertyBase
     /** @inheritdoc */
     public function apply(object $target, $value): bool
     {
-        try {
-            $class = $this->reflect->getDeclaringClass();
-            $method = $class->getMethod($this->method);
-            $method->invoke($target, $value);
-        }
-        catch (ReflectionException $ex) {
-            throw new BadMethodCallException("Virtual method not found: {$this->method}");
+        if (!method_exists($target, $this->method)) {
+            return false;
         }
 
+        $target->{$this->method}($value);
         return true;
     }
 }
