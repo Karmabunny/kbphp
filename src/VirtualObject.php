@@ -47,8 +47,11 @@ class VirtualObject extends VirtualPropertyBase
         if (is_array($value)) {
             $value = Configure::create($this->class, $value);
         }
-        else if (is_object($value) and get_class($value) === $this->class) {
-            $value = $value;
+        else if (
+            is_object($value)
+            and is_a($value, $this->class, false)
+        ) {
+            // No-op.
         }
         else if (
             // @phpstan-ignore-next-line : PHP8 only.

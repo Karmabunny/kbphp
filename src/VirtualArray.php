@@ -55,7 +55,10 @@ class VirtualArray extends VirtualPropertyBase
                 if (is_array($item)) {
                     $items[$key] = Configure::create($this->class, $item);
                 }
-                else if (get_class($item) === $this->class) {
+                else if (
+                    is_object($item)
+                    and is_a($item, $this->class, false)
+                ) {
                     $items[$key] = $item;
                 }
             }
