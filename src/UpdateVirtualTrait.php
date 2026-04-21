@@ -48,10 +48,10 @@ trait UpdateVirtualTrait
     /**
      * Apply virtual properties.
      *
-     * @param iterable $config
+     * @param array $config
      * @return string[] set of updated fields
      */
-    public function setVirtual($config): array
+    public function setVirtual(array $config): array
     {
         $virtuals = $this->virtual();
         $updated = [];

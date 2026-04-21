@@ -43,10 +43,10 @@ trait AttributeVirtualTrait
      *  - `__clone()`
      *  - `update()`
      *
-     * @param iterable $config
+     * @param array $config
      * @return string[]
      */
-    public function setVirtual($config): array
+    public function setVirtual(array $config): array
     {
         $virtuals = VirtualPropertyBase::parse($this);
 
