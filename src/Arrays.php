@@ -921,9 +921,10 @@ class Arrays
      * This converts any nested arrayables to arrays.
      *
      * @param ArrayableInterface|Traversable|array $array
+     * @param bool $recurse - recurse into nested arrays
      * @return array
      */
-    public static function toArray($array): array
+    public static function toArray($array, bool $recurse = true): array
     {
         if ($array instanceof ArrayableInterface) {
             return $array->toArray();
@@ -942,6 +943,12 @@ class Arrays
 
             if (is_object($item)) {
                 $item = (array) $item;
+                continue;
+            }
+
+            // Recurse.
+            if ($recurse and is_array($item)) {
+                $item = self::toArray($item, $recurse);
                 continue;
             }
 
