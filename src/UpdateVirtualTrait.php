@@ -18,7 +18,7 @@ trait UpdateVirtualTrait
 {
 
     /**
-     * A list of converter functions or target objects.
+     * A list of converter functions.
      *
      * Example:
      * ```php
