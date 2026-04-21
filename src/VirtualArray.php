@@ -44,6 +44,10 @@ class VirtualArray extends VirtualPropertyBase
     /** @inheritdoc */
     public function apply(object $target, $value): bool
     {
+        if (is_iterable($value) and !is_array($value)) {
+            $value = iterator_to_array($value);
+        }
+
         if (is_array($value)) {
             $items = [];
 
@@ -56,11 +60,15 @@ class VirtualArray extends VirtualPropertyBase
                 }
             }
         }
-        else if ($this->isNullable()) {
+        else if (
+            // @phpstan-ignore-next-line : PHP8 only.
+            ($type = $this->reflect->getType())
+            and $type->allowsNull()
+        ) {
             $items = null;
         }
         else {
-            // TODO or overwrite with an empty array?
+            // Invalid.
             return false;
         }
 

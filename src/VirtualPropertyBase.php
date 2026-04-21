@@ -33,7 +33,7 @@ abstract class VirtualPropertyBase
      * @param mixed $value
      * @return bool
      */
-    public abstract function apply(object $target, $value): bool    ;
+    public abstract function apply(object $target, $value): bool;
 
 
     /**
@@ -44,19 +44,6 @@ abstract class VirtualPropertyBase
     public function getName(): string
     {
         return $this->reflect->getName();
-    }
-
-
-    /**
-     * Is this property nullable?
-     *
-     * @return bool
-     */
-    public function isNullable(): bool
-    {
-        // @phpstan-ignore-next-line : PHP8 only.
-        $type = $this->reflect->getType();
-        return ($type and $type->allowsNull());
     }
 
 
