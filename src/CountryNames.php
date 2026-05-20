@@ -342,13 +342,16 @@ class CountryNames
 
         // If the names match, it must be right!
         $locale = Locale::getDisplayRegion('-' . $code, $language);
-        if (strcasecmp($country_name, $locale) == 0) return $code;
+
+        if ($locale != $code and strcasecmp($country_name, $locale) == 0) {
+            return $code;
+        }
 
         // Okay, try them all.
         foreach (static::COUNTRY_CODES as $code) {
             $locale = Locale::getDisplayRegion('-' . $code, $language);
 
-            if (strcasecmp($country_name, $locale) == 0) {
+            if ($locale != $code and strcasecmp($country_name, $locale) == 0) {
                 return $code;
             }
         }
