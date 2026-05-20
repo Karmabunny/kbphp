@@ -9,7 +9,7 @@ namespace karmabunny\kb;
 /**
  * Write PHP arrays to a file.
  *
- * @package Bloom\Base
+ * @package karmabunny\kb
  */
 class Generate
 {

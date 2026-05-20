@@ -11,7 +11,7 @@ use karmabunny\interfaces\EventInterface;
 /**
  * An abstract base event.
  *
- * @package Bloom\Base
+ * @package karmabunny\kb
  */
 abstract class Event extends DataObject implements EventInterface
 {

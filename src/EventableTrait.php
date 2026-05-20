@@ -12,7 +12,7 @@ use karmabunny\interfaces\EventInterface;
 /**
  * Implements events helpers.
  *
- * @package Bloom\Base
+ * @package karmabunny\kb
  */
 trait EventableTrait
 {

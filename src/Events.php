@@ -16,7 +16,7 @@ use ReflectionNamedType;
 /**
  * A static events system.
  *
- * @package Bloom\Base
+ * @package karmabunny\kb
  */
 class Events
 {
