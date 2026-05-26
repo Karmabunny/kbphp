@@ -647,11 +647,19 @@ class Time
      * This can be used to serialise intervals.
      *
      * @param DateInterval $interval
+     * @param int $subseconds number of decimal places to include
      * @return string
      */
-    public static function getIntervalString(DateInterval $interval): string
+    public static function getIntervalString(DateInterval $interval, int $subseconds = 0): string
     {
-        return $interval->format('P%yY%mM%dDT%hH%iM%sS');
+        $value = $interval->format('P%yY%mM%dDT%hH%iM%sS');
+
+        if ($subseconds > 0 and $interval->f > 0) {
+            $value .= '.';
+            $value .= substr(sprintf('%06d', $interval->f), 0, $subseconds);
+        }
+
+        return $value;
     }
 
 
