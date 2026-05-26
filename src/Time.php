@@ -716,6 +716,66 @@ class Time
 
 
     /**
+     * Get the total of an interval in the given unit.
+     *
+     * IMPORTANT: This is not a perfect conversion.
+     *
+     * - months are always 30 days
+     * - years are always 365 days
+     *
+     * @param DateInterval $interval
+     * @param string $unit
+     * @return float
+     */
+    public static function getIntervalTotal(DateInterval $interval, string $unit = 'seconds'): float
+    {
+        $total = 0;
+
+        $total += $interval->y * 365 * 24 * 60 * 60;
+        $total += $interval->m * 30 * 24 * 60 * 60;
+        $total += $interval->d * 24 * 60 * 60;
+        $total += $interval->h * 60 * 60;
+        $total += $interval->i * 60;
+        $total += $interval->s;
+
+        if ($unit == 'years') {
+            return $total / (365 * 24 * 60 * 60);
+        }
+
+        if ($unit == 'months') {
+            return $total / (30 * 24 * 60 * 60);
+        }
+
+        if ($unit == 'days') {
+            return $total / (24 * 60 * 60);
+        }
+
+        if ($unit == 'hours') {
+            return $total / (60 * 60);
+        }
+
+        if ($unit == 'minutes') {
+            return $total / 60;
+        }
+
+        if ($unit == 'milliseconds') {
+            $total *= 1000;
+            $total += $interval->f / 1000;
+            return $total;
+        }
+
+        if ($unit == 'microseconds') {
+            $total *= 1000000;
+            $total += $interval->f;
+            return $total;
+        }
+
+        // seconds.
+        return $total;
+    }
+
+
+    /**
      * Get a series of date periods between these two dates.
      *
      * For a 3 day period between 1st and 20th:

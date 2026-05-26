@@ -150,6 +150,33 @@ final class TimeTest extends TestCase {
     }
 
 
+    public static function dataIntervalTotal()
+    {
+        $seconds = 365 * 86400 + 2 * 86400 + 40 * 3600 + 100 * 60;
+
+        return [
+            ['P1Y2DT40H100M', 'seconds', $seconds],
+            ['P1Y2DT40H100M', 'minutes', $seconds / 60],
+            ['P1Y2DT40H100M', 'hours', $seconds / 3600],
+            ['P1Y2DT40H100M', 'days', $seconds / 86400],
+            ['PT30M', 'hours', 0.5],
+            ['PT30M', 'minutes', 30],
+            ['PT30M', 'seconds', 30 * 60],
+            ['PT30M', 'milliseconds', 30 * 60 * 1000],
+            ['PT30M', 'microseconds', 30 * 60 * 1000000],
+        ];
+    }
+
+
+    /** @dataProvider dataIntervalTotal */
+    public function testIntervalTotal($interval, $unit, $expected)
+    {
+        $interval = Time::parseInterval($interval);
+        $actual = Time::getIntervalTotal($interval, $unit);
+        $this->assertEquals($expected, $actual);
+    }
+
+
     public function testPeriods()
     {
         $start = new DateTime('2020-10-10');
