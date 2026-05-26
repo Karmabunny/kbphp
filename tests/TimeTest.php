@@ -106,6 +106,7 @@ final class TimeTest extends TestCase {
             'h' => 40,
             'i' => 100,
             's' => 0,
+            'f' => 0,
         ];
         $this->assertEquals($expected, $actual);
 

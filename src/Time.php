@@ -598,7 +598,7 @@ class Time
      */
     public static function getIntervalConfig(DateInterval $interval): array
     {
-        static $UNITS = ['y', 'm', 'd', 'h', 'i', 's'];
+        static $UNITS = ['y', 'm', 'd', 'h', 'i', 's', 'f'];
 
         $config = [];
 
@@ -627,18 +627,16 @@ class Time
      */
     public static function createIntervalFromConfig(array $config): DateInterval
     {
+        static $UNITS = ['y', 'm', 'd', 'h', 'i', 's', 'f'];
+
         $config = array_change_key_case($config, CASE_LOWER);
 
-        $interval = 'P';
-        $interval .= ($config['y'] ?? 0) . 'Y';
-        $interval .= ($config['m'] ?? 0) . 'M';
-        $interval .= ($config['d'] ?? 0) . 'D';
-        $interval .= 'T';
-        $interval .= ($config['h'] ?? 0) . 'H';
-        $interval .= ($config['i'] ?? 0) . 'M';
-        $interval .= ($config['s'] ?? 0) . 'S';
+        $interval = new DateInterval('P0D');
 
-        $interval = new DateInterval($interval);
+        foreach ($UNITS as $unit) {
+            $interval->$unit = $config[$unit] ?? 0;
+        }
+
         return $interval;
     }
 
