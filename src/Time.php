@@ -357,6 +357,58 @@ class Time
 
 
     /**
+     * Parse a time string into an interval.
+     *
+     * This accepts:
+     * - shorthands like: `1y`, `2d`, `3h`, `4m`, `5s`, `6ms`, `7us` (no support for months)
+     * - ISO 8601 periods like: `P1Y2DT3H4M5S` (with support for subseconds)
+     * - relative PHP date strings like: `+1 day`, `-2 hours`, `3 minutes`, `4 seconds`
+     *
+     * @param string $value
+     * @return DateInterval
+     */
+    public static function parseInterval(string $value): DateInterval
+    {
+        $matches = [];
+
+        // Shorthands not recognised by PHP.
+        if (preg_match('/(\d+)\s*(y(?=rs?$|$)|d$|h(?=rs?$|$)|m(?=ins?$|$)|s(?=ecs?$|$)|ms$|us$)/', $value, $matches)) {
+            [, $amount, $unit] = $matches;
+
+            if ($unit == 'm') {
+                $unit = 'i';
+            }
+            else if ($unit == 'us') {
+                $unit = 'f';
+            }
+            else if ($unit == 'ms') {
+                $unit = 'f';
+                $amount *= 1000;
+            }
+
+            $interval = self::createIntervalFromConfig([$unit => $amount]);
+            return $interval;
+        }
+
+        // ISO 8601 periods (with subseconds).
+        if (strpos($value, 'P') === 0) {
+            $parts = explode('.', $value, 2);
+
+            $interval = new DateInterval($parts[0]);
+
+            if (is_numeric($parts[1] ?? null)) {
+                $interval->f = (int) $parts[1];
+            }
+
+            return $interval;
+        }
+
+        // Relative PHP date strings.
+        return DateInterval::createFromDateString($value);
+    }
+
+
+    /**
      * Convert any date interface into a datetime.
      *
      * This exists in PHP8+ as `DateTime::createFromInterface()`.

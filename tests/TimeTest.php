@@ -63,6 +63,36 @@ final class TimeTest extends TestCase {
         $this->assertTrue(Time::timeAgo(60 * 60 * 24 * 2) == '2 days ago');
     }
 
+    public static function dataIntervalParse()
+    {
+        return [
+            '1y'     => ['1y',     'P1Y0M0DT0H0M0S'],
+            '1yr'    => ['1yr',    'P1Y0M0DT0H0M0S'],
+            '1 yrs'  => ['1 yrs',  'P1Y0M0DT0H0M0S'],
+            '2d'     => ['2d',     'P0Y0M2DT0H0M0S'],
+            '2 days' => ['2 days', 'P0Y0M2DT0H0M0S'],
+            '3h'     => ['3h',     'P0Y0M0DT3H0M0S'],
+            '3hrs'   => ['3hrs',   'P0Y0M0DT3H0M0S'],
+            '4m'     => ['4m',     'P0Y0M0DT0H4M0S'],
+            '4mins'  => ['4mins',  'P0Y0M0DT0H4M0S'],
+            '5s'     => ['5s',     'P0Y0M0DT0H0M5S'],
+            '5secs'  => ['5secs',  'P0Y0M0DT0H0M5S'],
+            '600ms'  => ['600ms',  'P0Y0M0DT0H0M0S.600000'],
+            '700us'  => ['700us',  'P0Y0M0DT0H0M0S.000700'],
+            'P8Y'    => ['P8Y',    'P8Y0M0DT0H0M0S'],
+            'PT9S'   => ['PT9S',   'P0Y0M0DT0H0M9S'],
+            'multi' => ['1 hour 2 minutes 3 seconds', 'P0Y0M0DT1H2M3S'],
+        ];
+    }
+
+
+    /** @dataProvider dataIntervalParse */
+    public function testIntervalParse($value, $spec)
+    {
+        $interval = Time::parseInterval($value);
+        // var_dump($interval);
+        $this->assertEquals($spec, Time::getIntervalString($interval, 6));
+    }
 
     public function testIntervalModify()
     {
