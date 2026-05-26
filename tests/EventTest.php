@@ -460,6 +460,22 @@ class EventTest extends TestCase
     {
         Events::setLogging($withLogs);
 
+        // Test specific parent/child scenario.
+        Events::trigger(RootEmitter::class, new TestEvent());
+
+        $actual = Events::hasRun(RootEmitter::class, TestEvent::class);
+        $this->assertTrue($actual);
+
+        $actual = Events::hasRun(SubEmitter::class, TestEvent::class);
+        $this->assertTrue($actual);
+
+        // Reset.
+        Events::clearLog(true);
+
+        $actual = Events::hasRun(RootEmitter::class, TestEvent::class);
+        $this->assertFalse($actual);
+
+        // Test lots of things.
         $this->testNested();
 
         $actual = Events::hasRun(RootEmitter::class, TestEvent::class);

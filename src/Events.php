@@ -290,7 +290,17 @@ class Events
             return false;
         }
         else {
-            return !empty(self::$_run[$sender][$event]);
+            if (!empty(self::$_run[$sender][$event])) {
+                return true;
+            }
+
+            while ($sender = get_parent_class($sender)) {
+                if (!empty(self::$_run[$sender][$event])) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 
