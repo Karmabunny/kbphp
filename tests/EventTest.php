@@ -608,7 +608,7 @@ class RootEmitter
     public function testDynamic(): array
     {
         $event = new TestEvent();
-        $results = $this->trigger(get_class($this), $event);
+        $results = $this->trigger(null, $event);
         return $results;
     }
 }

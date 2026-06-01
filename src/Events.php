@@ -69,14 +69,20 @@ class Events
      * - `static::class`
      * - `get_class($this)`
      *
-     * @param class-string $sender
+     * @param class-string|object $sender
      * @param EventInterface $event
      * @param bool $once Don't trigger if the event has already run at least once.
      * @return array[] event results.
      */
-    public static function trigger(string $sender, EventInterface $event, bool $once = false): array
+    public static function trigger($sender, EventInterface $event, bool $once = false): array
     {
         // Events are ID'd by their full namespaced class name.
+        if (is_object($sender)) {
+            if ($event instanceof Event) {
+                $event->sender = $sender;
+            }
+            $sender = get_class($sender);
+        }
 
         if ($once) {
             if (isset(self::$_run[$sender][get_class($event)])) {
@@ -134,14 +140,14 @@ class Events
      * In the second form the event type is derived from the first parameter
      * of the handler function.
      *
-     * @param class-string $sender
+     * @param class-string|object $sender
      * @param class-string<EventInterface>|callable $event
      * @param callable|bool|null $fn
      * @param bool $append
      * @return void
      * @throws InvalidArgumentException
      */
-    public static function on(string $sender, $event, $fn = null, bool $append = true)
+    public static function on($sender, $event, $fn = null, bool $append = true)
     {
         // If no handler is given, assume the second parameter is handler.
         // Using some cheeky reflection we can extract the event type.
@@ -185,6 +191,10 @@ class Events
             throw new InvalidArgumentException("Event '{$event}' is not an EventInterface");
         }
 
+        if (is_object($sender)) {
+            $sender = get_class($sender);
+        }
+
         if (!$append and isset(self::$_events[$sender][$event])) {
             array_unshift(self::$_events[$sender][$event], $fn);
         }
@@ -203,12 +213,16 @@ class Events
      *
      * Or both `null, null` to remove _all_ listeners from all senders.
      *
-     * @param class-string|null $sender
+     * @param class-string|object|null $sender
      * @param class-string<EventInterface>|null $event
      * @return void
      */
-    public static function off(?string $sender, ?string $event = null)
+    public static function off($sender, ?string $event = null)
     {
+        if (is_object($sender)) {
+            $sender = get_class($sender);
+        }
+
         if ($sender === null) {
             if ($event) {
                 foreach (array_keys(self::$_events) as $sender) {
