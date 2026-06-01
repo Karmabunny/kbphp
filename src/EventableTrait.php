@@ -50,7 +50,7 @@ trait EventableTrait
             throw new InvalidArgumentException("Object {$self} is not a subclass of {$class}");
         }
 
-        $class ??= $this;
+        $class = $class ?? $this;
 
         if ($event instanceof Event) {
             $event->sender = $this;
