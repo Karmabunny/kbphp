@@ -557,6 +557,34 @@ class EventTest extends TestCase
         $this->assertEquals(2, $count);
         $this->assertCount(0, $actual);
     }
+
+
+    public function testEventSender()
+    {
+        $root1 = new RootEmitter();
+        $root2 = new RootEmitter();
+
+        $events = [];
+
+        $root1->on(function(TestEvent $event) use (&$events) {
+            $events[] = $event;
+        });
+
+        $root2->on(function(TestEvent $event) use (&$events) {
+            $events[] = $event;
+        });
+
+        $root1->testDynamic();
+        $root2->testDynamic();
+
+        $this->assertCount(2, $events);
+
+        $this->assertEquals(spl_object_id($root1), spl_object_id($events[0]->sender));
+        $this->assertNotEquals(spl_object_id($root1), spl_object_id($events[1]->sender));
+
+        $this->assertNotEquals(spl_object_id($root2), spl_object_id($events[0]->sender));
+        $this->assertEquals(spl_object_id($root2), spl_object_id($events[1]->sender));
+    }
 }
 
 
