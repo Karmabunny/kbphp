@@ -44,6 +44,11 @@ trait EventableTrait
      */
     protected function trigger(string $class, EventInterface $event, bool $once = false): array
     {
+        if (!is_a($this, $class, true)) {
+            $self = get_class($this);
+            throw new InvalidArgumentException("Object {$self} is not a subclass of {$class}");
+        }
+
         if ($event instanceof Event) {
             $event->sender = $this;
         }
