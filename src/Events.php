@@ -84,6 +84,11 @@ class Events
             $sender = get_class($sender);
         }
 
+        // @phpstan-ignore-next-line: runtime check.
+        if (!is_string($sender) or !class_exists($sender)) {
+            throw new InvalidArgumentException("Sender '{$sender}' is not a class");
+        }
+
         if ($once) {
             if (isset(self::$_run[$sender][get_class($event)])) {
                 return [];
