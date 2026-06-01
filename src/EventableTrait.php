@@ -30,9 +30,9 @@ trait EventableTrait
      * ```
      * // Good
      * this->trigger(MyClass::class, $event);
+     * $this->trigger(self::class, $event);
      *
      * // Beware
-     * $this->trigger(self::class, $event);
      * $this->trigger(static::class, $event);
      * $this->trigger(get_class($this), $event);
      * ```

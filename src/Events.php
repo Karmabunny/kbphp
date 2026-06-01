@@ -65,7 +65,7 @@ class Events
      * Triggering events in a class that is not it's own, or even from
      * a parent class is _strongly_ discouraged.
      *
-     * _Don't_ use dynamic class names, such as:
+     * Avoid dynamic class names, such as:
      * - `static::class`
      * - `get_class($this)`
      *
@@ -127,7 +127,7 @@ class Events
     /**
      * Listen to an event.
      *
-     * This method has two signatures:
+     * This method has two key signatures:
      *
      * ```
      * // Full form
@@ -139,6 +139,11 @@ class Events
      *
      * In the second form the event type is derived from the first parameter
      * of the handler function.
+     *
+     * All invocations accept the `$sender` as an object or string. Given a
+     * object instance the sender is attached to the event. This then automatically
+     * filters events on that sender to the appropriate instance. Filtering is
+     * not applied to `EventInterface` objects not extending `Event`.
      *
      * @param class-string|object $sender
      * @param class-string<EventInterface>|callable $event
