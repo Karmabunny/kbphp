@@ -202,7 +202,7 @@ class Events
         }
 
         if (is_object($sender)) {
-            if (is_subclass_of($event, Event::class)) {
+            if (is_a($event, Event::class, true)) {
                 $fn = function(Event $event) use ($sender, $fn) {
                     if ($event->sender === $sender) {
                         return $fn($event);
