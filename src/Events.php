@@ -102,6 +102,10 @@ class Events
         // Fire off.
         foreach ($handlers as $fn) {
             $results[] = $fn($event);
+
+            if ($event instanceof Event and $event->handled) {
+                break;
+            }
         }
 
         if (self::$_log !== null) {

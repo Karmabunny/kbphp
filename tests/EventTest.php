@@ -121,36 +121,31 @@ class EventTest extends TestCase
     public function testHandled()
     {
         Events::on(RootEmitter::class, function(TestEvent $event) {
-            if ($event->handled) return;
             return 'one';
         });
 
         Events::on(RootEmitter::class, function(TestEvent $event) {
-            if ($event->handled) return;
             return 'two';
         });
 
         Events::on(RootEmitter::class, function(TestEvent $event) {
-            if ($event->handled) return;
             $event->handled = true;
             return 'three';
         }, false);
 
         Events::on(RootEmitter::class, function(TestEvent $event) {
-            if ($event->handled) return;
             return 'four';
         }, false);
 
         Events::on(RootEmitter::class, function(TestEvent $event) {
-            if ($event->handled) return;
             return 'five';
         }, true);
 
         $event = new TestEvent();
         $actual = Events::trigger(RootEmitter::class, $event);
 
-        $this->assertCount(5, $actual);
-        $this->assertEquals(['four', 'three', null, null, null], $actual);
+        $this->assertCount(2, $actual);
+        $this->assertEquals(['four', 'three'], $actual);
     }
 
 
