@@ -121,36 +121,31 @@ class EventTest extends TestCase
     public function testHandled()
     {
         Events::on(RootEmitter::class, function(TestEvent $event) {
-            if ($event->handled) return;
             return 'one';
         });
 
         Events::on(RootEmitter::class, function(TestEvent $event) {
-            if ($event->handled) return;
             return 'two';
         });
 
         Events::on(RootEmitter::class, function(TestEvent $event) {
-            if ($event->handled) return;
             $event->handled = true;
             return 'three';
         }, false);
 
         Events::on(RootEmitter::class, function(TestEvent $event) {
-            if ($event->handled) return;
             return 'four';
         }, false);
 
         Events::on(RootEmitter::class, function(TestEvent $event) {
-            if ($event->handled) return;
             return 'five';
         }, true);
 
         $event = new TestEvent();
         $actual = Events::trigger(RootEmitter::class, $event);
 
-        $this->assertCount(5, $actual);
-        $this->assertEquals(['four', 'three', null, null, null], $actual);
+        $this->assertCount(2, $actual);
+        $this->assertEquals(['four', 'three'], $actual);
     }
 
 
@@ -562,6 +557,34 @@ class EventTest extends TestCase
         $this->assertEquals(2, $count);
         $this->assertCount(0, $actual);
     }
+
+
+    public function testEventSender()
+    {
+        $root1 = new RootEmitter();
+        $root2 = new RootEmitter();
+
+        $events = [];
+
+        $root1->on(function(TestEvent $event) use (&$events) {
+            $events[] = $event;
+        });
+
+        $root2->on(function(TestEvent $event) use (&$events) {
+            $events[] = $event;
+        });
+
+        $root1->testDynamic();
+        $root2->testDynamic();
+
+        $this->assertCount(2, $events);
+
+        $this->assertEquals(spl_object_id($root1), spl_object_id($events[0]->sender));
+        $this->assertNotEquals(spl_object_id($root1), spl_object_id($events[1]->sender));
+
+        $this->assertNotEquals(spl_object_id($root2), spl_object_id($events[0]->sender));
+        $this->assertEquals(spl_object_id($root2), spl_object_id($events[1]->sender));
+    }
 }
 
 
@@ -613,7 +636,7 @@ class RootEmitter
     public function testDynamic(): array
     {
         $event = new TestEvent();
-        $results = $this->trigger(get_class($this), $event);
+        $results = $this->trigger(null, $event);
         return $results;
     }
 }

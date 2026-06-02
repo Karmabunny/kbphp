@@ -30,20 +30,28 @@ trait EventableTrait
      * ```
      * // Good
      * this->trigger(MyClass::class, $event);
+     * $this->trigger(self::class, $event);
      *
      * // Beware
-     * $this->trigger(self::class, $event);
      * $this->trigger(static::class, $event);
      * $this->trigger(get_class($this), $event);
      * ```
      *
      * @see Events::trigger()
+     * @param class-string|null $class
      * @param EventInterface $event
      * @param bool $once Don't trigger if the event has already run at least once.
      * @return array handler results
      */
-    protected function trigger(string $class, EventInterface $event, bool $once = false): array
+    protected function trigger(?string $class, EventInterface $event, bool $once = false): array
     {
+        if ($class and !is_a($this, $class, true)) {
+            $self = get_class($this);
+            throw new InvalidArgumentException("Object {$self} is not a subclass of {$class}");
+        }
+
+        $class = $class ?? $this;
+
         if ($event instanceof Event) {
             $event->sender = $this;
         }
@@ -74,6 +82,6 @@ trait EventableTrait
         // Unlike trigger, using dynamic class names here is OK. A user is not
         // surprised (hopefully) that they only receive events appropriate for
         // the leaf node that is 'this'.
-        Events::on(static::class, $event, $fn, $append);
+        Events::on($this, $event, $fn, $append);
     }
 }
