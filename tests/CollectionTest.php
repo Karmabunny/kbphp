@@ -9,6 +9,9 @@ use karmabunny\kb\ArrayableFields;
 use karmabunny\kb\UpdateStrictTrait;
 use karmabunny\kb\UpdateTidyTrait;
 use karmabunny\kb\UpdateVirtualTrait;
+use karmabunny\kb\VirtualArray;
+use karmabunny\kb\VirtualObject;
+use karmabunny\kb\VirtualProperty;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -266,6 +269,29 @@ final class CollectionTest extends TestCase {
 
         $this->assertEquals('NEAT - here', $thing->thing);
     }
+
+
+    /** @requires PHP >= 8.0 */
+    public function testVirtualAttributes()
+    {
+        $thing = new ThingoVirtualAttributes([
+            'name' => 'good',
+            'thing' => 'here',
+            'object' => ['id' => 123],
+            'array' => [['id' => 123], ['id' => 456]],
+        ]);
+
+        $this->assertEquals('OH LOOK - here', $thing->thing);
+
+        $this->assertInstanceOf(Thingo::class, $thing->object);
+        $this->assertEquals(123, $thing->object->id);
+
+        $this->assertCount(2, $thing->array);
+        $this->assertInstanceOf(Thingo::class, $thing->array[0]);
+        $this->assertEquals(123, $thing->array[0]->id);
+        $this->assertInstanceOf(Thingo::class, $thing->array[1]);
+        $this->assertEquals(456, $thing->array[1]->id);
+    }
 }
 
 
@@ -404,6 +430,27 @@ class ThingoVirtual extends Collection {
             'thing' => [$this, 'setThing'],
         ];
     }
+
+    public function setThing($thing)
+    {
+        if ($thing === null) return;
+        $this->thing = 'OH LOOK - ' . $thing;
+    }
+}
+
+
+class ThingoVirtualAttributes extends Collection {
+
+    public $name;
+
+    #[VirtualProperty('setThing')]
+    public $thing;
+
+    #[VirtualObject(Thingo::class)]
+    public $object;
+
+    #[VirtualArray(Thingo::class)]
+    public $array;
 
     public function setThing($thing)
     {

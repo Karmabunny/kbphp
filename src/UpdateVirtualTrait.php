@@ -10,21 +10,32 @@ namespace karmabunny\kb;
  * This modifies the behaviour of a DataObject/Collection for updating complex
  * properties, such as arrays and objects.
  *
+ * Implement the {@see UpdateVirtualInterface} to enable this for DataObject types.
+ *
  * @package karmabunny\kb
  */
 trait UpdateVirtualTrait
 {
 
     /**
-     * A list of converter functions to apply to the data before saving.
+     * A list of converter functions.
      *
      * Example:
      * ```php
      * [
-     *     'destinations' => [$this, 'setDestinations'],
+     *     // A local method.
+     *     'user' => [$this, ['setUser'],
+     *
+     *     // Some external method.
      *     'some_string_i_guess' => 'trim',
      * ]
      * ```
+     *
+     * Fields specified here are included in the returned 'update set' from
+     * the `setVirtual()` method.
+     *
+     * Returning `false` from a method will prevent the field being included
+     * in the update set.
      *
      * @return callable[]
      */
@@ -35,17 +46,46 @@ trait UpdateVirtualTrait
 
 
     /**
+     * Apply virtual properties.
+     *
+     * @param array $config
+     * @return string[] set of updated fields
+     */
+    public function setVirtual(array $config): array
+    {
+        $virtuals = $this->virtual();
+        $updated = [];
+
+        foreach ($virtuals as $name => $virtual) {
+
+            // @phpstan-ignore-next-line : runtime assertion.
+            if (!is_callable($virtual)) {
+                continue;
+            }
+
+            if (!array_key_exists($name, $config)) {
+                continue;
+            }
+
+            $ok = $virtual($config[$name]);
+
+            if ($ok !== false) {
+                $updated[] = $name;
+            }
+        }
+
+        return $updated;
+    }
+
+
+    /**
      * Apply the virtual converters to the all properties.
      *
-     * Recommended placements:
-     *  - `__clone()`
-     *  - `update()`
-     *
+     * @deprecated use setVirtual()
      * @return void
      */
     protected function applyVirtual()
     {
-        // Now run through the virtual stuff.
         $virtual = $this->virtual();
 
         foreach ($virtual as $key => $fn) {

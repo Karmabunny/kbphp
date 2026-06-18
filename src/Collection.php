@@ -45,13 +45,15 @@ abstract class Collection extends DataObject implements
         Serializable,
         JsonSerializable,
         ArrayableInterface,
-        DirtyObjectInterface
+        DirtyObjectInterface,
+        UpdateVirtualInterface
 {
 
     use ArrayAccessTrait;
     use ArrayableTrait;
     use SerializeTrait;
     use DirtyPropertiesTrait;
+    use AttributeVirtualTrait;
 
 
     /** @inheritdoc */

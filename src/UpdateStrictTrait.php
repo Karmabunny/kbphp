@@ -22,18 +22,46 @@ trait UpdateStrictTrait
     use PropertiesTrait;
 
     /**
+     * Update the object.
      *
      * @param iterable $config
      * @return void
      */
     public function update($config)
     {
-        $fields = array_fill_keys(static::getProperties(), true);
+        if (!is_array($config)) {
+            $config = iterator_to_array($config);
+        }
 
+        $fields = static::getPropertyTypes();
+
+        $virtual = [];
         $errors = [];
 
+        // Apply virtual properties.
+        if ($this instanceof UpdateVirtualInterface) {
+            $virtual = $this->setVirtual($config);
+            $virtual = array_fill_keys($virtual, true);
+        }
+
         foreach ($config as $key => $value) {
-            if (!array_key_exists($key, $fields)) {
+            // Skip virtual fields.
+            if (isset($virtual[$key])) continue;
+
+            // Check field exists.
+            $type = $fields[$key] ?? null;
+            if (!$type) {
+                $errors[] = $key;
+                continue;
+            }
+
+            // Check type matches.
+            // Only occurs on PHP 7.4+.
+            if (
+                is_object($value)
+                and class_exists($type)
+                and !is_a($value, $type)
+            ) {
                 $errors[] = $key;
                 continue;
             }
@@ -51,11 +79,15 @@ trait UpdateStrictTrait
                 $errors .= ' ...';
             }
 
-            throw new InvalidArgumentException("Unknown fields ({$count}): {$errors}");
+            throw new InvalidArgumentException("Unknown or invalid fields ({$count}): {$errors}");
         }
 
-        if (method_exists($this, 'applyVirtual')) {
-            call_user_func([$this, 'applyVirtual']);
+        // Backwards compatibility.
+        if (
+            !$this instanceof UpdateVirtualInterface
+            and method_exists($this, 'applyVirtual')
+        ) {
+            $this->applyVirtual();
         }
     }
 }

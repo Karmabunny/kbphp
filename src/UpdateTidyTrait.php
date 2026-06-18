@@ -19,21 +19,54 @@ trait UpdateTidyTrait
     use PropertiesTrait;
 
     /**
+     * Update the object.
      *
      * @param iterable $config
      * @return void
      */
     public function update($config)
     {
-        $fields = array_fill_keys(static::getProperties(), true);
+        if (!is_array($config)) {
+            $config = iterator_to_array($config);
+        }
+
+        $fields = static::getPropertyTypes();
+
+        $virtual = [];
+
+        // Apply virtual properties.
+        if ($this instanceof UpdateVirtualInterface) {
+            $virtual = $this->setVirtual($config);
+            $virtual = array_fill_keys($virtual, true);
+        }
 
         foreach ($config as $key => $value) {
-            if (!array_key_exists($key, $fields)) continue;
+            // Skip virtual fields.
+            if (isset($virtual[$key])) continue;
+
+            // Skip missing properties.
+            $type = $fields[$key] ?? null;
+            if (!$type) continue;
+
+            // Skip invalid types.
+            // Only occurs on PHP 7.4+.
+            if (
+                is_object($value)
+                and class_exists($type)
+                and !is_a($value, $type)
+            ) {
+                continue;
+            }
+
             $this->$key = $value;
         }
 
-        if (method_exists($this, 'applyVirtual')) {
-            call_user_func([$this, 'applyVirtual']);
+        // Backwards compatibility.
+        if (
+            !$this instanceof UpdateVirtualInterface
+            and method_exists($this, 'applyVirtual')
+        ) {
+            $this->applyVirtual();
         }
     }
 }
