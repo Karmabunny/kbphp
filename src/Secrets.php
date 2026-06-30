@@ -382,6 +382,22 @@ class Secrets extends DataObject
 
 
     /**
+     * Mask a string value if it looks like a secret.
+     *
+     * @param string $value
+     * @return string
+     */
+    public function maskValue(string $value): string
+    {
+        if ($this->isSecretValue($value)) {
+            return $this->getMask($value);
+        }
+
+        return $value;
+    }
+
+
+    /**
      * Remove any secrets in the given array.
      *
      * Note, recursive mode cannot dive into objects.
