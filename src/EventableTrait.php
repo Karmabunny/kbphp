@@ -84,4 +84,18 @@ trait EventableTrait
         // the leaf node that is 'this'.
         Events::on($this, $event, $fn, $append);
     }
+
+
+    /**
+     * Remove event listeners.
+     *
+     * Specify `null` event to remove all listeners.
+     *
+     * @param class-string<EventInterface>|null $event
+     * @return void
+     */
+    public function off($event)
+    {
+        Events::off($this, $event);
+    }
 }
