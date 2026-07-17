@@ -3,7 +3,6 @@
 namespace karmabunny\kb;
 
 use ArrayAccess;
-use Closure;
 use InvalidArgumentException;
 
 /**
@@ -38,6 +37,7 @@ use InvalidArgumentException;
  * $mapped = array_map(Wrap::construct(Thing::class), $results);
  * ```
  *
+ * @deprecated don't use this.
  * @package karmabunny/kb
  */
 class Wrap
