@@ -4,24 +4,24 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "318b4af6611bdd35902e72128cabf2c0",
+    "content-hash": "e78215c5cc91fefd1f05b60276ecddc6",
     "packages": [
         {
             "name": "karmabunny/interfaces",
-            "version": "v1.2.1",
+            "version": "dev-feat/php8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Karmabunny/kbinterfaces.git",
-                "reference": "dcf87a7013dbdb29c66480d3bdb8561d1167e0fe"
+                "reference": "0119a8b95d97f96c60651f93b237e4960b94fcb1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Karmabunny/kbinterfaces/zipball/dcf87a7013dbdb29c66480d3bdb8561d1167e0fe",
-                "reference": "dcf87a7013dbdb29c66480d3bdb8561d1167e0fe",
+                "url": "https://api.github.com/repos/Karmabunny/kbinterfaces/zipball/0119a8b95d97f96c60651f93b237e4960b94fcb1",
+                "reference": "0119a8b95d97f96c60651f93b237e4960b94fcb1",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.2|^8"
+                "php": "^8.2"
             },
             "require-dev": {
                 "phpcompatibility/php-compatibility": "^9.3",
@@ -53,9 +53,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Karmabunny/kbinterfaces/issues",
-                "source": "https://github.com/Karmabunny/kbinterfaces/tree/v1.2.1"
+                "source": "https://github.com/Karmabunny/kbinterfaces/tree/feat/php8"
             },
-            "time": "2026-01-28T01:05:13+00:00"
+            "time": "2026-07-17T03:10:22+00:00"
         },
         {
             "name": "symfony/polyfill-php73",
@@ -2207,7 +2207,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "karmabunny/interfaces": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
