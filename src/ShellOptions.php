@@ -108,7 +108,7 @@ class ShellOptions extends Collection
      * @param resource|array|string $descriptor
      * @return resource|array
      */
-    private static function parseDescriptor(string $mode, mixed$descriptor): mixed
+    private static function parseDescriptor(string $mode, mixed $descriptor): mixed
     {
         // Resource, cool.
         if (is_resource($descriptor)) {
