@@ -34,13 +34,13 @@ class Env
     ];
 
     /** The key name to determine the current environment mode. */
-    static $ENV_NAME = 'SITES_ENVIRONMENT';
+    public static string $ENV_NAME = 'SITES_ENVIRONMENT';
 
     /** The default environment, default 'DEV'. */
-    static $DEFAULT = self::DEV;
+    public static string $DEFAULT = self::DEV;
 
     /** @var string[]|null */
-    static $config;
+    public static ?array $config = null;
 
 
     /**
@@ -52,7 +52,7 @@ class Env
      * @param array $config (ENV_NAME, DEFAULT)
      * @return void
      */
-    public static function config(array $config)
+    public static function config(array $config): void
     {
         self::$ENV_NAME = $config['ENV_NAME'] ?? self::$ENV_NAME;
         self::$DEFAULT = $config['DEFAULT'] ?? self::$DEFAULT;
@@ -148,7 +148,7 @@ class Env
      * @param string $key
      * @return string|null
      */
-    public static function get(string $key)
+    public static function get(string $key): ?string
     {
         $config = self::load();
         return $config[$key] ?? null;

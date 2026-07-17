@@ -22,7 +22,7 @@ class RequiredRule extends BaseRule
 {
 
     /** @inheritdoc */
-    public function validate($data)
+    public function validate(array|object $data): void
     {
         if (empty($this->fields)) {
             return;

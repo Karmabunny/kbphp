@@ -18,7 +18,7 @@ class AllMatchRule extends BaseRule
 {
 
     /** @inheritdoc */
-    public function validate($data)
+    public function validate(array|object $data): void
     {
         $values = $this->getFieldValues($data);
         $unique = array_unique($values);

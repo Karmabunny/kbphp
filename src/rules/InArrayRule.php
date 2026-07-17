@@ -19,11 +19,11 @@ class InArrayRule extends BaseRule
 {
 
     /** @var array */
-    public $allowed = [];
+    public array $allowed = [];
 
 
     /** @inheritdoc */
-    public function parse(array $ruleset)
+    public function parse(array $ruleset): void
     {
         parent::parse($ruleset);
 
@@ -36,7 +36,7 @@ class InArrayRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function validateOne(string $field, $value)
+    public function validateOne(string $field, mixed $value): void
     {
         if (empty($this->allowed)) {
             return;

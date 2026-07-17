@@ -24,37 +24,37 @@ class RulesClassValidator implements RulesValidatorInterface
 {
 
     /** @var array|object */
-    protected $data;
+    protected array|object $data;
 
     /**
      * Available rules, as installed by setValidators().
      *
      * @var RuleInterface[]
      */
-    protected $validators = [];
+    protected array $validators = [];
 
     /**
      * Active rules, a subset of the validators as determined by setRules().
      *
      * @var RuleInterface[]
      */
-    protected $rules = [];
+    protected array $rules = [];
 
     /**
      * A copy of the original rulesets, used for reparsing rules.
      *
      * @var array
      */
-    protected $original_rules = [];
+    protected array $original_rules = [];
 
     /** @var array */
-    protected $errors = [];
+    protected array $errors = [];
 
 
     /**
      * @param array|object $data Data to validate
      */
-    public function __construct($data)
+    public function __construct(array|object $data)
     {
         $validators = require __DIR__ . '/config/rules.php';
         $this->setValidators($validators);
@@ -67,7 +67,7 @@ class RulesClassValidator implements RulesValidatorInterface
      *
      * @param array|object $data Data to validate
      */
-    public function setData($data)
+    public function setData(array|object $data): void
     {
         if (is_array($data) or $data instanceof ArrayAccess) {
             $this->data = $data;
@@ -86,7 +86,7 @@ class RulesClassValidator implements RulesValidatorInterface
      * @param string $field The field to set
      * @param mixed $value The value to set on the field
      */
-    public function setFieldValue($field, $value)
+    public function setFieldValue(string $field, mixed $value): void
     {
         $this->data[$field] = $value;
     }
@@ -98,7 +98,7 @@ class RulesClassValidator implements RulesValidatorInterface
      * @return void
      * @throws InvalidArgumentException
      */
-    public function setValidators(array $validators)
+    public function setValidators(array $validators): void
     {
         $this->validators = [];
 
@@ -125,7 +125,7 @@ class RulesClassValidator implements RulesValidatorInterface
      * @return void
      * @throws InvalidArgumentException
      */
-    public function addValidator($validator, ?string $name = null)
+    public function addValidator($validator, ?string $name = null): void
     {
         /** @var RuleInterface $validator */
         $validator = Configure::configure($validator, RuleInterface::class);
@@ -182,14 +182,14 @@ class RulesClassValidator implements RulesValidatorInterface
      * @return void
      * @throws InvalidArgumentException
      */
-    public function refreshRules()
+    public function refreshRules(): void
     {
         $this->setRules($this->original_rules);
     }
 
 
     /** @inheritdoc */
-    public function setRules(array $rules)
+    public function setRules(array $rules): void
     {
         $this->original_rules = $rules;
 
@@ -307,7 +307,7 @@ class RulesClassValidator implements RulesValidatorInterface
      *
      * @param array $fields Fields to check
      */
-    public function required(array $fields)
+    public function required(array $fields): void
     {
         foreach ($fields as $field_name) {
             if (RequiredRule::isEmpty($this->data, $field_name)) {
@@ -323,7 +323,7 @@ class RulesClassValidator implements RulesValidatorInterface
      * @param string $field_name The field to add the error message for
      * @param string|string[] $message The message text
      */
-    public function addFieldError($field_name, $message)
+    public function addFieldError(string $field_name, string|array $message): void
     {
         if (is_array($message)) {
             foreach ($message as $item) {
@@ -342,7 +342,7 @@ class RulesClassValidator implements RulesValidatorInterface
      * @param array $fields The fields to add the error message for
      * @param string $message The message text
      */
-    public function addMultipleFieldError(array $fields, $message)
+    public function addMultipleFieldError(array $fields, string $message): void
     {
         foreach ($fields as $f) {
             $this->addFieldError($f, $message);

@@ -12,28 +12,28 @@ namespace karmabunny\kb;
 class ShellOptions extends Collection
 {
     /** @var string required */
-    public $cmd;
+    public string $cmd = '';
 
     /** @var array */
-    public $args = [];
+    public array $args = [];
 
     /** @var string|null */
-    public $cwd = null;
+    public ?string $cwd = null;
 
-    /** @var string[] */
-    public $env = [];
-
-    /** @var string|array|resource|false */
-    public $stdin = 'pipe';
+    /** @var array<string,string> */
+    public array $env = [];
 
     /** @var string|array|resource|false */
-    public $stdout = 'pipe';
+    public mixed $stdin = 'pipe';
 
     /** @var string|array|resource|false */
-    public $stderr = 'pipe';
+    public mixed $stdout = 'pipe';
+
+    /** @var string|array|resource|false */
+    public mixed $stderr = 'pipe';
 
     /** @var int Limit for fgets() in bytes. */
-    public $chunk_size = 1024;
+    public int $chunk_size = 1024;
 
 
     /**
@@ -46,7 +46,7 @@ class ShellOptions extends Collection
      * @param string|array|ShellOptions $config
      * @return ShellOptions
      */
-    public static function parse($config)
+    public static function parse(string|array|ShellOptions $config): self
     {
         if ($config instanceof self) {
             return clone $config;
@@ -108,7 +108,7 @@ class ShellOptions extends Collection
      * @param resource|array|string $descriptor
      * @return resource|array
      */
-    private static function parseDescriptor(string $mode, $descriptor)
+    private static function parseDescriptor(string $mode, mixed $descriptor): mixed
     {
         // Resource, cool.
         if (is_resource($descriptor)) {

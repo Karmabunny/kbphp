@@ -7,10 +7,10 @@
 namespace karmabunny\kb;
 
 use ArrayAccess;
-use ReturnTypeWillChange;
 
 /**
  *
+ * @mixin ArrayAccess
  */
 trait VirtualArrayTrait
 {
@@ -23,8 +23,8 @@ trait VirtualArrayTrait
     public abstract function fields(): array;
 
 
-    #[ReturnTypeWillChange]
-    public function offsetExists($offset)
+    /** @inheritdoc */
+    public function offsetExists(mixed $offset): bool
     {
         if (!is_numeric($offset)) {
             $fields = $this->fields();
@@ -40,8 +40,8 @@ trait VirtualArrayTrait
     }
 
 
-    #[ReturnTypeWillChange]
-    public function offsetGet($offset)
+    /** @inheritdoc */
+    public function offsetGet(mixed $offset): mixed
     {
         if (!is_numeric($offset)) {
             $fields = $this->fields();

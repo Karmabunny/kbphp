@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use ReflectionClass;
+use ReflectionNamedType;
 use ReflectionProperty;
 
 /**
@@ -75,8 +76,8 @@ trait PropertiesTrait
     /**
      * Get a list of properties, with respective types (if available).
      *
-     * Beginning with PHP 7.4 object properties can have strict types. If not
-     * typed or running a older PHP all properties will be `mixed`.
+     * Object properties can have strict types. If not typed, all properties
+     * will be `mixed`.
      *
      * @return string[] [ name => type ]
      */
@@ -95,17 +96,14 @@ trait PropertiesTrait
                 if ($property->isStatic()) continue;
 
                 $name = $property->getName();
-                $type = null;
+                $type_name = null;
 
-                if (PHP_VERSION_ID >= 74000) {
-                    // @phpstan-ignore-next-line
-                    $type = $property->getType();
-                    if ($type !== null) {
-                        $type = $type->getName();
-                    }
+                $type = $property->getType();
+                if ($type instanceof ReflectionNamedType) {
+                    $type_name = $type->getName();
                 }
 
-                $fields[$name] = $type ?? 'mixed';
+                $fields[$name] = $type_name ?? 'mixed';
             }
 
             $_FIELDS[static::class] = $fields;

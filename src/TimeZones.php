@@ -18,7 +18,7 @@ use Exception;
 class TimeZones
 {
 
-    protected static $map = null;
+    protected static ?array $map = null;
 
 
     /**

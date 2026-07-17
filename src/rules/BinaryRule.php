@@ -18,7 +18,7 @@ class BinaryRule extends BaseRule
 {
 
     /** @inheritdoc */
-    public function validateOne(string $field, $value)
+    public function validateOne(string $field, mixed $value): void
     {
         if ($value !== '1' and $value !== 1 and $value !== '0' and $value !== 0) {
             throw new ValidationException('Value must be a "1" or "0"');

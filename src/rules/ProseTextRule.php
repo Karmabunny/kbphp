@@ -23,7 +23,7 @@ class ProseTextRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function validateOne(string $field, $value)
+    public function validateOne(string $field, mixed $value): void
     {
         // pL = letters, pN = numbers
         if (preg_match('/[^-\pL\pN \'"\/!?@#$%&():;.,]/u', (string) $value)) {

@@ -16,6 +16,9 @@ use InvalidArgumentException;
  *
  * Used with the {@see RulesStaticValidator} class.
  *
+ * Note, these methods accept mixed rather than strong 'string' types because
+ * often we're validating data from user input, which may contain nulls or other types.
+ *
  * @package karmabunny\kb
  */
 class Validity
@@ -27,13 +30,14 @@ class Validity
      * @example
      *    $valid->check('name', 'length', 1, 100)
      *
-     * @param string $val The value
+     * @param mixed $val The value
      * @param int $min Minimum length
      * @param int $max Maximum length
      * @throws ValidationException If item is too short or too long
      */
-    public static function length($val, $min, $max = PHP_INT_MAX)
+    public static function length(mixed $val, int $min, int $max = PHP_INT_MAX): void
     {
+        $val = (string) $val;
         $len = mb_strlen($val);
         if ($len < $min) {
             throw new ValidationException("Shorter than minimum allowed length of {$min}");
@@ -53,11 +57,12 @@ class Validity
      * @example
      *    $valid->check('email', 'email')
      *
-     * @param string $val email address
+     * @param mixed $val email address
      * @throws ValidationException
      */
-    public static function email($val)
+    public static function email(mixed $val): void
     {
+        $val = (string) $val;
         $regex = '/^[^@]+@[^@.]+\.[^@]+$/iD';
 
         if (!preg_match($regex, $val)) {
@@ -78,11 +83,12 @@ class Validity
      * @example
      *    $valid->check('password', 'password')
      *
-     * @param string $val Password to validate
+     * @param mixed $val Password to validate
      * @throws ValidationException
      */
-    public static function password($val)
+    public static function password(mixed $val): void
     {
+        $val = (string) $val;
         $errs = [];
 
         if (mb_strlen($val) < 8) {
@@ -113,13 +119,14 @@ class Validity
      * @example
      *    $valid->check('mobile', 'phone', 10)
      *
-     * @param string $val Phone number
+     * @param mixed $val Phone number
      * @param int $min_digits Minimum number of digits required in phone number.
      *        This can be less than 8 for fields which allow short numbers like 000 or 13 11 66
      * @throws ValidationException
      */
-    public static function phone($val, $min_digits = 8)
+    public static function phone(mixed $val, int $min_digits = 8): void
     {
+        $val = (string) $val;
         $min_digits = (int) $min_digits;
         if ($min_digits <= 0) $min_digits = 8;
 
@@ -155,12 +162,12 @@ class Validity
      * @example
      *    $valid->check('region_id', 'positiveInt')
      *
-     * @param string $val Value to check
+     * @param mixed $val Value to check
      * @throws ValidationException
      */
-    public static function positiveInt($val)
+    public static function positiveInt(mixed $val): void
     {
-        if (preg_match('/[^0-9]/', $val)) {
+        if (preg_match('/[^0-9]/', (string) $val)) {
             throw new ValidationException("Value must be a whole number that is greater than zero");
         }
 
@@ -181,10 +188,10 @@ class Validity
      * @example
      *    $valid->check('name', 'proseText')
      *
-     * @param string $str
+     * @param mixed $str
      * @throws ValidationException
      */
-    public static function proseText($str)
+    public static function proseText(mixed $str): void
     {
         // pL = letters, pN = numbers
         if (preg_match('/[^-\pL\pN \'"\/!?@#$%&():;.,]/u', (string) $str)) {
@@ -199,13 +206,13 @@ class Validity
      * @example
      *    $valid->check('date_published', 'dateMySQL')
      *
-     * @param string $val Value to check
+     * @param mixed $val Value to check
      * @throws ValidationException
      */
-    public static function dateMySQL($val)
+    public static function dateMySQL(mixed $val): void
     {
         $matches = null;
-        if (!preg_match('/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/', $val, $matches)) {
+        if (!preg_match('/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/', (string) $val, $matches)) {
             throw new ValidationException('Invalid date format');
         }
 
@@ -229,13 +236,13 @@ class Validity
      * @example
      *    $valid->check('event_time', 'timeMySQL')
      *
-     * @param string $val Value to check
+     * @param mixed $val Value to check
      * @throws ValidationException
      */
-    public static function timeMySQL($val)
+    public static function timeMySQL(mixed $val): void
     {
         $matches = null;
-        if (!preg_match('/^([0-9]{2}):([0-9]{2}):([0-9]{2})$/', $val, $matches)) {
+        if (!preg_match('/^([0-9]{2}):([0-9]{2}):([0-9]{2})$/', (string) $val, $matches)) {
             throw new ValidationException('Invalid time format');
         }
 
@@ -259,13 +266,13 @@ class Validity
      * @example
      *    $valid->check('start_date', 'datetimeMySQL')
      *
-     * @param string $val Value to check
+     * @param mixed $val Value to check
      * @throws ValidationException
      */
-    public static function datetimeMySQL($val)
+    public static function datetimeMySQL(mixed $val): void
     {
         $matches = null;
-        if (!preg_match('/^([0-9]{4}-[0-9]{2}-[0-9]{2}) ([0-9]{2}:[0-9]{2}:[0-9]{2})$/', $val, $matches)) {
+        if (!preg_match('/^([0-9]{4}-[0-9]{2}-[0-9]{2}) ([0-9]{2}:[0-9]{2}:[0-9]{2})$/', (string) $val, $matches)) {
             throw new ValidationException('Invalid datedate format');
         }
 
@@ -283,7 +290,7 @@ class Validity
      * @param array $vals Values to check
      * @throws ValidationException
      */
-    public static function oneRequired(array $vals)
+    public static function oneRequired(array $vals): void
     {
         foreach ($vals as $v) {
             if (is_array($v) and count($v) > 0) {
@@ -306,7 +313,7 @@ class Validity
      * @param array $vals Values to check
      * @throws ValidationException
      */
-    public static function allMatch(array $vals)
+    public static function allMatch(array $vals): void
     {
         $unique = array_unique($vals);
         if (count($unique) > 1) {
@@ -325,7 +332,7 @@ class Validity
      * @param array $vals Values to check
      * @throws ValidationException
      */
-    public static function allUnique(array $vals)
+    public static function allUnique(array $vals): void
     {
         $unique = array_unique($vals);
         if (count($unique) != count($vals)) {
@@ -344,7 +351,7 @@ class Validity
      * @param array $allowed
      * @throws ValidationException
      */
-    public static function inArray($val, array $allowed)
+    public static function inArray(mixed $val, array $allowed): void
     {
         if (!in_array($val, $allowed)) {
             throw new ValidationException('Invalid value');
@@ -377,10 +384,10 @@ class Validity
      * @example
      *    $valid->check('cost', 'numeric')
      *
-     * @param string $val
+     * @param mixed $val
      * @throws ValidationException
      */
-    public static function numeric($val)
+    public static function numeric(mixed $val): void
     {
         if (!is_numeric($val)) {
             throw new ValidationException('Value must be a number');
@@ -394,10 +401,10 @@ class Validity
      * @example
      *    $valid->check('active', 'binary')
      *
-     * @param string|int $val
+     * @param mixed $val
      * @throws ValidationException
      */
-    public static function binary($val)
+    public static function binary(mixed $val): void
     {
         if ($val !== '1' and $val !== 1 and $val !== '0' and $val !== 0) {
             throw new ValidationException('Value must be a "1" or "0"');
@@ -412,11 +419,11 @@ class Validity
      *    $valid->check('cost', 'range', 0, 5000)
      *
      * @param string $val
-     * @param number $min The minimum the value may be
-     * @param number $max The maximum the value may be
+     * @param int|float $min The minimum the value may be
+     * @param int|float $max The maximum the value may be
      * @throws ValidationException
      */
-    public static function range($val, $min, $max)
+    public static function range(mixed $val, int|float $min, int|float $max): void
     {
         static::numeric($val);
 
@@ -437,7 +444,7 @@ class Validity
      * @param string $max (optional) A date string (compatible with strtotime) for the maximum of the date range.
      * @param bool $enforce_ordering (optional) Ensures that the start date is less than or equal to the end date. On by default.
      */
-    public static function dateRange(array $vals, $min = null, $max = null, $enforce_ordering = true)
+    public static function dateRange(array $vals, ?string $min = null, ?string $max = null, bool $enforce_ordering = true): void
     {
         if (count($vals) != 2) {
             throw new InvalidArgumentException('Incorrect number of fields. A date range must only contain two dates: a start and an end date.');
@@ -481,7 +488,7 @@ class Validity
      * @return void
      * @throws ValidationException If the value doesn't match the pattern
      */
-    public static function regex($val, $pattern)
+    public static function regex(string $val, string $pattern): void
     {
         if (!preg_match($pattern, $val)) {
             throw new ValidationException('Incorrect format');
@@ -495,7 +502,7 @@ class Validity
      * @return void
      * @throws ValidationException If the value isn't a valid IPv4 address
      */
-    public static function ipv4Addr($val)
+    public static function ipv4Addr(string $val): void
     {
         if (!preg_match('/^[0-9]+(?:\.[0-9]+){3}$/', $val)) {
             throw new ValidationException('Invalid IP address');
@@ -515,7 +522,7 @@ class Validity
      * @return void
      * @throws ValidationException If the value isn't a valid IPv4 CIDR block
      */
-    public static function ipv4Cidr($val)
+    public static function ipv4Cidr(string $val): void
     {
         if (strpos($val, '/') === false) {
             throw new ValidationException('Invalid CIDR block');
@@ -540,7 +547,7 @@ class Validity
      * @return void
      * @throws ValidationException If the value isn't a valid IPv4 address or CIDR block
      */
-    public static function ipv4AddrOrCidr($val)
+    public static function ipv4AddrOrCidr(string $val): void
     {
         if (strpos($val, '/') === false) {
             self::ipv4Addr($val);

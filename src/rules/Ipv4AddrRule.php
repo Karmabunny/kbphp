@@ -18,7 +18,7 @@ class Ipv4AddrRule extends BaseRule
 {
 
     /** @inheritdoc */
-    public function validateOne(string $field, $value)
+    public function validateOne(string $field, mixed $value): void
     {
         if (!preg_match('/^[0-9]+(?:\.[0-9]+){3}$/', $value)) {
             throw new ValidationException('Invalid IP address');

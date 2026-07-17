@@ -8,6 +8,7 @@ namespace karmabunny\kb;
 
 use Exception;
 use karmabunny\interfaces\RulesValidatorInterface;
+use karmabunny\interfaces\ValidatesInterface;
 
 /**
  * Use validator functions to validate properties.
@@ -16,6 +17,7 @@ use karmabunny\interfaces\RulesValidatorInterface;
  * @see RulesClassValidator
  * @see Validity
  *
+ * @mixin ValidatesInterface
  * @package karmabunny\kb
  */
 trait RulesValidatorTrait
@@ -102,7 +104,7 @@ trait RulesValidatorTrait
      * @throws Exception
      * @throws ValidationException
      */
-    public function validate(?string $scenario = null)
+    public function validate(?string $scenario = null): void
     {
         $errors = $this->valid($scenario);
         if ($errors !== true) {
@@ -118,7 +120,7 @@ trait RulesValidatorTrait
      * @return array|true True if valid, errors array if invalid.
      * @throws Exception
      */
-    public function valid(?string $scenario = null)
+    public function valid(?string $scenario = null): array|true
     {
         $valid = $this->getValidator();
 

@@ -24,13 +24,13 @@ use karmabunny\kb\ValidationException;
 class LengthRule extends BaseRule
 {
 
-    public $min = 0;
+    public int $min = 0;
 
-    public $max = PHP_INT_MAX;
+    public int $max = PHP_INT_MAX;
 
 
     /** @inheritdoc */
-    public function parse(array $ruleset)
+    public function parse(array $ruleset): void
     {
         parent::parse($ruleset);
 
@@ -40,7 +40,7 @@ class LengthRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function validateOne(string $field, $value)
+    public function validateOne(string $field, mixed $value): void
     {
         $len = mb_strlen($value);
 

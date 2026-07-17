@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace karmabunny\kb;
 
@@ -52,7 +53,7 @@ class Cli
 
 
     /** @var bool|null */
-    protected static $colors = null;
+    protected static ?bool $colors = null;
 
 
     /**
@@ -63,7 +64,7 @@ class Cli
      * @param mixed ...$args
      * @return void
      */
-    public static function puts(...$args)
+    public static function puts(mixed ...$args): void
     {
         self::write(\STDOUT, ...$args);
     }
@@ -77,7 +78,7 @@ class Cli
      * @param mixed ...$args
      * @return void
      */
-    public static function error(...$args)
+    public static function error(mixed ...$args): void
     {
         self::write(\STDERR, ...$args);
     }
@@ -92,7 +93,7 @@ class Cli
      * @param mixed ...$args
      * @return void
      */
-    public static function write($stream, ...$args)
+    public static function write(mixed $stream, mixed ...$args): void
     {
         $hasColors = self::$colors ?? self::hasColors($stream);
 
@@ -114,7 +115,7 @@ class Cli
      * @param mixed $text
      * @return void
      */
-    public static function stdout($text)
+    public static function stdout(mixed $text): void
     {
         fwrite(\STDOUT, $text);
     }
@@ -125,7 +126,7 @@ class Cli
      * @param mixed $text
      * @return void
      */
-    public static function stderr($text)
+    public static function stderr(mixed $text): void
     {
         fwrite(\STDERR, $text);
     }
@@ -205,7 +206,7 @@ class Cli
      * @param bool|string $enable
      * @return void
      */
-    public static function setColors($enable = true)
+    public static function setColors(bool|string $enable = true): void
     {
         $enable = filter_var($enable, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
         self::$colors = $enable;
@@ -216,7 +217,7 @@ class Cli
      *
      * @return void
      */
-    protected static function registerExits()
+    protected static function registerExits(): void
     {
         static $registered = false;
         if ($registered) return;
@@ -266,7 +267,7 @@ class Cli
      *
      * @return void
      */
-    public static function clear()
+    public static function clear(): void
     {
         // Maaaagic.
         fwrite(STDOUT, chr(27) . "[H" . chr(27) . "[2J");
@@ -278,7 +279,7 @@ class Cli
      *
      * @return void
      */
-    public static function clearLine()
+    public static function clearLine(): void
     {
         fwrite(STDOUT, chr(27) . '[2K' . "\r");
     }
@@ -424,7 +425,7 @@ class Cli
      * @param string[] $options
      * @return string
      */
-    public static function options(string $prompt, array $options)
+    public static function options(string $prompt, array $options): string
     {
         self::registerExits();
 

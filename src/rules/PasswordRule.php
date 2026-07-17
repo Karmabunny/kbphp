@@ -18,11 +18,11 @@ class PasswordRule extends BaseRule
 {
 
 
-    public $digits = 8;
+    public int $digits = 8;
 
 
     /** @inheritdoc */
-    public function parse(array $ruleset)
+    public function parse(array $ruleset): void
     {
         parent::parse($ruleset);
 
@@ -33,7 +33,7 @@ class PasswordRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function validateOne(string $field, $value)
+    public function validateOne(string $field, mixed $value): void
     {
         $errors = [];
 
