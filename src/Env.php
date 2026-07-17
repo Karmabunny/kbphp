@@ -39,7 +39,7 @@ class Env
     /** The default environment, default 'DEV'. */
     static $DEFAULT = self::DEV;
 
-    /** @var string[] */
+    /** @var string[]|null */
     static $config;
 
 
@@ -63,15 +63,15 @@ class Env
      * Load the config from the system environment.
      *
      * @param bool $clean Remove variables once we've read them.
-     * @return string[] [name => value]
+     * @return array<string,string> [name => value]
      */
-    public static function loadFromSystem($clean = false): array
+    public static function loadFromSystem(bool $clean = false, bool $merge = false): array
     {
-        if (self::$config !== null) {
+        if (self::$config !== null and !$merge) {
             return self::$config;
         }
 
-        self::$config = [];
+        self::$config = self::$config ?? [];
 
         foreach ($_SERVER as $key => $value) {
             $value = getenv($key);
@@ -94,15 +94,15 @@ class Env
      * Load the config from a file (Recommended).
      *
      * @param string $path
-     * @return string[] [name => value]
+     * @return array<string,string> [name => value]
      */
-    public static function loadFromFile(string $path): array
+    public static function loadFromFile(string $path, bool $merge = false): array
     {
-        if (self::$config !== null) {
+        if (self::$config !== null and !$merge) {
             return self::$config;
         }
 
-        self::$config = [];
+        self::$config = self::$config ?? [];
 
         $file = @fopen($path, 'r');
 
@@ -131,7 +131,7 @@ class Env
      * It's recommended to first load the environment from a file in your
      * bootstrap.
      *
-     * @return string[] [name => value]
+     * @return array<string,string> [name => value]
      */
     protected static function load(): array
     {
@@ -189,7 +189,7 @@ class Env
      * Note, This will load variables from the system if not already populated.
      *
      * @param array|null $keys
-     * @return string[] [name => value]
+     * @return array<string,string> [name => value]
      */
     public static function getConfig(?array $keys = null): array
     {
