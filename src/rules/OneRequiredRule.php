@@ -17,7 +17,7 @@ use karmabunny\kb\ValidationException;
 class OneRequiredRule extends BaseRule
 {
     /** @var string|null */
-    public $group;
+    public ?string $group = null;
 
     public function parse(array $ruleset): void
     {

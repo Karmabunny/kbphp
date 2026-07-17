@@ -97,7 +97,7 @@ class Uuid
      * @return string
      * @throws Exception Not enough entropy
      */
-    public static function uuid1($options = 0): string
+    public static function uuid1(int $options = 0): string
     {
         // 60-bit time in 100ths of nanoseconds
         $timestamp = self::getSubNanoTime((bool) ($options & self::V1_LAZY));
@@ -399,7 +399,7 @@ class Uuid
      *
      * @return int 16-bit number.
      */
-    private static function getSequence()
+    private static function getSequence(): int
     {
         static $base;
         if (!$base) $base = getmypid() ?: 1;

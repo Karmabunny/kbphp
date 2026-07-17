@@ -299,7 +299,7 @@ class CountryNames
      * @param string $code alpha-2
      * @return string|null alpha-3
      */
-    public static function getAlpha3From2(string $code)
+    public static function getAlpha3From2(string $code): ?string
     {
         $code = strtoupper(trim($code));
         if (strlen($code) == 3) return $code;
@@ -313,7 +313,7 @@ class CountryNames
      * @param string $code alpha-3
      * @return string|null alpha-2
      */
-    public static function getAlpha2From3(string $code)
+    public static function getAlpha2From3(string $code): ?string
     {
         $code = strtoupper(trim($code));
         if (strlen($code) == 2) return $code;
@@ -329,7 +329,7 @@ class CountryNames
      * @param string $language default 'en'
      * @return string|null
      */
-    public static function getCountryCode(string $country_name, string $language = 'en')
+    public static function getCountryCode(string $country_name, string $language = 'en'): ?string
     {
         if (strlen($language) != 2) return null;
         $language = strtoupper($language);
@@ -369,7 +369,7 @@ class CountryNames
      * @param string $language default 'en'
      * @return string|null
      */
-    public static function getCountryName(string $country_code, string $language = 'en')
+    public static function getCountryName(string $country_code, string $language = 'en'): ?string
     {
         if (strlen($language) != 2) return null;
         $language = strtoupper($language);

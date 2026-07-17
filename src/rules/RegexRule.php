@@ -18,7 +18,7 @@ use karmabunny\kb\ValidationException;
 class RegexRule extends BaseRule
 {
 
-    public $pattern = null;
+    public ?string $pattern = null;
 
 
     /** @inheritdoc */

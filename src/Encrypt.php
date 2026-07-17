@@ -16,7 +16,7 @@ class Encrypt implements EncryptInterface
 {
 
     /** @var array */
-    protected $config;
+    protected array $config;
 
 
     /**

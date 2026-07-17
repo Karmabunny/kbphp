@@ -15,14 +15,14 @@ class UrlDecodeException extends UrlException
 {
 
     /** @var string|null */
-    public $query;
+    public ?string $query = null;
 
     /**
      *
      * @param string $query
      * @return static
      */
-    public function setQuery(string $query)
+    public function setQuery(string $query): static
     {
         $this->query = $query;
         return $this;

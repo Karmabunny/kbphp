@@ -18,11 +18,11 @@ use karmabunny\kb\ValidationException;
 class DateRangeRule extends BaseRule
 {
 
-    public $min = null;
+    public ?string $min = null;
 
-    public $max = null;
+    public ?string $max = null;
 
-    public $ordered = true;
+    public bool $ordered = true;
 
 
     /** @inheritdoc */

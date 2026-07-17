@@ -20,7 +20,7 @@ trait LoggerTrait {
     private $loggers = [];
 
 
-    public function clearLoggers()
+    public function clearLoggers(): void
     {
         $this->loggers = [];
     }

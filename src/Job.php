@@ -29,13 +29,13 @@ abstract class Job implements
     use RulesValidatorTrait;
 
     /** @var string */
-    public $id;
+    public string $id = '';
 
     /** @var int Unix timestamp in seconds. */
-    public $start;
+    public int $start = 0;
 
     /** @var array */
-    public $config;
+    public array $config = [];
 
 
     /**
@@ -122,9 +122,9 @@ abstract class Job implements
      * Shorthand for creating, validating and running a job.
      *
      * @param array $config
-     * @return Job
+     * @return static
      */
-    public static function execute(array $config = [])
+    public static function execute(array $config = []): static
     {
         // @phpstan-ignore-next-line
         $job = new static();

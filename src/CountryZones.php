@@ -80,7 +80,7 @@ class CountryZones
      * @param bool $alpha3
      * @return null|string
      */
-    public static function lookup(string $zone, $alpha3 = false): ?string
+    public static function lookup(string $zone, bool $alpha3 = false): ?string
     {
         $map = self::getMap();
         $zone = $map[$zone] ?? null;

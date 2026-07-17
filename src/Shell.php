@@ -35,7 +35,7 @@ class Shell
      * @param array $args keyed args
      * @return string escaped cmd string
      */
-    public static function escape(string $cmd, array $args)
+    public static function escape(string $cmd, array $args): string
     {
         return preg_replace_callback('/{([^}]+)}/', function($matches) use ($args) {
             $index = $matches[1];
@@ -54,7 +54,7 @@ class Shell
      * @param mixed $args
      * @return string
      */
-    public static function runSync(string $dir, string $cmd, ...$args)
+    public static function runSync(string $dir, string $cmd, mixed ...$args): string
     {
         $shell = self::run([
             'cwd' => $dir,
@@ -79,7 +79,7 @@ class Shell
      * @param mixed $args
      * @return Generator<string>
      */
-    public static function runAsync(string $dir, string $cmd, ...$args)
+    public static function runAsync(string $dir, string $cmd, mixed ...$args): Generator
     {
         $shell = self::run([
             'cwd' => $dir,
@@ -115,7 +115,7 @@ class Shell
      *   - env  - `string[]`
      * @return ShellOutput
      */
-    public static function run($config)
+    public static function run(string|array|ShellOptions $config): ShellOutput
     {
         $config = ShellOptions::parse($config);
 

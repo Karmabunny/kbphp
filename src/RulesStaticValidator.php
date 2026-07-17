@@ -79,12 +79,12 @@ use karmabunny\interfaces\RulesValidatorInterface;
  */
 class RulesStaticValidator implements RulesValidatorInterface
 {
-    protected $labels;
-    protected $data;
-    protected $rules;
-    protected $field_errors;
-    protected $general_errors;
-    protected $validity;
+    protected array $labels;
+    protected array|object $data;
+    protected array $rules;
+    protected array $field_errors;
+    protected array $general_errors;
+    protected string $validity;
 
     /**
      * Recursive trim data
@@ -118,7 +118,7 @@ class RulesStaticValidator implements RulesValidatorInterface
      * @param array|object $data Data to validate
      * @param array $rules Validation rules
      */
-    public function __construct($data, array $rules = [])
+    public function __construct(array|object $data, array $rules = [])
     {
         $this->labels = [];
         $this->field_errors = [];
@@ -135,7 +135,7 @@ class RulesStaticValidator implements RulesValidatorInterface
      *
      * @param array $labels Field labels
      */
-    public function setLabels(array $labels)
+    public function setLabels(array $labels): void
     {
         $this->labels = $labels;
     }
@@ -146,7 +146,7 @@ class RulesStaticValidator implements RulesValidatorInterface
      *
      * @param array|object $data Data to validate
      */
-    public function setData($data)
+    public function setData(array|object $data): void
     {
         if (is_array($data) or $data instanceof ArrayAccess) {
             $this->data = $data;
@@ -176,7 +176,7 @@ class RulesStaticValidator implements RulesValidatorInterface
      * @param string $field The field to set
      * @param mixed $value The value to set on the field
      */
-    public function setFieldValue($field, $value)
+    public function setFieldValue(string $field, mixed $value): void
     {
         $this->data[$field] = $value;
     }
@@ -188,7 +188,7 @@ class RulesStaticValidator implements RulesValidatorInterface
      * @param string $field The field to set
      * @param string $label The label to set on the field
      */
-    public function setFieldLabel($field, $label)
+    public function setFieldLabel(string $field, string $label): void
     {
         $this->labels[$field] = $label;
     }
@@ -200,7 +200,7 @@ class RulesStaticValidator implements RulesValidatorInterface
      * @param string $class
      * @throws InvalidArgumentException
      */
-    public function setValidity(string $class)
+    public function setValidity(string $class): void
     {
         if (!class_exists($class)) {
             throw new InvalidArgumentException("Invalid validity class: {$class}");
@@ -215,7 +215,7 @@ class RulesStaticValidator implements RulesValidatorInterface
      * @param callable|string $func The function to expand.
      * @return callable|false False if not callable.
      */
-    protected function expandNs($func)
+    protected function expandNs(callable|string $func): mixed
     {
         // Check for methods on a validity class first.
         $expanded = [$this->validity, $func];
@@ -351,11 +351,11 @@ class RulesStaticValidator implements RulesValidatorInterface
      * If a empty value is provided, it is not validated - returns true
      *
      * @param string $field_name The field to check
-     * @param callable $func The function or method to call.
+     * @param callable|string $func The function or method to call.
      * @param array $args
      * @return bool True if validation was successful, false if it failed
      */
-    public function check($field_name, $func, ...$args)
+    public function check(string $field_name, callable|string $func, mixed ...$args): bool
     {
         $value = $this->data[$field_name] ?? null;
 
@@ -394,11 +394,11 @@ class RulesStaticValidator implements RulesValidatorInterface
      *    // $errs now contains [ 'vals' => [2 => [...], 3 => [...]] ]
      *
      * @param string $field_name The field to check
-     * @param callable $func The function or method to call.
+     * @param callable|string $func The function or method to call.
      * @param array $args
      * @return array Key => Boolean True if validation was successful, false if it failed
      */
-    public function arrayCheck($field_name, $func, ...$args)
+    public function arrayCheck(string $field_name, callable|string $func, mixed ...$args): array
     {
         $values = $this->data[$field_name] ?? null;
 
@@ -436,11 +436,11 @@ class RulesStaticValidator implements RulesValidatorInterface
      * Additional arguments are passed to the underlying method
      *
      * @param array $fields The fields to check
-     * @param callable $func The function or method to call.
+     * @param callable|string $func The function or method to call.
      * @param array $args
      * @return bool True if validation was successful, false if it failed
      */
-    public function multipleCheck(array $fields, $func, ...$args)
+    public function multipleCheck(array $fields, callable|string $func, mixed ...$args): bool
     {
         $this->expandNs($func);
 
@@ -466,7 +466,7 @@ class RulesStaticValidator implements RulesValidatorInterface
      * @param mixed $val
      * @return bool True if empty, false if not.
      */
-    public static function isEmpty($val)
+    public static function isEmpty($val): bool
     {
         if (is_array($val) and count($val) == 0) {
             return true;
@@ -483,7 +483,7 @@ class RulesStaticValidator implements RulesValidatorInterface
      *
      * @param array $fields Fields to check
      */
-    public function required(array $fields)
+    public function required(array $fields): void
     {
         foreach ($fields as $field_name) {
             if (!isset($this->data[$field_name])) {
@@ -501,7 +501,7 @@ class RulesStaticValidator implements RulesValidatorInterface
      * @param string $field_name The field to add the error message for
      * @param string $message The message text
      */
-    public function addFieldError($field_name, $message)
+    public function addFieldError(string $field_name, string $message): void
     {
         if (!isset($this->field_errors[$field_name])) {
             $this->field_errors[$field_name] = [$message];
@@ -519,7 +519,7 @@ class RulesStaticValidator implements RulesValidatorInterface
      * @param int $index The array index of the field to report error for
      * @param string $message The message text
      */
-    public function addArrayFieldError($field_name, $index, $message)
+    public function addArrayFieldError(string $field_name, int $index, string $message): void
     {
         if (!isset($this->field_errors[$field_name])) {
             $this->field_errors[$field_name] = [];
@@ -538,7 +538,7 @@ class RulesStaticValidator implements RulesValidatorInterface
      * @param array $fields The fields to add the error message for
      * @param string $message The message text
      */
-    public function addMultipleFieldError(array $fields, $message)
+    public function addMultipleFieldError(array $fields, string $message): void
     {
         foreach ($fields as $f) {
             $this->addFieldError($f, $message);
@@ -552,7 +552,7 @@ class RulesStaticValidator implements RulesValidatorInterface
      *
      * @return array
      */
-    public function getFieldErrors()
+    public function getFieldErrors(): array
     {
         return $this->field_errors;
     }
@@ -576,7 +576,7 @@ class RulesStaticValidator implements RulesValidatorInterface
      *
      * @param string $message The message text
      */
-    public function addGeneralError($message)
+    public function addGeneralError(string $message): void
     {
         $this->general_errors[] = $message;
     }
@@ -587,7 +587,7 @@ class RulesStaticValidator implements RulesValidatorInterface
      *
      * @return array
      */
-    public function getGeneralErrors()
+    public function getGeneralErrors(): array
     {
         return $this->general_errors;
     }

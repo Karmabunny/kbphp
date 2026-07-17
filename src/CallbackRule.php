@@ -20,12 +20,12 @@ class CallbackRule extends BaseRule
 {
 
     /** @var callable|null */
-    public $callable;
+    public mixed $callable = null;
 
     /** @var array */
-    public $args = [];
+    public array $args = [];
 
-    public $multi = false;
+    public bool $multi = false;
 
 
     /** @inheritdoc */

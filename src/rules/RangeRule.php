@@ -18,9 +18,9 @@ use karmabunny\kb\ValidationException;
 class RangeRule extends BaseRule
 {
 
-    public $min = null;
+    public ?int $min = null;
 
-    public $max = null;
+    public ?int $max = null;
 
 
     /** @inheritdoc */

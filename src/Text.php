@@ -55,23 +55,23 @@ class Text {
 
 
     /** @var string */
-    static $ENCODING = 'UTF-8';
+    public static string $ENCODING = 'UTF-8';
 
     /** @var int */
-    static $MIN_SIMILAR_PERCENT = 85;
+    public static int $MIN_SIMILAR_PERCENT = 85;
 
     /** @var int */
-    static $DISTANCE_FACTOR = 10;
+    public static int $DISTANCE_FACTOR = 10;
 
     /** @var array */
-    static $ALPHA_RULES = [
+    public static array $ALPHA_RULES = [
         "a4 e3 o0D ilL1!| `’",
         "AA EE OOO IIIIII ''",
     ];
 
 
     /** @var array|null Not for public use. */
-    static $_map = null;
+    public static ?array $_map = null;
 
 
     /**
@@ -89,7 +89,7 @@ class Text {
      * @param int $flags
      * @return string
      */
-    public static function normalize(string $str, $flags = self::NORMALIZE_ALL)
+    public static function normalize(string $str, int $flags = self::NORMALIZE_ALL): string
     {
         if ($flags & self::NORMALIZE_ALPHA) {
             $str = self::normalizeAlpha($str);
@@ -119,7 +119,7 @@ class Text {
      * @param string $str
      * @return string
      */
-    public static function normalizeAlpha(string $str)
+    public static function normalizeAlpha(string $str): string
     {
         list($find, $replace) = self::$ALPHA_RULES;
         return strtr($str, $find, $replace);
@@ -145,7 +145,7 @@ class Text {
      * @param array $map
      * @return string
      */
-    public static function normalizeMultibyte(string $str, array &$map = [])
+    public static function normalizeMultibyte(string $str, array &$map = []): string
     {
         $matches = [];
 
@@ -174,7 +174,7 @@ class Text {
      * @param int $flags one of the normalisation flags
      * @return float 0-100 bigger is better
      */
-    public static function similarity(string $str1, string $str2, $flags = self::NORMALIZE_ALL)
+    public static function similarity(string $str1, string $str2, int $flags = self::NORMALIZE_ALL): float
     {
         if ($flags) {
             self::$_map = [];
@@ -197,7 +197,7 @@ class Text {
      * @param int $flags one of the normalisation flags
      * @return int lower is better (or -1 if too long)
      */
-    public static function compare(string $str1, string $str2, $flags = self::NORMALIZE_ALL)
+    public static function compare(string $str1, string $str2, int $flags = self::NORMALIZE_ALL): int
     {
         if ($flags) {
             self::$_map = [];
@@ -223,7 +223,7 @@ class Text {
      * @param int $flags one of the normalisation flags
      * @return bool
      */
-    public static function similar(string $str1, string $str2, $flags = self::NORMALIZE_ALL)
+    public static function similar(string $str1, string $str2, int $flags = self::NORMALIZE_ALL): bool
     {
         if ($flags) {
             self::$_map = [];
@@ -270,7 +270,7 @@ class Text {
      * @param int $flags one of the normalisation flags
      * @return string[] subset of 'options' in order of closeness
      */
-    public static function find(string $needle, array $haystack, $max = 5, $flags = self::NORMALIZE_ALL): array
+    public static function find(string $needle, array $haystack, int $max = 5, int $flags = self::NORMALIZE_ALL): array
     {
         self::$_map = [];
 
@@ -335,7 +335,7 @@ class Text {
      * @param int $flags
      * @return array
      */
-    public static function startsWith(string $needle, array $haystack, $max = 5, $flags = self::NORMALIZE_ALL): array
+    public static function startsWith(string $needle, array $haystack, int $max = 5, int $flags = self::NORMALIZE_ALL): array
     {
         $flags |= self::FIND_STARTS_WITH;
         return self::find($needle, $haystack, $max, $flags);
@@ -351,7 +351,7 @@ class Text {
      * @param int $end Optional number of characters to keep from the end of string. Eg `2` = `***le`
      * @return string Eg `*****`|`A****`|`****e`|`A***e`
      */
-    public static function mask(string $word, $mask_char = '*', $start = 0, $end = 0)
+    public static function mask(string $word, string $mask_char = '*', int $start = 0, int $end = 0): string
     {
         if (empty($word)) return '';
         if (empty($mask_char)) $mask_char = '*';
@@ -384,11 +384,11 @@ class Text {
      *
      * @param string $word
      * @param string $preset Text::MASK_TYPE_*
-     * @param string|null $mask_char Optional masking character. Default of `*`
+     * @param string $mask_char Optional masking character. Default of `*`
      * @return string
      * @throws Exception Unknown preset
      */
-    public static function maskPreset(string $word, string $preset, $mask_char = '*')
+    public static function maskPreset(string $word, string $preset, string $mask_char = '*'): string
     {
         switch ($preset)
         {
