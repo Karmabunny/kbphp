@@ -317,7 +317,8 @@ class CountryNames
     {
         $code = strtoupper(trim($code));
         if (strlen($code) == 2) return $code;
-        return array_search($code, self::COUNTRY_CODES);
+        $code = array_search($code, self::COUNTRY_CODES);
+        return $code ?: null;
     }
 
 
@@ -373,7 +374,8 @@ class CountryNames
         if (strlen($language) != 2) return null;
         $language = strtoupper($language);
 
-        return Locale::getDisplayRegion('-' . $country_code, $language);
+        $region = Locale::getDisplayRegion('-' . $country_code, $language);
+        return $region ?: null;
     }
 
 
