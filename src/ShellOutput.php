@@ -176,6 +176,9 @@ class ShellOutput
         $buf_out = '';
         $buf_err = '';
 
+        $eof1 = true;
+        $eof2 = true;
+
         while (true) {
             // Select pipes.
             $read = [];
@@ -185,9 +188,9 @@ class ShellOutput
             // stdout
             if ($target_out) {
                 $read[] = $this->pipes[1];
-                $eof = feof($this->pipes[1]);
+                $eof1 = feof($this->pipes[1]);
 
-                if (!$eof) {
+                if (!$eof1) {
                     $buf_out .= fgets($this->pipes[1], $chunk_size);
 
                     if (self::eol($buf_out)) {
@@ -200,9 +203,9 @@ class ShellOutput
             // stderr
             if ($target_err) {
                 $read[] = $this->pipes[2];
-                $eof = feof($this->pipes[2]);
+                $eof2 = feof($this->pipes[2]);
 
-                if (!$eof) {
+                if (!$eof2) {
                     $buf_err .= fgets($this->pipes[2], $chunk_size);
 
                     if (self::eol($buf_err)) {
@@ -213,7 +216,9 @@ class ShellOutput
             }
 
             // End of input!
-            if (!isset($eof) or $eof) break;
+            if ($eof1 and $eof2) {
+                break;
+            }
 
             // Sleep for a bit (100ms), but this will exit early if the
             // system knows there's activity on the streams.
