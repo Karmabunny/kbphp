@@ -320,7 +320,7 @@ class Cli
                 continue;
             }
 
-            if ($text) {
+            if ($text !== '') {
                 $text .= $separator;
             }
 
