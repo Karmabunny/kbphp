@@ -34,6 +34,8 @@ class Time
         'second' => 's',
     ];
 
+    const INTERVAL_UNITS = ['y', 'm', 'd', 'h', 'i', 's', 'f'];
+
     const EMPTY_WEEK = [
         1 => null,
         2 => null,
@@ -612,15 +614,17 @@ class Time
      */
     public static function modifyInterval(...$intervals)
     {
-        static $UNITS = ['y', 'm', 'd', 'h', 'i', 's'];
+        if (empty($intervals)) {
+            return new DateInterval('P0D');
+        }
 
-        $config = array_fill_keys($UNITS, 0);
+        $config = array_fill_keys(self::INTERVAL_UNITS, 0);
 
         foreach ($intervals as $interval) {
             if (is_array($interval)) {
                 $interval = array_change_key_case($interval, CASE_LOWER);
 
-                foreach ($UNITS as $unit) {
+                foreach (self::INTERVAL_UNITS as $unit) {
                     $config[$unit] += $interval[$unit] ?? 0;
                 }
             }
@@ -629,7 +633,7 @@ class Time
                     $interval = DateInterval::createFromDateString($interval);
                 }
 
-                foreach ($UNITS as $unit) {
+                foreach (self::INTERVAL_UNITS as $unit) {
                     $config[$unit] += $interval->$unit;
                 }
             }
@@ -650,11 +654,9 @@ class Time
      */
     public static function getIntervalConfig(DateInterval $interval): array
     {
-        static $UNITS = ['y', 'm', 'd', 'h', 'i', 's', 'f'];
-
         $config = [];
 
-        foreach ($UNITS as $unit) {
+        foreach (self::INTERVAL_UNITS as $unit) {
             $config[$unit] = $interval->$unit;
         }
 
@@ -679,13 +681,11 @@ class Time
      */
     public static function createIntervalFromConfig(array $config): DateInterval
     {
-        static $UNITS = ['y', 'm', 'd', 'h', 'i', 's', 'f'];
-
         $config = array_change_key_case($config, CASE_LOWER);
 
         $interval = new DateInterval('P0D');
 
-        foreach ($UNITS as $unit) {
+        foreach (self::INTERVAL_UNITS as $unit) {
             $interval->$unit = $config[$unit] ?? 0;
         }
 
