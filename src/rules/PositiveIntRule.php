@@ -18,7 +18,7 @@ class PositiveIntRule extends BaseRule
 {
 
     /** @inheritdoc */
-    public function validateOne(string $field, $value)
+    public function validateOne(string $field, mixed $value): void
     {
         if (preg_match('/[^0-9]/', $value)) {
             throw new ValidationException("Value must be a whole number that is greater than zero");

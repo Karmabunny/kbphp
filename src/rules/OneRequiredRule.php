@@ -19,7 +19,7 @@ class OneRequiredRule extends BaseRule
     /** @var string|null */
     public $group;
 
-    public function parse(array $ruleset)
+    public function parse(array $ruleset): void
     {
         parent::parse($ruleset);
 
@@ -28,7 +28,7 @@ class OneRequiredRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function validate($data)
+    public function validate(array|object $data): void
     {
         $values = $this->getFieldValues($data);
 

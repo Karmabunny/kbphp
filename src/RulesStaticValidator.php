@@ -164,7 +164,7 @@ class RulesStaticValidator implements RulesValidatorInterface
      * @param array $rules
      * @return void
      */
-    public function setRules(array $rules)
+    public function setRules(array $rules): void
     {
         $this->rules = $rules;
     }

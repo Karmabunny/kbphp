@@ -21,7 +21,7 @@ class PhoneRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function parse(array $ruleset)
+    public function parse(array $ruleset): void
     {
         parent::parse($ruleset);
 
@@ -32,7 +32,7 @@ class PhoneRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function validateOne(string $field, $value)
+    public function validateOne(string $field, mixed $value): void
     {
         // Allow international numbers starting with + and country code, e.g. +61 for Australia
         $clean = preg_replace('/^\+[0-9]+ */', '', $value);

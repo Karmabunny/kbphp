@@ -6,12 +6,15 @@
 
 namespace karmabunny\kb;
 
+use karmabunny\interfaces\ConfigurableInterface;
+
 /**
  * This is functional the same as {@see UpdateTrait} only it uses the
  * `getProperties()` helper to determine which fields belong to the class.
  *
  * To raise errors on unknown fields {@see UpdateStrictTrait}.
  *
+ * @mixin ConfigurableInterface
  * @package karmabunny\kb
  */
 trait UpdateTidyTrait
@@ -23,7 +26,7 @@ trait UpdateTidyTrait
      * @param iterable $config
      * @return void
      */
-    public function update($config)
+    public function update(iterable $config): void
     {
         $fields = array_fill_keys(static::getProperties(), true);
 

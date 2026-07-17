@@ -6,6 +6,8 @@
 
 namespace karmabunny\kb;
 
+use karmabunny\interfaces\ConfigurableInterface;
+
 /**
  * This implements basic `update()` behaviour for an object.
  *
@@ -14,6 +16,7 @@ namespace karmabunny\kb;
  *
  * To raise errors on unknown fields {@see UpdateStrictTrait}.
  *
+ * @mixin ConfigurableInterface
  * @package karmabunny\kb
  */
 trait UpdateTrait
@@ -23,7 +26,7 @@ trait UpdateTrait
      * @param iterable $config
      * @return void
      */
-    public function update($config)
+    public function update(iterable $config): void
     {
         foreach ($config as $key => $item) {
             if (!property_exists($this, $key)) continue;

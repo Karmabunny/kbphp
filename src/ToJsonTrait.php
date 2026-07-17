@@ -8,6 +8,9 @@ use karmabunny\interfaces\ArrayableInterface;
  * JSON builders for models.
  *
  * This builds on the 'Arrayable' interface.
+ *
+ * @mixin ArrayableInterface
+ * @mixin JsonSerializable
  */
 trait ToJsonTrait
 {

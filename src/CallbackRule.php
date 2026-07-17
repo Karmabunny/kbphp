@@ -29,7 +29,7 @@ class CallbackRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function parse(array $ruleset)
+    public function parse(array $ruleset): void
     {
         parent::parse($ruleset);
 
@@ -44,7 +44,7 @@ class CallbackRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function validate($data)
+    public function validate(array|object $data): void
     {
         if (!$this->callable or empty($this->fields)) {
             return;
@@ -61,7 +61,7 @@ class CallbackRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function validateOne(string $field, $value)
+    public function validateOne(string $field, mixed $value): void
     {
         if (!$this->callable) {
             return;

@@ -17,7 +17,7 @@ class Ipv4AddrOrCidrRule extends BaseRule
 {
 
     /** @inheritdoc */
-    public function validateOne(string $field, $value)
+    public function validateOne(string $field, mixed $value): void
     {
         if (strpos($value, '/') === false) {
             $rule = new Ipv4AddrRule();
