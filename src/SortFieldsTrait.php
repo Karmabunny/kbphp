@@ -6,6 +6,8 @@
 
 namespace karmabunny\kb;
 
+use karmabunny\interfaces\SortableInterface;
+
 /**
  * A simple sorter for object.
  *
@@ -16,9 +18,9 @@ namespace karmabunny\kb;
  *
  * All comparisons are done with the spaceship operator.
  *
- * @see Sortable
  * @see Arrays::sort
  *
+ * @mixin SortableInterface
  * @package karmabunny\kb
  */
 trait SortFieldsTrait
@@ -48,7 +50,7 @@ trait SortFieldsTrait
      * @param string $mode
      * @return int
      */
-    public function compare($other, $mode = 'default'): int
+    public function compare(mixed $other, string $mode = 'default'): int
     {
         if ($other instanceof static) {
             // Our default sort key.

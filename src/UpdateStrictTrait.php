@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use InvalidArgumentException;
+use karmabunny\interfaces\ConfigurableInterface;
 
 /**
  * This modifies the behaviour of a DataObject/Collection so that only
@@ -15,6 +16,7 @@ use InvalidArgumentException;
  * This extends the behaviour of {@see UpdateTidyTrait}, where it will throw
  * errors if a field is missing instead of silently ignoring it.
  *
+ * @mixin ConfigurableInterface
  * @package karmabunny\kb
  */
 trait UpdateStrictTrait
@@ -26,7 +28,7 @@ trait UpdateStrictTrait
      * @param iterable $config
      * @return void
      */
-    public function update($config)
+    public function update(iterable $config): void
     {
         $fields = array_fill_keys(static::getProperties(), true);
 

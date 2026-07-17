@@ -57,7 +57,7 @@ abstract class Job implements
 
 
     /** @inheritdoc */
-    public function update($config)
+    public function update(iterable $config): void
     {
         if (!is_array($config)) {
             $config = iterator_to_array($config, true);

@@ -10,6 +10,7 @@ use ArrayAccess;
 
 /**
  *
+ * @mixin ArrayAccess
  */
 trait VirtualArrayTrait
 {

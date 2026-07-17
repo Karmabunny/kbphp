@@ -2,10 +2,13 @@
 
 namespace karmabunny\kb;
 
+use karmabunny\interfaces\ValidatesInterface;
+
 /**
  * This extends the Validates interface with a `valid()` method that returns a
  * boolean. The errors are stored in the model.
  *
+ * @mixin ValidatesInterface
  * @package karmabunny\kb
  */
 trait ValidErrorsTrait
@@ -25,7 +28,7 @@ trait ValidErrorsTrait
      * @param string|null $scenario
      * @throws ValidationException
      */
-    public abstract function validate(?string $scenario = null);
+    public abstract function validate(?string $scenario = null): void;
 
 
     /**

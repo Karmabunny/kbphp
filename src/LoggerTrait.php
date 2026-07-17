@@ -47,11 +47,11 @@ trait LoggerTrait {
      * ```
      *
      * @param callable|LogSinkInterface $logger (message, level, category, timestamp)
-     * @param string|array|null $category filter by category
      * @param int|null $level filter by level
+     * @param string|array|null $category filter by category
      * @return int
      */
-    public function addLogger($logger, ?int $level = null, $category = null): int
+    public function addLogger(callable|LogSinkInterface $logger, ?int $level = null, string|array|null $category = null): int
     {
         if (
             $logger === $this
@@ -78,11 +78,11 @@ trait LoggerTrait {
      *
      * @deprecated Use addLogger() instead
      * @param callable|LogSinkInterface $logger
-     * @param string|array|null $category filter by category
      * @param int|null $level filter by level
+     * @param string|array|null $category filter by category
      * @return void
      */
-    public function attach($logger, ?int $level = null, $category = null)
+    public function attach(callable|LogSinkInterface $logger, ?int $level = null, string|array|null $category = null): void
     {
         $this->addLogger($logger, $level, $category);
     }
@@ -93,18 +93,18 @@ trait LoggerTrait {
      *
      * @param mixed $message
      * @param int $level default: LEVEL_INFO
-     * @param string|null $_category default: class name (static)
-     * @param int|float|null $_timestamp default: now
+     * @param string|null $category default: class name (static)
+     * @param float|null $timestamp default: now
      * @return void
      */
-    public function log($message, ?int $level = null, ?string $_category = null, $_timestamp = null)
+    public function log(mixed $message, ?int $level = null, ?string $category = null, ?float $timestamp = null): void
     {
         if ($level === null) $level = Log::LEVEL_INFO;
-        if ($_category === null) $_category = static::class;
-        if ($_timestamp === null) $_timestamp = microtime(true);
+        if ($category === null) $category = static::class;
+        if ($timestamp === null) $timestamp = microtime(true);
 
         foreach ($this->loggers as $logger) {
-            $logger($message, $level, $_category, $_timestamp);
+            $logger($message, $level, $category, $timestamp);
         }
     }
 }

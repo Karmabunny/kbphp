@@ -189,7 +189,7 @@ class RulesClassValidator implements RulesValidatorInterface
 
 
     /** @inheritdoc */
-    public function setRules(array $rules)
+    public function setRules(array $rules): void
     {
         $this->original_rules = $rules;
 

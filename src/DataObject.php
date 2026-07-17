@@ -28,7 +28,7 @@ abstract class DataObject implements ConfigurableInterface
     /**
      * @param iterable $config
      */
-    function __construct($config = [])
+    function __construct(iterable $config = [])
     {
         // This makes things not break. Something about references.
         if (!is_array($config)) {

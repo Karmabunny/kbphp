@@ -6,8 +6,8 @@
 
 namespace karmabunny\kb;
 
-use Exception;
 use Generator;
+use karmabunny\interfaces\ValidatorInterface;
 use ReflectionClass;
 use ReflectionProperty;
 
@@ -29,7 +29,8 @@ use ReflectionProperty;
  * ```
  * @package karmabunny\kb
  */
-class DocValidator implements Validator {
+class DocValidator implements ValidatorInterface
+{
 
     /** @var object */
     protected $target;

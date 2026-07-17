@@ -24,7 +24,7 @@ class RangeRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function parse(array $ruleset)
+    public function parse(array $ruleset): void
     {
         parent::parse($ruleset);
 
@@ -44,7 +44,7 @@ class RangeRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function validateOne(string $field, $value)
+    public function validateOne(string $field, mixed $value): void
     {
         if (!is_numeric($value)) {
             throw new ValidationException('Value must be a number');
