@@ -17,7 +17,7 @@ class CountryZones
 
     /**
      *
-     * @return string[]
+     * @return array<string,string>
      */
     public static function getMap(): array
     {
@@ -33,9 +33,9 @@ class CountryZones
 
     /**
      *
-     * @return string[][]
+     * @return array<string,string[]>
      */
-    public static function getZoneMap()
+    public static function getZoneMap(): array
     {
         $map = self::getMap();
 

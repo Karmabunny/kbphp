@@ -18,6 +18,7 @@ class CountryNames
 
     /**
      * alpha-2 => alpha-3
+     * @var array<string,string>
      */
     const COUNTRY_CODES = [
         'AF' => 'AFG',
