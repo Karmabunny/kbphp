@@ -437,8 +437,7 @@ class Time
     /**
      * Convert any date interface into a datetime.
      *
-     * This exists in PHP8+ as `DateTime::createFromInterface()`.
-     *
+     * @deprecated use DateTime::createFromInterface() instead
      * @param DateTimeInterface $interface
      * @return DateTime
      */
@@ -458,8 +457,7 @@ class Time
     /**
      * Convert any date interface into a immutable.
      *
-     * This exists in PHP8+ as `DateTimeImmutable::createFromInterface()`.
-     *
+     * @deprecated use DateTimeImmutable::createFromInterface() instead
      * @param DateTimeInterface $interface
      * @return DateTimeImmutable
      */
@@ -833,8 +831,8 @@ class Time
      */
     public static function periods(DateTimeInterface $start, DateTimeInterface $end, string $period, ?string $gap = null): Generator
     {
-        $start = self::toDateTimeImmutable($start);
-        $end = self::toDateTimeImmutable($end);
+        $start = DateTimeImmutable::createFromInterface($start);
+        $end = DateTimeImmutable::createFromInterface($end);
 
         $periodStart = $start;
         $periodEnd = $end;
