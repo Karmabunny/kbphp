@@ -43,7 +43,7 @@ trait ConfigureTrait
      * @return object
      * @throws InvalidArgumentException
      */
-    public static function configure($config, string $assert = null, bool $init = true)
+    public static function configure($config, ?string $assert = null, bool $init = true)
     {
         return Configure::configure($config, $assert, $init);
     }
