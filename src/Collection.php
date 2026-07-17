@@ -11,7 +11,6 @@ use ArrayIterator;
 use IteratorAggregate;
 use JsonSerializable;
 use karmabunny\interfaces\ArrayableInterface;
-use ReturnTypeWillChange;
 use Traversable;
 
 /**
@@ -61,8 +60,7 @@ abstract class Collection extends DataObject implements
 
 
     /** @inheritdoc */
-    #[ReturnTypeWillChange]
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return $this->getSerializedProperties();
     }

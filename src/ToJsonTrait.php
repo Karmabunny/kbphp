@@ -1,7 +1,8 @@
 <?php
 namespace karmabunny\kb;
 
-use ReturnTypeWillChange;
+use JsonSerializable;
+use karmabunny\interfaces\ArrayableInterface;
 
 /**
  * JSON builders for models.
@@ -80,10 +81,9 @@ trait ToJsonTrait
     /**
      * A default JSON serialiser. No 'extras' I'm afraid.
      *
-     * @return mixed
+     * @return array
      */
-    #[ReturnTypeWillChange]
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return $this->toJson();
     }
