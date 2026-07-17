@@ -444,7 +444,7 @@ class Validity
      * @param string $max (optional) A date string (compatible with strtotime) for the maximum of the date range.
      * @param bool $enforce_ordering (optional) Ensures that the start date is less than or equal to the end date. On by default.
      */
-    public static function dateRange(array $vals, string $min = null, string $max = null, bool $enforce_ordering = true): void
+    public static function dateRange(array $vals, ?string $min = null, ?string $max = null, bool $enforce_ordering = true): void
     {
         if (count($vals) != 2) {
             throw new InvalidArgumentException('Incorrect number of fields. A date range must only contain two dates: a start and an end date.');
