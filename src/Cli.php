@@ -60,7 +60,7 @@ class Cli
      *
      * This supports ANSI control codes.
      *
-     * @param mixed $args
+     * @param mixed ...$args
      * @return void
      */
     public static function puts(...$args)
@@ -74,7 +74,7 @@ class Cli
      *
      * This supports ANSI control codes.
      *
-     * @param mixed $args
+     * @param mixed ...$args
      * @return void
      */
     public static function error(...$args)
@@ -89,7 +89,7 @@ class Cli
      * This supports ANSI control codes.
      *
      * @param resource $stream
-     * @param mixed $args
+     * @param mixed ...$args
      * @return void
      */
     public static function write($stream, ...$args)
