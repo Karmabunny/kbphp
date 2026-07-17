@@ -72,12 +72,12 @@ trait EventableTrait
      *
      * @see Events::on()
      * @param class-string<EventInterface>|callable $event
-     * @param callable|bool|null $fn
+     * @param callable|null $fn
      * @param bool $append
      * @return void
      * @throws InvalidArgumentException
      */
-    public function on(string|callable $event, callable|bool|null $fn = null, bool $append = true)
+    public function on(string|callable $event, ?callable $fn = null, bool $append = true)
     {
         // Unlike trigger, using dynamic class names here is OK. A user is not
         // surprised (hopefully) that they only receive events appropriate for
