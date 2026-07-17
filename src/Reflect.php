@@ -103,25 +103,19 @@ class Reflect
      * Provide an array like: `[self::class, 'methodName']`
      * Or a string like: `ns\to\Class::methodName`
      *
+     * @deprecated is_callable() handles this just fine.
+     * @phpstan-assert-if-true callable $callable
      * @param array|string $callable
      * @return bool
      */
     public static function isStaticCallable($callable): bool
     {
-        /** @var mixed $callable */
-
-        if (is_string($callable)) {
-            $callable = explode('::', $callable, 2);
+        if (!is_callable($callable, true)) {
+            return false;
         }
 
-        if (!is_array($callable)) return false;
-        if (!is_callable($callable)) return false;
-        if (count($callable) !== 2) return false;
-
         try {
-            list($class, $method) = $callable;
-            $reflect = new ReflectionMethod($class, $method);
-
+            $reflect = new ReflectionMethod($callable);
             return $reflect->isStatic() and !$reflect->isAbstract();
         }
         catch (ReflectionException $exception) {
