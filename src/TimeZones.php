@@ -18,19 +18,35 @@ use Exception;
 class TimeZones
 {
 
+    protected static $map = null;
+
+
     /**
+     * Get a map of Windows timezones to IANA timezones.
      *
-     * @return array
+     * @return array<string,string>
      */
     public static function getMap(): array
     {
-        static $map;
-
-        if (!isset($map)) {
-            $map = require __DIR__ . '/config/tzwin.php';
+        if (self::$map === null) {
+            self::$map = require __DIR__ . '/config/tzwin.php';
         }
 
+        $map = self::$map;
+        unset($map['__rev__']);
         return $map;
+    }
+
+
+    /**
+     * Get a map of IANA timezones to Windows timezones.
+     *
+     * @return array<string,string>
+     */
+    public static function getIanaMap(): array
+    {
+        self::getMap();
+        return self::$map['__rev__'] ?? [];
     }
 
 
@@ -43,11 +59,6 @@ class TimeZones
     public static function fromWindows(string $name): ?string
     {
         $map = self::getMap();
-
-        if ($name === '__rev__') {
-            return null;
-        }
-
         return $map[$name] ?? null;
     }
 
@@ -60,8 +71,8 @@ class TimeZones
      */
     public static function fromIana(string $name): ?string
     {
-        $map = self::getMap();
-        return $map['__rev__'][$name] ?? null;
+        $map = self::getIanaMap();
+        return $map[$name] ?? null;
     }
 
 
