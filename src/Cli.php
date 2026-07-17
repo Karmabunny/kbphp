@@ -53,7 +53,7 @@ class Cli
 
 
     /** @var bool|null */
-    protected static $colors = null;
+    protected static ?bool $colors = null;
 
 
     /**
@@ -93,7 +93,7 @@ class Cli
      * @param mixed ...$args
      * @return void
      */
-    public static function write($stream, ...$args)
+    public static function write(mixed $stream, mixed ...$args): void
     {
         $hasColors = self::$colors ?? self::hasColors($stream);
 
@@ -206,7 +206,7 @@ class Cli
      * @param bool|string $enable
      * @return void
      */
-    public static function setColors($enable = true)
+    public static function setColors(bool|string $enable = true): void
     {
         $enable = filter_var($enable, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
         self::$colors = $enable;
