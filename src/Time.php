@@ -47,9 +47,16 @@ class Time
     ];
 
 
+    /** @var array{float,float}|null */
     protected static $time_travel = null;
 
 
+    /**
+     * Get the the date in respect to time travel.
+     *
+     * @param string $modifier
+     * @return DateTimeImmutable
+     */
     public static function getDate(string $modifier = 'now'): DateTimeImmutable
     {
         $date = new DateTimeImmutable();
@@ -75,6 +82,14 @@ class Time
     }
 
 
+    /**
+     * Set time travel.
+     *
+     * Use `null` to clear time travel.
+     *
+     * @param DateTimeImmutable|string|float|null $date
+     * @return void
+     */
     public static function setTimeTravel($date): void
     {
         if ($date === null) {
@@ -92,6 +107,12 @@ class Time
     }
 
 
+    /**
+     * Pause or resume time travel.
+     *
+     * @param bool $pause
+     * @return void
+     */
     public static function pause(bool $pause = true): void
     {
         if ($pause) {
