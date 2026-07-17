@@ -198,22 +198,16 @@ class Cli
     /**
      * Set the colors mode.
      *
-     * 'auto' will use colors if the terminal supports it.
-     * 'true' will use colors, regardless if the terminal supports it.
-     * 'false' will not use colors.
+     * - 'auto' will use colors if the terminal supports it (default).
+     * - 'true' will use colors, regardless if the terminal supports it.
+     * - 'false' will not use colors.
      *
-     * @param bool|string $enable default 'auto'
+     * @param bool|string $enable
      * @return void
      */
-    public static function setColors($enable)
+    public static function setColors($enable = true)
     {
-        if ($enable !== 'auto') {
-            $enable = filter_var($enable, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-        }
-        else {
-            $enable = null;
-        }
-
+        $enable = filter_var($enable, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
         self::$colors = $enable;
     }
 
