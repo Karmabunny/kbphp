@@ -153,18 +153,15 @@ class Events
      *
      * @param class-string|object $sender
      * @param class-string<EventInterface>|callable $event
-     * @param callable|bool|null $fn
+     * @param callable|null $fn
      * @param bool $append
      * @return void
      * @throws InvalidArgumentException
      */
-    public static function on(string|object $sender, string|callable $event, callable|bool|null $fn = null, bool $append = true)
+    public static function on(string|object $sender, string|callable $event, ?callable $fn = null, bool $append = true)
     {
-        // If no handler is given, assume the second parameter is handler.
         // Using some cheeky reflection we can extract the event type.
-        if ($fn === null or is_bool($fn)) {
-            $append = $fn ?? $append;
-
+        if ($fn === null) {
             try {
                 $fn = $event;
                 $event = null;
