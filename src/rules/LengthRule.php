@@ -24,9 +24,9 @@ use karmabunny\kb\ValidationException;
 class LengthRule extends BaseRule
 {
 
-    public $min = 0;
+    public int $min = 0;
 
-    public $max = PHP_INT_MAX;
+    public int $max = PHP_INT_MAX;
 
 
     /** @inheritdoc */

@@ -29,7 +29,7 @@ abstract class BaseRule implements RuleInterface
 {
 
     /** @var string[] */
-    public $fields = [];
+    public array $fields = [];
 
 
     /** @inheritdoc */

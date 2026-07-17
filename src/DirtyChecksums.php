@@ -19,10 +19,10 @@ class DirtyChecksums implements NotSerializable
 {
 
     /** @var string[] [ name => sha ] */
-    public $checksums = [];
+    public array $checksums = [];
 
     /** @var object */
-    public $target;
+    public object $target;
 
 
     /**
@@ -47,7 +47,7 @@ class DirtyChecksums implements NotSerializable
      * @param mixed $value
      * @return string
      */
-    protected function getChecksum($value): string
+    protected function getChecksum(mixed $value): string
     {
         if (
             $value === null
@@ -94,7 +94,7 @@ class DirtyChecksums implements NotSerializable
      *
      * @return void
      */
-    public function reset()
+    public function reset(): void
     {
         $this->checksums = [];
     }
@@ -107,7 +107,7 @@ class DirtyChecksums implements NotSerializable
      *
      * @return void
      */
-    public function update()
+    public function update(): void
     {
         foreach ($this->getProperties() as $name => $value) {
             $this->checksums[$name] = $this->getChecksum($value);
@@ -135,7 +135,7 @@ class DirtyChecksums implements NotSerializable
      * @param string $name
      * @return void
      */
-    public function markDirty(string $name)
+    public function markDirty(string $name): void
     {
         if (property_exists($this->target, $name)) {
             $this->checksums[$name] = 'DIRTY';
@@ -149,7 +149,7 @@ class DirtyChecksums implements NotSerializable
      * @param string $name
      * @return bool
      */
-    public function isDirty(string $name)
+    public function isDirty(string $name): bool
     {
         // Don't know about this one. Not dirty.
         if (!property_exists($this->target, $name)) {

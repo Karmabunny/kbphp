@@ -18,28 +18,28 @@ class Url extends DataObject
     use UpdateVirtualTrait;
 
     /** @var string|null */
-    public $scheme;
+    public ?string $scheme = null;
 
     /** @var string|null */
-    public $host;
+    public ?string $host = null;
+
+    /** @var int|null */
+    public ?int $port = null;
 
     /** @var string|null */
-    public $port;
+    public ?string $user = null;
 
     /** @var string|null */
-    public $user;
+    public ?string $pass = null;
 
     /** @var string|null */
-    public $pass;
-
-    /** @var string|null */
-    public $path;
+    public ?string $path = null;
 
     /** @var array after the question mark ? */
-    public $query = [];
+    public mixed $query = [];
 
     /** @var string|null after the hashmark # */
-    public $fragment;
+    public ?string $fragment = null;
 
 
     /** @inheritdoc */
@@ -58,7 +58,7 @@ class Url extends DataObject
      * @return static
      * @throws UrlDecodeException
      */
-    public function setQuery($query)
+    public function setQuery(array|string $query): static
     {
         if (is_array($query)) {
             $this->query = $query;
@@ -77,7 +77,7 @@ class Url extends DataObject
      * @return static
      * @throws UrlDecodeException
      */
-    public function addParams(array $query)
+    public function addParams(array $query): static
     {
         $this->query = array_merge($this->query, $query);
         return $this;
@@ -91,7 +91,7 @@ class Url extends DataObject
      * @param mixed $value
      * @return static
      */
-    public function setParam(string $name, $value)
+    public function setParam(string $name, mixed $value): static
     {
         $this->query[$name] = $value;
         return $this;
@@ -108,7 +108,7 @@ class Url extends DataObject
      * @param mixed $value
      * @return static
      */
-    public function addParam(string $name, $value)
+    public function addParam(string $name, mixed $value): static
     {
         if (array_key_exists($name, $this->query)) {
             $existing = $this->query[$name];
@@ -133,7 +133,7 @@ class Url extends DataObject
      * @param string $name
      * @return static
      */
-    public function removeParam(string $name)
+    public function removeParam(string $name): static
     {
         unset($this->query[$name]);
         return $this;
@@ -157,7 +157,7 @@ class Url extends DataObject
      *
      * @return void
      */
-    public function normalize()
+    public function normalize(): void
     {
         if ($this->scheme) {
             $default = self::getDefaultPort($this->scheme);
@@ -256,10 +256,10 @@ class Url extends DataObject
      * @return self
      * @throws UrlParseException
      */
-    public static function parse(string $url)
+    public static function parse(string $url): self
     {
         $config = parse_url($url);
-        if ($config === false) {
+        if (!is_array($config)) {
             throw new UrlParseException("Could not parse URL: {$url}");
         }
         return new self($config);
@@ -296,7 +296,7 @@ class Url extends DataObject
 
     /**
      *
-     * @return array
+     * @return array<string,int>
      */
     public static function getDefaultPorts(): array
     {
@@ -310,7 +310,7 @@ class Url extends DataObject
      * @param string $scheme
      * @return null|int
      */
-    public static function getDefaultPort(string $scheme)
+    public static function getDefaultPort(string $scheme): ?int
     {
         $ports = self::getDefaultPorts();
         return $ports[$scheme] ?? null;
@@ -336,7 +336,7 @@ class Url extends DataObject
      * @param string|array $parts
      * @return string
      */
-    public static function build(...$parts): string
+    public static function build(mixed ...$parts): string
     {
         if (empty($parts)) return '/';
 

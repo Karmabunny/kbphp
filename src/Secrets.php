@@ -74,16 +74,16 @@ class Secrets extends DataObject
 
 
     /** @var string[] */
-    public $key_rules;
+    public array $key_rules;
 
     /** @var string[] */
-    public $value_rules;
+    public array $value_rules;
 
     /** @var string */
-    public $key_pattern;
+    public string $key_pattern;
 
     /** @var string */
-    public $value_pattern;
+    public string $value_pattern;
 
     /**
      * Whether to treat _all_ base64 strings as secrets.
@@ -97,7 +97,7 @@ class Secrets extends DataObject
      *
      * @var bool
      */
-    public $base64 = false;
+    public bool $base64 = false;
 
     /**
      * Whether to treat _all_ hex strings as secrets.
@@ -111,14 +111,14 @@ class Secrets extends DataObject
      *
      * @var bool
      */
-    public $hex = false;
+    public bool $hex = false;
 
     /**
      * Create masks with fixed sizes.
      *
      * @var int|null
      */
-    public $mask_length = 16;
+    public ?int $mask_length = 16;
 
 
     /**
@@ -150,7 +150,7 @@ class Secrets extends DataObject
      * @param string $pattern regex
      * @return void
      */
-    public function addKeyRule(string $pattern)
+    public function addKeyRule(string $pattern): void
     {
         $this->key_rules[] = $pattern;
         $this->key_pattern = $this->buildPattern($this->key_rules);
@@ -163,7 +163,7 @@ class Secrets extends DataObject
      * @param string $pattern regex
      * @return void
      */
-    public function addValueRule(string $pattern)
+    public function addValueRule(string $pattern): void
     {
         $this->value_rules[] = $pattern;
         $this->value_pattern = static::buildPattern($this->value_rules);
@@ -176,7 +176,7 @@ class Secrets extends DataObject
      * @param mixed $item
      * @return bool
      */
-    public function isSecretKey($item): bool
+    public function isSecretKey(mixed $item): bool
     {
         if (!is_string($item)) {
             return false;
@@ -201,7 +201,7 @@ class Secrets extends DataObject
      * @param bool $recursive - process url/json strings
      * @return bool
      */
-    public function isSecretValue($item, bool $recursive = true): bool
+    public function isSecretValue(mixed $item, bool $recursive = true): bool
     {
         if (!is_string($item)) {
             return false;
@@ -317,7 +317,7 @@ class Secrets extends DataObject
      * @param mixed $item
      * @return bool
      */
-    public function isSecret($item): bool
+    public function isSecret(mixed $item): bool
     {
         if (!is_string($item)) {
             return false;

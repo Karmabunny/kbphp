@@ -75,7 +75,7 @@ class Events
      * @param bool $once Don't trigger if the event has already run at least once.
      * @return array[] event results.
      */
-    public static function trigger($sender, EventInterface $event, bool $once = false): array
+    public static function trigger(string|object $sender, EventInterface $event, bool $once = false): array
     {
         // Events are ID'd by their full namespaced class name.
         if (is_object($sender)) {
@@ -158,7 +158,7 @@ class Events
      * @return void
      * @throws InvalidArgumentException
      */
-    public static function on(string|object $sender, string|callable $event, ?callable $fn = null, bool $append = true)
+    public static function on(string|object $sender, string|callable $event, ?callable $fn = null, bool $append = true): void
     {
         // Using some cheeky reflection we can extract the event type.
         if ($fn === null) {

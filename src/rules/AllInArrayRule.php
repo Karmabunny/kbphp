@@ -19,7 +19,7 @@ class AllInArrayRule extends BaseRule
 {
 
     /** @var array */
-    public $allowed = [];
+    public array $allowed = [];
 
 
     /** @inheritdoc */

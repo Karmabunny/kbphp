@@ -27,34 +27,34 @@ class CsvExport
     const DIRTY_CHARS = ' "\r\n\t';
 
     /** @var resource */
-    public $handle;
+    public mixed $handle;
 
     /** @var array */
-    public $formatters = [];
+    public array $formatters = [];
 
     /** @var string Only supported in PHP 8.1+ */
-    public $break = "\n";
+    public string $break = "\n";
 
     /** @var string */
-    public $delimiter = ',';
+    public string $delimiter = ',';
 
     /** @var string */
-    public $null = '\N';
+    public string $null = '\N';
 
     /** @var string */
-    public $enclosure = '"';
+    public string $enclosure = '"';
 
     /** @var string */
-    public $escape = '\\';
+    public string $escape = '\\';
 
     /** @var array|null */
-    public $headers = null;
+    public array|null $headers = null;
 
     /** @var string */
-    private $dirty_re;
+    private string $dirty_re;
 
     /** @var bool */
-    private $_own_handles = false;
+    private bool $_own_handles = false;
 
     /**
      * Configure the CSV output format.

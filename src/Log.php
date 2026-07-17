@@ -110,12 +110,12 @@ class Log
      * $loggable->attach($parent, null, ['stats' => false, 'meta' => false]);
      * ```
      *
-     * @param callable|Loggable $logger
+     * @param callable|LogSinkInterface $logger
      * @param int|null $level
      * @param string|array|null $category
      * @return callable
      */
-    public static function filter($logger, $level = null, $category = null)
+    public static function filter(callable|LogSinkInterface $logger, ?int $level = null, string|array|null $category = null): callable
     {
         if ($level === null and $category === null) {
             return $logger;
@@ -177,7 +177,7 @@ class Log
      * @param int $timestamp
      * @return void - echoes to stdout
      */
-    public static function print($message, $level, $category, $timestamp)
+    public static function print(mixed $message, int $level, string $category, int $timestamp): void
     {
         echo self::format($message, $level, $category, $timestamp);
     }
@@ -191,7 +191,7 @@ class Log
      * @param int $timestamp
      * @return string
      */
-    public static function format($message, $level, $category, $timestamp)
+    public static function format(mixed $message, int $level, string $category, int $timestamp): string
     {
         $line = '';
         $line .= '[' . date('c', $timestamp) . ']';
@@ -206,9 +206,10 @@ class Log
      * An attempt to convert things into strings.
      *
      * @param mixed $value
+     * @param int $indent
      * @return string
      */
-    public static function stringify($value, $indent = 0): string
+    public static function stringify(mixed $value, int $indent = 0): string
     {
         // Bad hack.
         if (!$indent and is_object($value)) $indent = 2;
@@ -290,7 +291,7 @@ class Log
      * @param mixed $thing
      * @return void
      */
-    public static function dump($thing)
+    public static function dump(mixed $thing): void
     {
         while (ob_get_level() > 0) ob_end_clean();
         header('content-type: text/plain');
@@ -310,7 +311,7 @@ class Log
      * @param int[]|int $levels Filtering; only log on these levels
      * @return callable (message, level, category)
      */
-    public static function createFileLogger(string $path, $cache_size = 5, $levels = null)
+    public static function createFileLogger(string $path, int $cache_size = 5, int|array|null $levels = null): callable
     {
         // A happy little closure value.
         $cache = [];

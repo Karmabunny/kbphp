@@ -17,7 +17,7 @@ use karmabunny\kb\ValidationException;
 class PhoneRule extends BaseRule
 {
 
-    public $digits = 8;
+    public int $digits = 8;
 
 
     /** @inheritdoc */

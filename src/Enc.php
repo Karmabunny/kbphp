@@ -20,11 +20,11 @@ class Enc
     * Funky stuff is anything in the ASCII control plane (0x00 - 0x1F)
     * Except tab, line feed, carriage return
     **/
-    public static function cleanfunky($value)
+    public static function cleanfunky(mixed $value): string
     {
         if (is_array($value)) return '';
         if (is_object($value)) return '';
-        return preg_replace('![\x00-\x08\x0B\x0C\x0E-\x1F]!', '', (string) $value);
+        return preg_replace('![\x00-\x08\x0B\x0C\x0E-\x1F]!', '', (string) $value) ?: '';
     }
 
     /**
@@ -35,7 +35,7 @@ class Enc
      * @example $html = Enc::html('A & B'); // returns A &amp; B
      * @example $bad_html = Enc::html('A &amp; B'); // don't do this; returns A &amp;amp; B
      */
-    public static function html($value)
+    public static function html(mixed $value): string
     {
         return htmlspecialchars(self::cleanfunky($value), ENT_COMPAT, 'UTF-8');
     }
@@ -47,9 +47,9 @@ class Enc
      * @example $html = Enc::html('A & B'); // returns A &amp; B
      * @example $html = Enc::html('A &amp; B'); // this is fine; returns A &amp; B
      */
-    public static function htmlNoDup($value)
+    public static function htmlNoDup(mixed $value): string
     {
-        return htmlspecialchars(self::cleanfunky($value), ENT_COMPAT, 'UTF-8', false);
+        return htmlspecialchars(self::cleanfunky($value), ENT_COMPAT, 'UTF-8', false) ?: '';
     }
 
     /**
@@ -57,7 +57,7 @@ class Enc
     *
     * @param string $value The value to encode
     **/
-    public static function xml($value)
+    public static function xml(mixed $value): string
     {
         $value = self::cleanfunky($value);
         $value = preg_replace('/[\s\r\n][\s\r\n]+/', "\n", $value);
@@ -69,7 +69,7 @@ class Enc
     *
     * @param string $value The value to encode
     **/
-    public static function url($value)
+    public static function url(mixed $value): string
     {
         return urlencode(self::cleanfunky($value));
     }
@@ -79,7 +79,7 @@ class Enc
     *
     * @param string $value The value to encode
     **/
-    public static function id($value)
+    public static function id(mixed $value): string
     {
         $value = self::cleanfunky($value);
         $value = trim($value);
@@ -112,7 +112,7 @@ class Enc
     *
     * @param string $value The value to encode
     **/
-    public static function httpfield($value)
+    public static function httpfield(mixed $value): string
     {
         $value = self::cleanfunky($value);
         $value = str_replace(' ', '_', $value);
@@ -131,7 +131,7 @@ class Enc
      * @param string $value The value to encode
      * @return string
      */
-    public static function urlname($value, $delimiter = '-')
+    public static function urlname(mixed $value, string $delimiter = '-'): string
     {
         $value = self::cleanfunky($value);
         $value = strtolower(trim($value, "&_- \t\n\r\0\x0B"));
@@ -162,7 +162,7 @@ class Enc
     * @param string $from What format the date was in origanally.
     * @return string|null JavaScript snippet for the given date or NULL if the input value is invalid
     **/
-    public static function jsdate($value, $from = 'mysql')
+    public static function jsdate(mixed $value, string $from = 'mysql'): ?string
     {
         $day = null;
         $month = null;

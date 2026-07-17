@@ -103,7 +103,7 @@ class Buffer
      *
      * @return void
      */
-    public function discard()
+    public function discard(): void
     {
         if (!$this->level()) {
             return;
@@ -225,7 +225,7 @@ class Buffer
      *
      * @return void
      */
-    public static function closeAll()
+    public static function closeAll(): void
     {
         while (ob_get_level()) ob_end_clean();
     }
@@ -236,7 +236,7 @@ class Buffer
      *
      * @return void
      */
-    public static function flushAll()
+    public static function flushAll(): void
     {
         while (ob_get_level()) ob_end_flush();
     }

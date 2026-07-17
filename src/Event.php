@@ -17,9 +17,9 @@ abstract class Event extends DataObject implements EventInterface
 {
 
     /** @var object|null */
-    public $sender;
+    public ?object $sender = null;
 
     /** @var bool */
-    public $handled = false;
+    public bool $handled = false;
 
 }
