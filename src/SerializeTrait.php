@@ -7,7 +7,6 @@
 namespace karmabunny\kb;
 
 use ReflectionProperty;
-use ReturnTypeWillChange;
 
 /**
  * Implements a PHP serialiser.
@@ -18,13 +17,6 @@ use ReturnTypeWillChange;
  *
  * You can extend, or restrict, serialization per class by overriding
  * the `getSerializedProperties()` method.
- *
- * This provides compatibility with the `Serializable` interface. Modern
- * PHP (7.4+) will use the magic `__serialize()/__unserialize()` methods if
- * available, but still prefers the "Serializable" methods.
- *
- * When overriding these methods, just override the magic ones and let this
- * trait wrap them to comply with the `Serializable` interface.
  */
 trait SerializeTrait
 {
@@ -55,25 +47,6 @@ trait SerializeTrait
 
 
     /** @inheritdoc */
-    #[ReturnTypeWillChange]
-    public function serialize()
-    {
-        $serialized = $this->__serialize();
-        return serialize($serialized);
-    }
-
-
-    /** @inheritdoc */
-    #[ReturnTypeWillChange]
-    public function unserialize($serialized)
-    {
-        $serialized = unserialize($serialized);
-        $this->__unserialize($serialized);
-    }
-
-
-    /** @inheritdoc */
-    // phpcs:ignore
     public function __serialize(): array
     {
         if ($this instanceof NotSerializable) {
@@ -86,9 +59,7 @@ trait SerializeTrait
 
 
     /** @inheritdoc */
-    #[ReturnTypeWillChange]
-    // phpcs:ignore
-    public function __unserialize(array $serialized)
+    public function __unserialize(array $serialized): void
     {
         if ($this instanceof DataObject) {
             $this->update($serialized);
