@@ -108,6 +108,17 @@ class Time
 
 
     /**
+     * Resume time travel.
+     *
+     * @return void
+     */
+    public static function resume(): void
+    {
+        self::pause(false);
+    }
+
+
+    /**
      * Timestamp as an integer in microseconds.
      *
      * This uses hrtime for 7.2+ with a microtime fallback.
