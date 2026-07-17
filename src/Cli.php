@@ -56,35 +56,45 @@ class Cli
 
 
     /**
+     * Write text to the standard output stream.
+     *
+     * This supports ANSI control codes.
      *
      * @param mixed $args
      * @return void
      */
     public static function puts(...$args)
     {
-        $hasColors = self::$colors ?? self::hasColors(\STDOUT);
-
-        if ($hasColors) {
-            $args[] = self::RESET;
-            $text = self::joinAnsi(' ', $args);
-        }
-        else {
-            $text = self::joinAnsi(' ', $args);
-            $text = self::stripAnsi($text);
-        }
-
-        self::stdout($text . PHP_EOL);
+        self::write(\STDOUT, ...$args);
     }
 
 
     /**
+     * Write text to the standard error stream.
+     *
+     * This supports ANSI control codes.
      *
      * @param mixed $args
      * @return void
      */
     public static function error(...$args)
     {
-        $hasColors = self::$colors ?? self::hasColors(\STDERR);
+        self::write(\STDERR, ...$args);
+    }
+
+
+    /**
+     * Write text to a stream.
+     *
+     * This supports ANSI control codes.
+     *
+     * @param resource $stream
+     * @param mixed $args
+     * @return void
+     */
+    public static function write($stream, ...$args)
+    {
+        $hasColors = self::$colors ?? self::hasColors($stream);
 
         if ($hasColors) {
             $args[] = self::RESET;
@@ -95,7 +105,7 @@ class Cli
             $text = self::stripAnsi($text);
         }
 
-        self::stderr($text . PHP_EOL);
+        fwrite($stream, $text . PHP_EOL);
     }
 
 
