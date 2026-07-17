@@ -7,6 +7,7 @@
 namespace karmabunny\kb;
 
 use ArrayAccess;
+use ArrayObject;
 use InvalidArgumentException;
 use karmabunny\interfaces\RuleInterface;
 
@@ -70,6 +71,10 @@ abstract class BaseRule implements RuleInterface
     /** @inheritdoc */
     public function validate($data)
     {
+        if (is_object($data) and !$data instanceof ArrayAccess) {
+            $data = new ArrayObject($data, ArrayObject::STD_PROP_LIST | ArrayObject::ARRAY_AS_PROPS);
+        }
+
         if (empty($this->fields)) {
             return;
         }
@@ -122,11 +127,15 @@ abstract class BaseRule implements RuleInterface
     /**
      * Get a list of values that match this rule's fields.
      *
-     * @param array|ArrayAccess $data
+     * @param array|object $data
      * @return array
      */
     public function getFieldValues($data): array
     {
+        if (is_object($data) and !$data instanceof ArrayAccess) {
+            $data = new ArrayObject($data, ArrayObject::STD_PROP_LIST | ArrayObject::ARRAY_AS_PROPS);
+        }
+
         $values = [];
 
         foreach ($this->fields as $field) {
@@ -146,7 +155,7 @@ abstract class BaseRule implements RuleInterface
      *
      * Note, this considers a numeric 'zero' as non-empty.
      *
-     * @param mixed $data
+     * @param array|ArrayAccess $data
      * @param string $field
      * @return bool
      */

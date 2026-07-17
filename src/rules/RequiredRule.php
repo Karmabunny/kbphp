@@ -6,6 +6,8 @@
 
 namespace karmabunny\kb\rules;
 
+use ArrayAccess;
+use ArrayObject;
 use karmabunny\kb\BaseRule;
 use karmabunny\kb\ValidationException;
 
@@ -24,6 +26,10 @@ class RequiredRule extends BaseRule
     {
         if (empty($this->fields)) {
             return;
+        }
+
+        if (is_object($data) and !$data instanceof ArrayAccess) {
+            $data = new ArrayObject($data, ArrayObject::STD_PROP_LIST | ArrayObject::ARRAY_AS_PROPS);
         }
 
         $error = new ValidationException();
