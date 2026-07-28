@@ -164,14 +164,44 @@ final class TimeTest extends TestCase {
             ['PT30M', 'seconds', 30 * 60],
             ['PT30M', 'milliseconds', 30 * 60 * 1000],
             ['PT30M', 'microseconds', 30 * 60 * 1000000],
+            ['-30 minutes', 'hours', -0.5],
+            ['-30 minutes', 'seconds', -30 * 60],
+            ['-30 minutes', 'milliseconds', -30 * 60 * 1000],
+            ['-30 minutes', 'microseconds', -30 * 60 * 1000000],
         ];
     }
 
 
     /** @dataProvider dataIntervalTotal */
-    public function testIntervalTotal($interval, $unit, $expected)
+    public function testIntervalTotal(string $interval, string $unit, float $expected)
     {
         $interval = Time::parseInterval($interval);
+        $actual = Time::getIntervalTotal($interval, $unit);
+        $this->assertEquals($expected, $actual);
+    }
+
+
+    public static function dataIntervalTotalDates()
+    {
+        return [
+            ['2020-01-01 01:00:00', '2020-01-01 01:30:00', 'seconds', 30 * 60],
+            ['2020-01-01 01:00:00', '2020-01-01 01:30:00', 'hours', 0.5],
+            ['2020-01-01 01:00:00', '2020-01-01 01:30:00', 'milliseconds', 30 * 60 * 1000],
+            ['2020-01-01 01:00:00', '2020-01-01 01:30:00', 'microseconds', 30 * 60 * 1000000],
+            ['2020-01-01 01:00:00', '2020-01-01 00:30:00', 'seconds', -30 * 60],
+            ['2020-01-01 01:00:00', '2020-01-01 00:30:00', 'hours', -0.5],
+            ['2020-01-01 01:00:00', '2020-01-01 00:30:00', 'milliseconds', -30 * 60 * 1000],
+            ['2020-01-01 01:00:00', '2020-01-01 00:30:00', 'microseconds', -30 * 60 * 1000000],
+        ];
+    }
+
+    /** @dataProvider dataIntervalTotalDates */
+    public function testIntervalTotalDates(string $date1, string $date2, string $unit, float $expected)
+    {
+        $date1 = new DateTime($date1);
+        $date2 = new DateTime($date2);
+
+        $interval = $date1->diff($date2);
         $actual = Time::getIntervalTotal($interval, $unit);
         $this->assertEquals($expected, $actual);
     }
