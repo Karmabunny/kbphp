@@ -701,4 +701,52 @@ final class TimeTest extends TestCase {
         $date = Time::getDate();
         $this->assertEquals($now->format('Y-m-d H:i:s'), $date->format('Y-m-d H:i:s'));
     }
+
+
+    public function dataHasRelativeKeywords(): array
+    {
+        return [
+            // Relative keywords
+            ['+1 day', true],
+            ['-2 months', true],
+            ['+3 year', true],
+            ['+5 hours', true],
+            ['+1 week', true],
+
+            // Technically relative because it preserves the date component.
+            ['14:35:00', true],
+
+            // Definitely relative.
+            ['now', true],
+            ['+0 seconds', true],
+
+            // Fancy relative.
+            ['yesterday', true],
+            ['tomorrow', true],
+            ['next Monday', true],
+            ['first tuesday of next month', true],
+
+            // Absolute times (time is set to midnight).
+            ['2026-08-01', false],
+            ['01/02/2020', false],
+
+            // Obviously absolute times.
+            ['2023-08-01 14:35:00', false],
+            ['2025-10-01T12:34:56Z', false],
+
+            // Just invalid.
+            ['nope', false],
+            ['asdfasdfasdf', false],
+        ];
+    }
+
+
+    /**
+     * @dataProvider dataHasRelativeKeywords
+     */
+    public function testHasRelativeKeywords($input, $expected)
+    {
+        $actual = Time::hasRelativeKeywords($input);
+        $this->assertEquals($expected, $actual, "failed: {$input}");
+    }
 }

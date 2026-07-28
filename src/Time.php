@@ -14,6 +14,7 @@ use DateTimeZone;
 use Generator;
 use InvalidArgumentException;
 use SeekableIterator;
+use Throwable;
 
 /**
  * Various date and time utilities.
@@ -1120,5 +1121,30 @@ class Time
         $minutes = floor(($offset * 60) % 60);
 
         return sprintf('%s%02d:%02d', $sign, $hours, $minutes);
+    }
+
+
+    /**
+     * Check if a time string contains relative keywords.
+     *
+     * For example: '+1 day', '+3 month', '+1 year'.
+     *
+     * @param string $time
+     * @return bool
+     */
+    public static function hasRelativeKeywords(string $time): bool
+    {
+        try {
+            $date1 = new DateTime('2020-01-01');
+            $date1->modify($time);
+
+            $date2 = new DateTime('2025-10-10');
+            $date2->modify($time);
+
+            return $date1 != $date2;
+        }
+        catch (Throwable $error) {
+            return false;
+        }
     }
 }
