@@ -770,6 +770,10 @@ class Time
         $total += $interval->i * 60;
         $total += $interval->s;
 
+        if ($interval->invert) {
+            $total *= -1;
+        }
+
         if ($unit == 'years') {
             return $total / (365 * 24 * 60 * 60);
         }
@@ -792,13 +796,13 @@ class Time
 
         if ($unit == 'milliseconds') {
             $total *= 1000;
-            $total += $interval->f / 1000;
+            $total += ($interval->invert ? -1 : 1) * ($interval->f / 1000);
             return $total;
         }
 
         if ($unit == 'microseconds') {
             $total *= 1000000;
-            $total += $interval->f;
+            $total += ($interval->invert ? -1 : 1) * $interval->f;
             return $total;
         }
 
