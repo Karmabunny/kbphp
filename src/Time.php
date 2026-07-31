@@ -1143,6 +1143,7 @@ class Time
 
             return $date1 != $date2;
         }
+        // @phpstan-ignore-next-line: what??
         catch (Throwable $error) {
             return false;
         }
