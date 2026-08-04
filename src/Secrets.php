@@ -464,11 +464,16 @@ class Secrets extends DataObject
      *
      * TODO use php8 sensitive attributes here.
      *
-     * @param string $value
+     * Values arrive from arbitrary logged data (sessions, exception
+     * properties), so anything non-string masks as an empty value rather
+     * than raising a type error inside the logger.
+     *
+     * @param mixed $value
      * @return string
      */
-    protected function getMask(string $value): string
+    protected function getMask($value): string
     {
+        $value = is_scalar($value) ? (string) $value : '';
         $length = $this->mask_length ?: strlen($value);
         return str_repeat('*', $length);
     }

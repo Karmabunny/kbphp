@@ -275,6 +275,39 @@ class SecretsTest extends TestCase
     }
 
 
+    public function testMaskingNonStrings()
+    {
+        $input = [
+            'token' => null,
+            'nested' => [
+                'secret' => [null, 123, true],
+            ],
+            'safe' => [
+                'keep' => null,
+            ],
+        ];
+
+        $secrets = Secrets::create();
+        $actual = $secrets->mask($input);
+
+        $expected = [
+            'token' => '****************',
+            'nested' => [
+                'secret' => [
+                    '****************',
+                    '****************',
+                    '****************',
+                ],
+            ],
+            'safe' => [
+                'keep' => null,
+            ],
+        ];
+
+        $this->assertEquals($expected, $actual);
+    }
+
+
     public function testClean()
     {
         $input = DATA;
