@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e78215c5cc91fefd1f05b60276ecddc6",
+    "content-hash": "c2aaf0aef9e5dd09b1903c33a9c8aca7",
     "packages": [
         {
             "name": "karmabunny/interfaces",
-            "version": "dev-feat/php8",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Karmabunny/kbinterfaces.git",
-                "reference": "0119a8b95d97f96c60651f93b237e4960b94fcb1"
+                "reference": "31513261005e7ffaf28fdf4aef5e58762790ab08"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Karmabunny/kbinterfaces/zipball/0119a8b95d97f96c60651f93b237e4960b94fcb1",
-                "reference": "0119a8b95d97f96c60651f93b237e4960b94fcb1",
+                "url": "https://api.github.com/repos/Karmabunny/kbinterfaces/zipball/31513261005e7ffaf28fdf4aef5e58762790ab08",
+                "reference": "31513261005e7ffaf28fdf4aef5e58762790ab08",
                 "shasum": ""
             },
             "require": {
@@ -53,9 +53,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Karmabunny/kbinterfaces/issues",
-                "source": "https://github.com/Karmabunny/kbinterfaces/tree/feat/php8"
+                "source": "https://github.com/Karmabunny/kbinterfaces/tree/v2.0.0"
             },
-            "time": "2026-07-17T03:10:22+00:00"
+            "time": "2026-09-03T00:52:54+00:00"
         },
         {
             "name": "symfony/polyfill-php73",
@@ -2207,9 +2207,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "karmabunny/interfaces": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
