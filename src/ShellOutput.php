@@ -22,29 +22,29 @@ class ShellOutput
 
 
     /** @var int milliseconds */
-    static $SELECT_TIMEOUT = 100;
+    public static int $SELECT_TIMEOUT = 100;
 
 
     /** @var ShellOptions */
-    public $config;
+    public ShellOptions $config;
 
     /** @var resource */
-    public $handle;
+    public mixed $handle;
 
     /** @var int */
-    public $pid = -1;
+    public int $pid = -1;
 
     /** @var bool */
-    public $running = false;
+    public bool $running = false;
 
     /** @var int|false */
-    public $exit = false;
+    public int|false $exit = false;
 
     /** @var array [ stdin, stdout, stderr ] */
-    private $pipes;
+    private array $pipes;
 
     /** @var array resource, string array */
-    private $descriptors;
+    private array $descriptors;
 
 
     /**
@@ -53,7 +53,7 @@ class ShellOutput
      * @param resource $handle from proc_open()
      * @param array $pipes from proc_open()
      */
-    public function __construct(ShellOptions $config, $handle, array $pipes)
+    public function __construct(ShellOptions $config, mixed $handle, array $pipes)
     {
         $this->config = $config;
         $this->handle = $handle;

@@ -167,6 +167,8 @@ class HttpStatus
 
     /**
      * Status code strings.
+     *
+     * @var array<int,string>
      */
     const STRINGS = [
         self::CONTINUE => 'Continue',

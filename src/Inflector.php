@@ -23,12 +23,13 @@ use karmabunny\interfaces\InflectorInterface;
 class Inflector extends DataObject implements InflectorInterface
 {
 
-    // Cached inflections
-    protected $_cache = [];
+    protected array $_cache = [];
 
-    // Uncountable and irregular words
-    public $uncountable = [];
-    public $irregular = [];
+    /** @var string[] */
+    public array $uncountable = [];
+
+    /** @var array<string,string> */
+    public array $irregular = [];
 
 
     /** @inheritdoc */
@@ -43,7 +44,7 @@ class Inflector extends DataObject implements InflectorInterface
 
 
     /** @inheritdoc */
-    public function update($config)
+    public function update(iterable $config): void
     {
         parent::update($config);
         $this->uncountable = array_combine($this->uncountable, $this->uncountable);
@@ -70,7 +71,7 @@ class Inflector extends DataObject implements InflectorInterface
      * @param   int      $count number of things
      * @return  string
      */
-    public function singular($word, $count = 1): string
+    public function singular(string $word, int $count = 1): string
     {
         $key = "singular_{$word}_{$count}";
 
@@ -93,7 +94,7 @@ class Inflector extends DataObject implements InflectorInterface
      * @param   int      $count
      * @return  string
      */
-    public function plural($word, $count = 0): string
+    public function plural(string $word, int $count = 0): string
     {
         $key = "singular_{$word}_{$count}";
 
@@ -116,7 +117,7 @@ class Inflector extends DataObject implements InflectorInterface
      * @param   int      $count number of things
      * @return  string
      */
-    protected function _singular($word, $count = 1)
+    protected function _singular(string $word, int $count = 1): string
     {
         // Remove garbage
         $word = strtolower(trim($word));
@@ -163,7 +164,7 @@ class Inflector extends DataObject implements InflectorInterface
      * @param   int      $count
      * @return  string
      */
-    protected function _plural($word, $count = 0)
+    protected function _plural(string $word, int $count = 0): string
     {
         // Remove garbage
         $word = strtolower(trim($word));
@@ -205,7 +206,7 @@ class Inflector extends DataObject implements InflectorInterface
      * @param   bool $first Upper case the first letter
      * @return  string
      */
-    public static function camelize($phrase, $first = true)
+    public static function camelize(string $phrase, bool $first = true): string
     {
         $phrase = self::humanize($phrase);
         $phrase = ucwords(preg_replace('/\s+/', ' ', $phrase));
@@ -225,7 +226,7 @@ class Inflector extends DataObject implements InflectorInterface
      * @param   string $phrase
      * @return  string
      */
-    public static function underscore($phrase)
+    public static function underscore(string $phrase): string
     {
         $phrase = self::humanize($phrase);
         return preg_replace('/\s+/', '_', trim($phrase));
@@ -238,7 +239,7 @@ class Inflector extends DataObject implements InflectorInterface
      * @param   string $phrase
      * @return  string
      */
-    public static function kebab($phrase)
+    public static function kebab(string $phrase): string
     {
         $phrase = self::humanize($phrase);
         return preg_replace('/\s+/', '-', trim($phrase));
@@ -251,7 +252,7 @@ class Inflector extends DataObject implements InflectorInterface
      * @param   string $phrase
      * @return  string
      */
-    public static function humanize($phrase)
+    public static function humanize(string $phrase): string
     {
         // Convert from underscore + kebab.
         $phrase = trim(preg_replace('/[\s_-]+/', ' ', $phrase));

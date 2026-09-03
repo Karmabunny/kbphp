@@ -18,11 +18,11 @@ use karmabunny\kb\ValidationException;
 class RegexRule extends BaseRule
 {
 
-    public $pattern = null;
+    public ?string $pattern = null;
 
 
     /** @inheritdoc */
-    public function parse(array $ruleset)
+    public function parse(array $ruleset): void
     {
         parent::parse($ruleset);
 
@@ -35,7 +35,7 @@ class RegexRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function validateOne(string $field, $value)
+    public function validateOne(string $field, mixed $value): void
     {
         if (!$this->pattern) {
             return;

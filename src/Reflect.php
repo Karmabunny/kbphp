@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @link      https://github.com/Karmabunny
  * @copyright Copyright (c) 2020 Karmabunny
@@ -89,7 +90,6 @@ class Reflect
                 if (!class_exists($full_class, false)) continue;
 
                 // All classes must subtype the filter.
-                // @phpstan-ignore-next-line : phpstan doesn't like subclass checks.
                 if ($filter and !is_subclass_of($full_class, $filter)) continue;
                 yield $full_class;
             }
@@ -108,7 +108,7 @@ class Reflect
      * @param array|string $callable
      * @return bool
      */
-    public static function isStaticCallable($callable): bool
+    public static function isStaticCallable(array|string $callable): bool
     {
         if (!is_callable($callable, true)) {
             return false;
@@ -145,7 +145,7 @@ class Reflect
      *  - int: enum `ReflectionProperty::IS` modifier types
      * @return array
      */
-    public static function getProperties($target, $flags = true): array
+    public static function getProperties(object $target, bool|int|null $flags = true): array
     {
         if (is_numeric($flags) or $flags === null) {
             $flags = (int) $flags;
@@ -163,15 +163,13 @@ class Reflect
                 // Fix private/protected access.
                 $property->setAccessible(true);
 
-                // @phpstan-ignore-next-line : PHP 7.4+
-                if (PHP_VERSION_ID >= 70400 and !$property->isInitialized($target)) {
+                if (!$property->isInitialized($target)) {
                     // Don't serialize uninitialized properties
                     continue;
                 }
-                else {
-                    // We need to use getValue() so to bypass any __get() magic.
-                    $value = $property->getValue($target);
-                }
+
+                // We need to use getValue() so to bypass any __get() magic.
+                $value = $property->getValue($target);
 
                 $key = $property->getName();
                 $data[$key] = $value;
@@ -226,9 +224,10 @@ class Reflect
     /**
      *
      * @param ReflectionFunctionAbstract|string[]|string $function
+     * @param string[]|null $fallbacks
      * @return array
      */
-    public static function getParameters($function, ?array $fallbacks = null): array
+    public static function getParameters(ReflectionFunctionAbstract|array|string $function, ?array $fallbacks = null): array
     {
         if (is_array($function)) {
             list($class, $method) = $function;
@@ -268,7 +267,7 @@ class Reflect
      * @param string|null $fallback
      * @return string
      */
-    public static function getTypeName($type, ?string $fallback = null): string
+    public static function getTypeName(?ReflectionType $type, ?string $fallback = null): string
     {
         if ($type instanceof ReflectionNamedType) {
             $type = $type->getName();

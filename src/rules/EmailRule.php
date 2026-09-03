@@ -21,7 +21,7 @@ class EmailRule extends BaseRule
 {
 
     /** @inheritdoc */
-    public function validateOne(string $field, $value)
+    public function validateOne(string $field, mixed $value): void
     {
         $regex = '/^[^@]+@[^@.]+\.[^@]+$/iD';
 

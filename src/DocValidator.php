@@ -6,8 +6,8 @@
 
 namespace karmabunny\kb;
 
-use Exception;
 use Generator;
+use karmabunny\interfaces\ValidatorInterface;
 use ReflectionClass;
 use ReflectionProperty;
 
@@ -29,7 +29,8 @@ use ReflectionProperty;
  * ```
  * @package karmabunny\kb
  */
-class DocValidator implements Validator {
+class DocValidator implements ValidatorInterface
+{
 
     /** @var object */
     protected $target;
@@ -46,7 +47,7 @@ class DocValidator implements Validator {
      *
      * @param object $target Object to validate.
      */
-    public function __construct($target)
+    public function __construct(object $target)
     {
         $this->target = $target;
         $this->errors = [];
@@ -166,7 +167,7 @@ class DocValidator implements Validator {
      * @param object $target
      * @return Generator<DocType>
      */
-    public static function getDocTypes($target): Generator
+    public static function getDocTypes(object $target): Generator
     {
         $class = new ReflectionClass($target);
         $properties = $class->getProperties(ReflectionProperty::IS_PUBLIC);
@@ -196,7 +197,7 @@ class DocValidator implements Validator {
      * @param mixed $value real value
      * @return bool True if valid.
      */
-    protected function isValid(string $expected, $value): bool
+    protected function isValid(string $expected, mixed $value): bool
     {
         if ($value === null and $expected === 'null') {
             return true;
@@ -308,7 +309,7 @@ class DocValidator implements Validator {
      * @param string $name
      * @return string|null null if not found.
      */
-    protected function lookupClass(string $name)
+    protected function lookupClass(string $name): ?string
     {
         if (!trim($name)) return null;
 

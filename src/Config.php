@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @link      https://github.com/Karmabunny
  * @copyright Copyright (c) 2026 Karmabunny
@@ -31,25 +32,23 @@ abstract class Config
 {
 
     /** @var array<string,mixed> name => instance */
-    protected static $instances = [];
+    protected static array $instances = [];
 
     /** @var array<string,mixed> name => [key => value] */
-    protected $overrides = [];
+    protected array $overrides = [];
 
     /** @var array<string,array> name => config */
-    protected $cache = [];
+    protected array $cache = [];
 
     /** @var array<string,bool[]> name => [paths] */
-    protected $loaded = [];
+    protected array $loaded = [];
 
 
     /**
      * Get or create an instance of this config.
      *
-     * @param bool $refresh
-     * @return static
      */
-    public static function instance(bool $refresh = false)
+    public static function instance(bool $refresh = false): static
     {
         $instance = self::$instances[static::class] ?? null;
 
@@ -74,11 +73,9 @@ abstract class Config
     /**
      * Does this config exist?
      *
-     * @param string $name
-     * @return string[]
      * @throws InvalidArgumentException on an invalid config name.
      */
-    public function find(string $name)
+    public function find(string $name): array
     {
         if (preg_match('![^-_a-zA-Z0-9]!', $name)) {
             throw new InvalidArgumentException("Invalid config file '{$name}'");
@@ -100,6 +97,7 @@ abstract class Config
     /**
      * Load and merge configs.
      *
+     * @param array $config
      * @param string $path
      * @param string $name
      * @return bool
@@ -171,7 +169,7 @@ abstract class Config
      * @throws InvalidArgumentException When a config doesn't exist.
      * @throws RuntimeException if a recursive config file is detected.
      */
-    public static function get(string $key, $required = true)
+    public static function get(string $key, bool $required = true): mixed
     {
         $instance = static::instance();
         [$name, $subkey] = explode('.', $key, 2) + ['', null];
@@ -222,7 +220,7 @@ abstract class Config
      * @param mixed $value
      * @return void
      */
-    public static function set(string $key, $value)
+    public static function set(string $key, mixed $value): void
     {
         $instance = static::instance();
         [$name, $key] = explode('.', $key, 2) + ['', null];
@@ -237,7 +235,7 @@ abstract class Config
      * @param string $query dot-noted string: foo.bar.baz
      * @return mixed|null
      */
-    public static function query(array $array, string $query)
+    public static function query(array $array, string $query): mixed
     {
         if (empty($array)) {
             return null;
@@ -282,7 +280,7 @@ abstract class Config
      * @param mixed $value fill value for the key
      * @return void
      */
-    public static function querySet(array &$array, string $query, $value = null)
+    public static function querySet(array &$array, string $query, mixed $value = null): void
     {
         if (empty($query)) {
             return;

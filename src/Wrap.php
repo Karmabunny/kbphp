@@ -3,7 +3,6 @@
 namespace karmabunny\kb;
 
 use ArrayAccess;
-use Closure;
 use InvalidArgumentException;
 
 /**
@@ -38,6 +37,7 @@ use InvalidArgumentException;
  * $mapped = array_map(Wrap::construct(Thing::class), $results);
  * ```
  *
+ * @deprecated don't use this.
  * @package karmabunny/kb
  */
 class Wrap
@@ -54,7 +54,7 @@ class Wrap
      * @return callable (...$args) => object
      * @throws InvalidArgumentException
      */
-    public static function construct(string $name)
+    public static function construct(string $name): callable
     {
         // Validate, but also autoload things.
         if (!class_exists($name, true)) {
@@ -77,7 +77,7 @@ class Wrap
      * @param string $name a class name
      * @return callable ($item) => bool
      */
-    public static function instanceOf(string $name)
+    public static function instanceOf(string $name): callable
     {
         return function ($item) use ($name) {
             return (
@@ -98,7 +98,7 @@ class Wrap
      * @param string $name
      * @return callable (object) => mixed
      */
-    public static function property(string $name)
+    public static function property(string $name): callable
     {
         return function ($item) use ($name) {
             if (!is_object($item)) return null;
@@ -118,7 +118,7 @@ class Wrap
      * @param array $args
      * @return callable (object) => mixed
      */
-    public static function method(string $name, ...$args)
+    public static function method(string $name, mixed ...$args): callable
     {
         return function ($item) use ($name, $args) {
             if (!is_object($item)) return null;
@@ -137,7 +137,7 @@ class Wrap
      * @param string|int $key
      * @return callable (array) => mixed
      */
-    public static function item($key)
+    public static function item($key): callable
     {
         return function ($item) use ($key) {
             if (!(

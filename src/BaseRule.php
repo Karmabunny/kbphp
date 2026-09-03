@@ -29,11 +29,11 @@ abstract class BaseRule implements RuleInterface
 {
 
     /** @var string[] */
-    public $fields = [];
+    public array $fields = [];
 
 
     /** @inheritdoc */
-    public function parse(array $ruleset)
+    public function parse(array $ruleset): void
     {
         $this->fields = [];
 
@@ -69,7 +69,7 @@ abstract class BaseRule implements RuleInterface
 
 
     /** @inheritdoc */
-    public function validate($data)
+    public function validate(array|object $data): void
     {
         if (is_object($data) and !$data instanceof ArrayAccess) {
             $data = new ArrayObject($data, ArrayObject::STD_PROP_LIST | ArrayObject::ARRAY_AS_PROPS);
@@ -119,7 +119,7 @@ abstract class BaseRule implements RuleInterface
      * @param mixed $value
      * @return void
      */
-    public function validateOne(string $field, $value)
+    public function validateOne(string $field, mixed $value): void
     {
     }
 
@@ -130,7 +130,7 @@ abstract class BaseRule implements RuleInterface
      * @param array|object $data
      * @return array
      */
-    public function getFieldValues($data): array
+    public function getFieldValues(array|object $data): array
     {
         if (is_object($data) and !$data instanceof ArrayAccess) {
             $data = new ArrayObject($data, ArrayObject::STD_PROP_LIST | ArrayObject::ARRAY_AS_PROPS);
@@ -159,7 +159,7 @@ abstract class BaseRule implements RuleInterface
      * @param string $field
      * @return bool
      */
-    public static function isEmpty($data, string $field): bool
+    public static function isEmpty(array|ArrayAccess $data, string $field): bool
     {
         $value = $data[$field] ?? null;
 

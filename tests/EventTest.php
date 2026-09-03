@@ -98,7 +98,7 @@ class EventTest extends TestCase
         Events::on(RootEmitter::class, function(TestEvent $event) {
             $this->assertNull($event->sender);
             return 'two';
-        }, false);
+        }, append: false);
 
         // Test parent class listener.
         Events::on(RootEmitter::class, TestEvent::class, function(Event $event) {
@@ -131,15 +131,15 @@ class EventTest extends TestCase
         Events::on(RootEmitter::class, function(TestEvent $event) {
             $event->handled = true;
             return 'three';
-        }, false);
+        }, append: false);
 
         Events::on(RootEmitter::class, function(TestEvent $event) {
             return 'four';
-        }, false);
+        }, append: false);
 
         Events::on(RootEmitter::class, function(TestEvent $event) {
             return 'five';
-        }, true);
+        }, append: true);
 
         $event = new TestEvent();
         $actual = Events::trigger(RootEmitter::class, $event);

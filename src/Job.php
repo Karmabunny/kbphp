@@ -29,31 +29,35 @@ abstract class Job implements
     use RulesValidatorTrait;
 
     /** @var string */
-    public $id;
+    public string $id = '';
 
     /** @var int Unix timestamp in seconds. */
-    public $start;
+    public int $start = 0;
 
     /** @var array */
-    public $config;
+    public array $config = [];
 
 
     /**
      * Create and validate a job with this config.
      *
      * @param array $config
+     * @param bool $validate
      * @return void
      */
-    public function __construct(array $config)
+    public function __construct(array $config = [], bool $validate = true)
     {
         $this->update($config);
         $this->start = time();
-        $this->validate();
+
+        if ($config and $validate) {
+            $this->validate();
+        }
     }
 
 
     /** @inheritdoc */
-    public function update($config)
+    public function update(iterable $config): void
     {
         if (!is_array($config)) {
             $config = iterator_to_array($config, true);
@@ -84,6 +88,13 @@ abstract class Job implements
     }
 
 
+    /** @inheritdoc */
+    public function rules(?string $scenario = null): array
+    {
+        return [];
+    }
+
+
     /**
      * Get the current stats.
      *
@@ -111,13 +122,14 @@ abstract class Job implements
      * Shorthand for creating, validating and running a job.
      *
      * @param array $config
-     * @return Job
+     * @return static
      */
-    public static function execute(array $config = [])
+    public static function execute(array $config = []): static
     {
-        $class = static::class;
-
-        $job = new $class($config);
+        // @phpstan-ignore-next-line
+        $job = new static();
+        $job->update($config);
+        $job->validate();
 
         $job->addLogger(function($message) {
             echo Log::stringify($message), PHP_EOL;

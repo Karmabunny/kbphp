@@ -44,7 +44,7 @@ trait CachedHelperTrait
      * @param string|null $key
      * @return void
      */
-    protected function clearCache(?string $key = null)
+    protected function clearCache(?string $key = null): void
     {
         if ($key) {
             unset($this->_cache[$key]);
@@ -109,7 +109,7 @@ trait CachedHelperTrait
      * @param callable $fn () => mixed
      * @return mixed function result
      */
-    protected function getCachedValue(string $id, $fn)
+    protected function getCachedValue(string $id, $fn): mixed
     {
         if (!array_key_exists($id, $this->_cache)) {
             $this->_cache[$id] = $fn();
@@ -129,7 +129,7 @@ trait CachedHelperTrait
      * @param mixed $fn (...$inputs) => mixed
      * @return mixed
      */
-    protected function getCachedResult(array $inputs, $fn)
+    protected function getCachedResult(array $inputs, $fn): mixed
     {
         $key = sha1(serialize($inputs));
 

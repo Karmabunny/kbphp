@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * @link      https://github.com/Karmabunny
  * @copyright Copyright (c) 2026 Karmabunny
@@ -16,7 +17,7 @@ use RuntimeException;
 class Buffer
 {
 
-    private $buffer_level = 0;
+    private int $buffer_level = 0;
 
 
     /**
@@ -28,7 +29,7 @@ class Buffer
      * @return bool true on success, false on failure
      * @throws RuntimeException if already open
      */
-    public function start(?callable $callback = null, int $chunk_size = 0, int $flags = PHP_OUTPUT_HANDLER_STDFLAGS)
+    public function start(?callable $callback = null, int $chunk_size = 0, int $flags = PHP_OUTPUT_HANDLER_STDFLAGS): bool
     {
         if ($this->level() > 0) {
             throw new RuntimeException('Buffer is already open');
@@ -102,7 +103,7 @@ class Buffer
      *
      * @return void
      */
-    public function discard()
+    public function discard(): void
     {
         if (!$this->level()) {
             return;
@@ -224,7 +225,7 @@ class Buffer
      *
      * @return void
      */
-    public static function closeAll()
+    public static function closeAll(): void
     {
         while (ob_get_level()) ob_end_clean();
     }
@@ -235,7 +236,7 @@ class Buffer
      *
      * @return void
      */
-    public static function flushAll()
+    public static function flushAll(): void
     {
         while (ob_get_level()) ob_end_flush();
     }

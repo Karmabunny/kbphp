@@ -19,16 +19,16 @@ namespace karmabunny\kb;
 class DocType extends Collection
 {
     /** @var string */
-    public $name;
+    public string $name;
 
     /** @var string */
-    public $comment;
+    public string $comment;
 
     /** @var mixed */
-    public $value;
+    public mixed $value;
 
     /** @var string[]|null */
-    private $_doc_types;
+    private array|null $_doc_types = null;
 
 
     /**
@@ -62,7 +62,7 @@ class DocType extends Collection
      * @param mixed $value
      * @return string
      */
-    public static function parseValueType($value): string
+    public static function parseValueType(mixed $value): string
     {
         if (is_array($value)) {
             $value = Arrays::first($value);
@@ -103,9 +103,9 @@ class DocType extends Collection
      * Returns an array of all type strings.
      *
      * @param string $comment
-     * @return string[]|null Null if missing/invalid.
+     * @return string[] empty if missing/invalid.
      */
-    public static function parseCommentTypes(string $comment)
+    public static function parseCommentTypes(string $comment): array
     {
         if (!$comment) return [];
 

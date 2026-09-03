@@ -17,7 +17,7 @@ trait VirtualMethodsTrait
      * @param mixed $name
      * @return mixed
      */
-    public function __get($name)
+    public function __get(mixed $name): mixed
     {
         // TODO Test this.
         if ($value = parent::__get($name)) return $value;

@@ -24,31 +24,31 @@ class CsvImport implements IteratorAggregate
     const MAX_MEMORY = 5 * 1024 * 1024;
 
     /** @var string */
-    public $break = "\n";
+    public string $break = "\n";
 
     /** @var string */
-    public $delimiter = ',';
+    public string $delimiter = ',';
 
     /** @var string */
-    public $null = '\N';
+    public string $null = '\N';
 
     /** @var string */
-    public $enclosure = '"';
+    public string $enclosure = '"';
 
     /** @var string */
-    public $escape = '\\';
+    public string $escape = '\\';
 
     /** @var array|null */
-    public $headers = null;
+    public array|null $headers = null;
 
     /** @var bool This importer manages it's own handles. */
-    private $_own_handles = false;
+    private bool $_own_handles = false;
 
     /** @var string */
-    private $_escape_re;
+    private string $_escape_re;
 
     /** @var resource|null */
-    private $handle;
+    private mixed $handle = null;
 
     /**
      * Configure the CSV output format.
@@ -82,14 +82,14 @@ class CsvImport implements IteratorAggregate
      *
      * @param string $filename
      * @param array $config
-     * @return null|CsvImport
+     * @return null|self
      */
-    public static function fromFile(string $filename, $config = [])
+    public static function fromFile(string $filename, $config = []): ?self
     {
         $handle = @fopen($filename, 'r');
         if ($handle === false) return null;
 
-        $importer = new CsvImport($handle, $config);
+        $importer = new self($handle, $config);
         $importer->_own_handles = true;
         return $importer;
     }
@@ -100,9 +100,9 @@ class CsvImport implements IteratorAggregate
      *
      * @param string $csv
      * @param array $config
-     * @return null|CsvImport
+     * @return null|self
      */
-    public static function fromString(string $csv, $config = [])
+    public static function fromString(string $csv, $config = []): ?self
     {
         $handle = @fopen('php://temp/maxmemory:' . self::MAX_MEMORY, 'r+');
         if ($handle === false) return null;
@@ -110,7 +110,7 @@ class CsvImport implements IteratorAggregate
         fputs($handle, $csv);
         rewind($handle);
 
-        $importer = new CsvImport($handle, $config);
+        $importer = new self($handle, $config);
         $importer->_own_handles = true;
         return $importer;
     }
@@ -149,7 +149,7 @@ class CsvImport implements IteratorAggregate
      *
      * @return null|array An associated array or null if EOF.
      */
-    public function getLine()
+    public function getLine(): ?array
     {
         // Load in headers from the first row.
         $this->getHeaders();
@@ -186,7 +186,7 @@ class CsvImport implements IteratorAggregate
      *
      * @return null|array row values or null if EOF.
      */
-    private function _getcsv()
+    private function _getcsv(): ?array
     {
         if ($this->handle === null) return null;
 

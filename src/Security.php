@@ -37,7 +37,7 @@ class Security
      * @param int $length
      * @return string Binary string
      */
-    public static function randBytes($length)
+    public static function randBytes(int $length): string
     {
         $length = (int) $length;
         if ($length < 8) {
@@ -53,7 +53,7 @@ class Security
      *
      * @return string Binary string; one byte
      */
-    public static function randByte()
+    public static function randByte(): string
     {
         static $buffer = [];
         if (count($buffer) === 0) {
@@ -69,7 +69,7 @@ class Security
      * @param int $length
      * @return string
      */
-    public static function randStr($length = 16, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890')
+    public static function randStr(int $length = 16, string $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'): string
     {
         $num_chars = strlen($chars) * 1.0;
         $mask = 256 - (256 % $num_chars);
@@ -95,7 +95,7 @@ class Security
      * @param string $user_string The user supplied hash to check
      * @return bool True if the strings match, false if they don't
      */
-    public static function compareStrings($known_string, $user_string)
+    public static function compareStrings(string $known_string, string $user_string): bool
     {
         return hash_equals($known_string, $user_string);
     }
@@ -106,12 +106,12 @@ class Security
      *
      * @deprecated Use password_hash() instead.
      * @param string $known_hash The known hash to check against, typically from the database
-     * @param int $algorithm Password algorithm, {@see self}
+     * @param int|string $algorithm Password algorithm, {@see self}
      * @param string $salt
      * @param string $user_string Password which was entered by the user, to check against the stored hash
      * @return bool True if the password matches, false if it doesn't
      */
-    public static function doPasswordCheck($known_hash, $algorithm, $salt, $user_string)
+    public static function doPasswordCheck(string $known_hash, int|string $algorithm, string $salt, string $user_string): bool
     {
         switch ($algorithm) {
             case self::PASSWORD_DEFAULT:
@@ -152,7 +152,7 @@ class Security
      * @return array 0 => hash, 1 => algorithm, 2 => salt
      * @throws InvalidArgumentException
      */
-    public static function hashPassword($password, $algorithm = self::PASSWORD_DEFAULT)
+    public static function hashPassword(string $password, int|string $algorithm = self::PASSWORD_DEFAULT): array
     {
         switch ($algorithm) {
             case self::PASSWORD_DEFAULT:

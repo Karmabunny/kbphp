@@ -15,16 +15,16 @@ class Generate
 {
 
     /** @var string */
-    public $indent = '    ';
+    public string $indent = '    ';
 
     /** @var resource */
-    protected $stream;
+    protected mixed $stream;
 
     /** @var bool */
-    protected $close;
+    protected bool $close;
 
     /** @var int */
-    protected $depth = 1;
+    protected int $depth = 1;
 
 
     /**
@@ -32,7 +32,7 @@ class Generate
      * @param string|resource $target
      * @return void
      */
-    public function __construct($target)
+    public function __construct(mixed $target)
     {
         if (is_string($target)) {
             $this->stream = fopen($target, 'w');
@@ -51,7 +51,7 @@ class Generate
      *
      * @return void
      */
-    public function close()
+    public function close(): void
     {
         if ($this->close) {
             @fflush($this->stream);
@@ -74,7 +74,7 @@ class Generate
      * @param string $comment
      * @return void
      */
-    public function comment(string $comment)
+    public function comment(string $comment): void
     {
         fwrite($this->stream, "// {$comment}\n");
     }
@@ -85,7 +85,7 @@ class Generate
      * @param array $array
      * @return void
      */
-    public function write(array $array)
+    public function write(array $array): void
     {
         fwrite($this->stream, "return [\n");
 
@@ -103,7 +103,7 @@ class Generate
      * @param mixed $value
      * @return void
      */
-    protected function writeItem($key, $value)
+    protected function writeItem(string|int|null $key, mixed $value): void
     {
         if ($key !== null and !is_int($key)) {
             $key = "'{$key}'";

@@ -22,7 +22,7 @@ class ValidationException extends Exception implements ValidationExceptionInterf
      *
      * @var array [ item => [errors] ]
      */
-    public $errors = [];
+    public array $errors = [];
 
 
     /**
@@ -44,7 +44,7 @@ class ValidationException extends Exception implements ValidationExceptionInterf
      * @param array $errors
      * @return static
      */
-    public function addErrors(array $errors)
+    public function addErrors(array $errors): static
     {
         foreach ($errors as $name => $messages) {
             if (isset($this->errors[$name])) {

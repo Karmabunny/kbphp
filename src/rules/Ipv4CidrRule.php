@@ -18,7 +18,7 @@ class Ipv4CidrRule extends BaseRule
 {
 
     /** @inheritdoc */
-    public function validateOne(string $field, $value)
+    public function validateOne(string $field, mixed $value): void
     {
         if (strpos($value, '/') === false) {
             throw new ValidationException('Invalid CIDR block');

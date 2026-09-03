@@ -18,15 +18,15 @@ use karmabunny\kb\ValidationException;
 class DateRangeRule extends BaseRule
 {
 
-    public $min = null;
+    public ?string $min = null;
 
-    public $max = null;
+    public ?string $max = null;
 
-    public $ordered = true;
+    public bool $ordered = true;
 
 
     /** @inheritdoc */
-    public function parse(array $ruleset)
+    public function parse(array $ruleset): void
     {
         parent::parse($ruleset);
 
@@ -44,7 +44,7 @@ class DateRangeRule extends BaseRule
 
 
     /** @inheritdoc */
-    public function validate($data)
+    public function validate(array|object $data): void
     {
         if (count($this->fields) != 2) {
             return;

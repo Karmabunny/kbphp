@@ -49,7 +49,7 @@ class Time
 
 
     /** @var array{float,float}|null */
-    protected static $time_travel = null;
+    protected static ?array $time_travel = null;
 
 
     /**
@@ -91,7 +91,7 @@ class Time
      * @param DateTimeImmutable|string|float|null $date
      * @return void
      */
-    public static function setTimeTravel($date): void
+    public static function setTimeTravel(DateTimeImmutable|string|float|null $date): void
     {
         if ($date === null) {
             self::$time_travel = null;
@@ -143,18 +143,14 @@ class Time
     /**
      * Timestamp as an integer in microseconds.
      *
-     * This uses hrtime for 7.2+ with a microtime fallback.
-     * You can force microtime by passing false.
-     *
      * Note, if using hrtime the timestamp _is not_ a unix epoch.
      *
-     * @param bool $hrtime Use high-resolution if available.
+     * @param bool $hrtime Use high-resolution (default)
      * @return int microseconds
      */
-    public static function utime($hrtime = true): int
+    public static function utime(bool $hrtime = true): int
     {
-        if ($hrtime and function_exists('hrtime')) {
-            // phpcs:ignore
+        if ($hrtime) {
             return intdiv(hrtime(true), 1000);
         }
         else {
@@ -172,7 +168,7 @@ class Time
      * @param int $timediff Amount of time that has passed, in seconds.
      * @return string
      **/
-    public static function timeAgo(int $timediff)
+    public static function timeAgo(int $timediff): string
     {
         $timediff = (int) $timediff;
 
@@ -210,15 +206,13 @@ class Time
      * - classic PHP date parsing
      * - timezones
      *
-     * @param string|int|float|DateTimeInterface $value
+     * @param mixed $value
      * @param string|DateTimeZone|null $zone
      * @return DateTimeInterface
      * @throws InvalidArgumentException
      */
-    public static function parse($value, $zone = null): DateTimeInterface
+    public static function parse(mixed $value, string|DateTimeZone|null $zone = null): DateTimeInterface
     {
-        /** @var mixed $value */
-
         // Also parse timezones while we're here.
         if (is_string($zone)) {
             $zone = new DateTimeZone($zone);
@@ -303,14 +297,12 @@ class Time
      *
      * `T101 => 'T10:10:00'`
      *
-     * @param string|int $time
+     * @param mixed $time
      * @param bool $big_endian left or right aligned number parsing
      * @return string|null `T HH:MM:II.SSS`
      */
-    public static function parseTimeString($time, $big_endian = true)
+    public static function parseTimeString(mixed $time, bool $big_endian = true): ?string
     {
-        /** @var mixed $time */
-
         // 24 hour time.
         if (is_numeric($time)) {
             $args = [];
@@ -446,8 +438,7 @@ class Time
     /**
      * Convert any date interface into a datetime.
      *
-     * This exists in PHP8+ as `DateTime::createFromInterface()`.
-     *
+     * @deprecated use DateTime::createFromInterface() instead
      * @param DateTimeInterface $interface
      * @return DateTime
      */
@@ -467,8 +458,7 @@ class Time
     /**
      * Convert any date interface into a immutable.
      *
-     * This exists in PHP8+ as `DateTimeImmutable::createFromInterface()`.
-     *
+     * @deprecated use DateTimeImmutable::createFromInterface() instead
      * @param DateTimeInterface $interface
      * @return DateTimeImmutable
      */
@@ -530,12 +520,12 @@ class Time
      * Convert a timestamp to a date string in the given timezone
      *
      * @param string $timezone
-     * @param int|float $timestamp
+     * @param float $timestamp
      * @param string $format
      * @return string The date string in the requested format
      * @throws InvalidArgumentException
      */
-    public static function utcTimeToDate(string $timezone, $timestamp, string $format = 'Y-m-d H:i:s'): string
+    public static function utcTimeToDate(string $timezone, float $timestamp, string $format = 'Y-m-d H:i:s'): string
     {
         $timezone_dt = new DateTimeZone($timezone);
         $date = self::parseFloat($timestamp, $timezone_dt);
@@ -645,7 +635,7 @@ class Time
      * @param DateInterval|array|string $intervals
      * @return DateInterval
      */
-    public static function modifyInterval(...$intervals)
+    public static function modifyInterval(mixed ...$intervals): DateInterval
     {
         if (empty($intervals)) {
             return new DateInterval('P0D');
@@ -844,10 +834,10 @@ class Time
      * @param string|null $gap A date modifier, a gap between each period
      * @return Generator<int,DateTimeInterface[]> [start, end]
      */
-    public static function periods(DateTimeInterface $start, DateTimeInterface $end, string $period, ?string $gap = null)
+    public static function periods(DateTimeInterface $start, DateTimeInterface $end, string $period, ?string $gap = null): Generator
     {
-        $start = self::toDateTimeImmutable($start);
-        $end = self::toDateTimeImmutable($end);
+        $start = DateTimeImmutable::createFromInterface($start);
+        $end = DateTimeImmutable::createFromInterface($end);
 
         $periodStart = $start;
         $periodEnd = $end;
@@ -875,9 +865,9 @@ class Time
      *
      * @param DateTimeInterface $start
      * @param DateTimeInterface $end
-     * @return iterable<DateTimeInterface>
+     * @return Generator<DateTimeInterface>
      */
-    public static function between(DateTimeInterface $start, DateTimeInterface $end)
+    public static function between(DateTimeInterface $start, DateTimeInterface $end): Generator
     {
         $periods = self::periods($start, $end, '+1 day');
         foreach ($periods as $days) yield $days[0];
@@ -899,9 +889,9 @@ class Time
      * @param int $year
      * @param int $from 1-indexed, inclusive
      * @param int $to 1-indexed, inclusive
-     * @return iterable<DateTimeInterface[]>
+     * @return Generator<DateTimeInterface[]>
      */
-    public static function months(int $year, int $from, int $to)
+    public static function months(int $year, int $from, int $to): Generator
     {
 
         while ($from <= $to) {
@@ -940,9 +930,9 @@ class Time
      * @param int $year
      * @param int $from 1-indexed, inclusive
      * @param int $to 1-indexed, inclusive
-     * @return iterable<DateTimeInterface[][]>
+     * @return Generator<DateTimeInterface[][]>
      */
-    public static function monthGrid(int $year, int $from, int $to)
+    public static function monthGrid(int $year, int $from, int $to): Generator
     {
         $months = self::months($year, $from, $to);
 
@@ -995,10 +985,10 @@ class Time
      * - minute
      * - second
      *
-     * @param array|string $config
+     * @param array $config
      * @return DateTimeImmutable
      */
-    public static function now($config = []): DateTimeInterface
+    public static function now(array $config = []): DateTimeInterface
     {
         $now = new DateTimeImmutable();
 
@@ -1052,7 +1042,7 @@ class Time
      * @param int $day day of the month, useful if using a day in the format
      * @return string[]
      */
-    public static function monthOptions(int $length = 9, string $format = 'F', int $day = 1)
+    public static function monthOptions(int $length = 9, string $format = 'F', int $day = 1): array
     {
         $options = [];
 
@@ -1101,7 +1091,7 @@ class Time
      * @param DateTimeInterface|int|null $now
      * @return string
      */
-    public static function getTimezoneOffset($timezone, $now = null): string
+    public static function getTimezoneOffset(string|DateTimeZone $timezone, DateTimeInterface|int|null $now = null): string
     {
         if (is_string($timezone)) {
             $timezone = new DateTimeZone($timezone);
