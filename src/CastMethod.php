@@ -8,6 +8,7 @@ namespace karmabunny\kb;
 
 use Attribute;
 use InvalidArgumentException;
+use ReflectionMethod;
 
 /**
  * Cast values with a custom method.
@@ -31,15 +32,9 @@ class CastMethod extends Cast
     /** @inheritdoc */
     public function build(mixed $value): mixed
     {
-        if (!is_callable([$this->target, $this->method])) {
-            if ($this->isNullable()) {
-                return null;
-            }
+        $reflect = new ReflectionMethod($this->target, $this->method);
 
-            throw new InvalidArgumentException("Method {$this->method} is not callable");
-        }
-
-        $value = ($this->target)->{$this->method}($value);
+        $value = $reflect->invoke($this->target, $value);
 
         if ($value === null and !$this->isNullable()) {
             throw new InvalidArgumentException("Cannot set null on {$this->property}");
