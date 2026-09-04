@@ -147,6 +147,62 @@ final class TypecastTest extends TestCase
 
         $this->assertSame('JOHN DOE', $thing->name);
     }
+
+    public function testUnionTypes()
+    {
+        $thing = new TypeUnion();
+
+        // $types = (new \ReflectionProperty($thing, 'boolIntString1'))->getType()->getTypes();
+        // $types = array_map(fn($type) => $type->getName(), $types);
+        // $types = implode('|', $types);
+
+        // var_dump($types);
+
+        // $types = (new \ReflectionProperty($thing, 'boolIntString2'))->getType()->getTypes();
+        // $types = array_map(fn($type) => $type->getName(), $types);
+        // $types = implode('|', $types);
+
+        // var_dump($types);
+
+        // die;
+
+        $thing->update([
+            'number' => '123',
+            'string' => 456,
+            'nullable' => null,
+            'boolOrInt' => 'true',
+            'boolIntString1' => '789',
+            'boolIntString2' => 'false',
+            'mixed' => 42.5,
+        ]);
+
+        $this->assertSame(123, $thing->number);
+        $this->assertSame('456', $thing->string);
+        $this->assertNull($thing->nullable);
+        $this->assertSame(true, $thing->boolOrInt);
+        $this->assertSame(789, $thing->boolIntString1);
+        $this->assertSame(false, $thing->boolIntString2);
+        $this->assertSame(42.5, $thing->mixed);
+
+        // Test alternative union value assignment
+        $thing->update([
+            'number' => 321.5,
+            'string' => 'abc',
+            'nullable' => 'something',
+            'boolOrInt' => 0,
+            'boolIntString1' => 'abc',
+            'boolIntString2' => 1,
+            'mixed' => 'hello',
+        ]);
+
+        $this->assertSame(321, $thing->number);
+        $this->assertSame('abc', $thing->string);
+        $this->assertSame('something', $thing->nullable);
+        $this->assertSame(0, $thing->boolOrInt);
+        $this->assertSame('abc', $thing->boolIntString1);
+        $this->assertSame(1, $thing->boolIntString2);
+        $this->assertSame('hello', $thing->mixed);
+    }
 }
 
 
@@ -212,4 +268,18 @@ class TypeMethod extends Collection
     {
         return strtoupper($value);
     }
+}
+
+
+class TypeUnion extends Collection
+{
+    use TypecastTrait;
+
+    public int $number;
+    public string $string;
+    public ?string $nullable;
+    public bool|int $boolOrInt;
+    public int|bool|string $boolIntString1;
+    public bool|int|string $boolIntString2;
+    public mixed $mixed;
 }
