@@ -8,6 +8,8 @@ namespace karmabunny\kb;
 
 use Attribute;
 use InvalidArgumentException;
+use ReflectionException;
+use ReflectionMethod;
 
 /**
  * Cast values with a custom method.
@@ -31,9 +33,15 @@ class CastMethod extends Cast
     /** @inheritdoc */
     public function build(mixed $value): mixed
     {
+        try {
+            $reflect = new ReflectionMethod($this->target, $this->method);
 
-        if (!is_callable([$this->target, $this->method])) {
-            throw new InvalidArgumentException("Method {$this->method} is not callable");
+            if (!$reflect->isStatic() or !$reflect->isPublic()) {
+                throw new InvalidArgumentException("Method {$this->method} is not static or public");
+            }
+        }
+        catch (ReflectionException $error) {
+            throw new InvalidArgumentException("Method {$this->method} not found", 0, $error);
         }
 
         $value = ($this->target)::{$this->method}($value);
