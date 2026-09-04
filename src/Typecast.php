@@ -75,8 +75,6 @@ class Typecast implements LogSourceInterface
         }
         // List of named types, but discard any intersections.
         else if ($parentType instanceof ReflectionUnionType) {
-            $typeNames = [];
-
             foreach ($parentType->getTypes() as $type) {
                 if (!$type instanceof ReflectionNamedType) {
                     continue;

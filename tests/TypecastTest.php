@@ -152,20 +152,6 @@ final class TypecastTest extends TestCase
     {
         $thing = new TypeUnion();
 
-        // $types = (new \ReflectionProperty($thing, 'boolIntString1'))->getType()->getTypes();
-        // $types = array_map(fn($type) => $type->getName(), $types);
-        // $types = implode('|', $types);
-
-        // var_dump($types);
-
-        // $types = (new \ReflectionProperty($thing, 'boolIntString2'))->getType()->getTypes();
-        // $types = array_map(fn($type) => $type->getName(), $types);
-        // $types = implode('|', $types);
-
-        // var_dump($types);
-
-        // die;
-
         $thing->update([
             'number' => '123',
             'string' => 456,
