@@ -1,19 +1,26 @@
 <?php
 namespace karmabunny\kb;
 
+use karmabunny\interfaces\LogSourceInterface;
 use ReflectionException;
 use ReflectionNamedType;
 use ReflectionProperty;
+use Throwable;
 
 /**
  * Typecasting for objects.
  *
+ * This does scalar-to-scalar casts and will apply the {@see Cast} attribute, if present.
+ *
+ * @see Cast
  * @see TypecastTrait
  *
  * @package karmabunny\kb
  */
-class Typecast
+class Typecast implements LogSourceInterface
 {
+    use LoggerTrait;
+
 
     /**
      *
@@ -28,6 +35,9 @@ class Typecast
     /**
      * Cast a value for this object.
      *
+     * - between applicable scalar types
+     * - properties that have {@see Cast} attributes
+     *
      * @param string $field
      * @param mixed $value mutable
      * @return bool true if the type matches, false otherwise
@@ -38,7 +48,20 @@ class Typecast
             $property = new ReflectionProperty($this->class, $field);
         }
         catch (ReflectionException $error) {
+            $this->log($error, Log::LEVEL_WARNING, static::class);
             return false;
+        }
+
+        // See if there's a cast attribute first.
+        if ($cast = Cast::find([ $this->class, $field ])) {
+            try {
+                $value = $cast->build($value);
+                return true;
+            }
+            catch (Throwable $error) {
+                $this->log($error, Log::LEVEL_ERROR, static::class);
+                return false;
+            }
         }
 
         $type = $property->getType();

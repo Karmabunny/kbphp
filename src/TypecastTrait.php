@@ -4,6 +4,8 @@ namespace karmabunny\kb;
 /**
  * Update trait for typecasting values.
  *
+ * This will convert between scalar types and apply any {@see Cast} attributes.
+ *
  * @package karmabunny\kb
  */
 trait TypecastTrait
