@@ -140,12 +140,19 @@ class Typecast implements LogSourceInterface
                 return true;
             }
 
+            if (is_iterable($value) and $type->getName() === 'iterable') {
+                return true;
+            }
+
             if (is_object($value)) {
                 if ($type->getName() === 'object') {
                     return true;
                 }
 
-                if ($value instanceof ($type->getName())) {
+                if (
+                    !$type->isBuiltin()
+                    and $value instanceof ($type->getName())
+                ) {
                     return true;
                 }
             }
