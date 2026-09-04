@@ -11,6 +11,9 @@ namespace karmabunny\kb;
 trait TypecastTrait
 {
 
+    private Typecast $__typecast__;
+
+
     /**
      * The typecast instance for this class type.
      *
@@ -18,8 +21,8 @@ trait TypecastTrait
      */
     public function getTypecast(): Typecast
     {
-        static $instance;
-        return $instance ??= new Typecast($this);
+        $this->__typecast__ ??= new Typecast($this);
+        return $this->__typecast__;
     }
 
 
