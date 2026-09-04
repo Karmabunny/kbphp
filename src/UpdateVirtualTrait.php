@@ -10,6 +10,7 @@ namespace karmabunny\kb;
  * This modifies the behaviour of a DataObject/Collection for updating complex
  * properties, such as arrays and objects.
  *
+ * @deprecated use {@see Cast} or property hooks in php 8.4
  * @package karmabunny\kb
  */
 trait UpdateVirtualTrait
