@@ -39,7 +39,7 @@ class CastArray extends Cast
 
         if ($this->preserve_keys) {
             foreach ($value as $key => $item) {
-                if (is_a($item, $this->class)) {
+                if ($item instanceof $this->class) {
                     $objects[$key] = $item;
                 }
                 else if (is_array($item)) {
@@ -49,7 +49,7 @@ class CastArray extends Cast
         }
         else {
             foreach ($value as $item) {
-                if (is_a($item, $this->class)) {
+                if ($item instanceof $this->class) {
                     $objects[] = $item;
                 }
                 else if (is_array($item)) {
