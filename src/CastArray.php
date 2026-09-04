@@ -9,7 +9,7 @@ namespace karmabunny\kb;
 use Attribute;
 
 /**
- * Cast an iterable to a colletion of objects.
+ * Cast an iterable to a list of objects.
  *
  * @package karmabunny\kb
  */

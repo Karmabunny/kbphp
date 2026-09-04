@@ -6,6 +6,7 @@
 
 use karmabunny\kb\Collection;
 use karmabunny\kb\CastArray;
+use karmabunny\kb\CastMethod;
 use karmabunny\kb\CastObject;
 use karmabunny\kb\TypecastTrait;
 use PHPUnit\Framework\TestCase;
@@ -135,6 +136,17 @@ final class TypecastTest extends TestCase
 
         $this->assertArrayNotHasKey('three', $thing->objectList);
     }
+
+
+    public function testCustomMethod()
+    {
+        $thing = new TypeMethod();
+        $thing->update([
+            'name' => 'john doe',
+        ]);
+
+        $this->assertSame('JOHN DOE', $thing->name);
+    }
 }
 
 
@@ -185,4 +197,19 @@ class TypePerson extends Collection
     public string $name;
 
     public int $age;
+}
+
+
+class TypeMethod extends Collection
+{
+    use TypecastTrait;
+
+    #[CastMethod('toName')]
+    public string $name;
+
+
+    public static function toName(string $value): string
+    {
+        return strtoupper($value);
+    }
 }

@@ -11,14 +11,20 @@ use ReflectionObject;
 use ReflectionProperty;
 
 /**
+ * Base class for cast attributes.
  *
  * @package karmabunny\kb
  */
 abstract class Cast
 {
 
+    /** @var class-string */
+    protected string $target;
 
-    protected $nullable = false;
+    /** @var string */
+    protected string $property;
+
+    protected bool $nullable = false;
 
 
     /**
@@ -54,19 +60,13 @@ abstract class Cast
         $virtuals = [];
 
         foreach ($reflect->getProperties() as $property) {
-            $name = $property->getName();
-            $attributes = $property->getAttributes(static::class, ReflectionAttribute::IS_INSTANCEOF);
+            $cast = self::find(get_class($target), $property);
 
-            if (empty($attributes)) {
+            if (!$cast) {
                 continue;
             }
 
-            $type = $property->getType();
-
-            $item = $attributes[0]->newInstance();
-            $item->nullable = ($type and $type->allowsNull());
-
-            $virtuals[$name] = $item;
+            $virtuals[$property->getName()] = $cast;
         }
 
         return $virtuals;
@@ -76,14 +76,14 @@ abstract class Cast
     /**
      * Find a cast attribute on a property.
      *
-     * @param ReflectionProperty|array{0:class-string,1:string} $property
+     * @param class-string $target
+     * @param ReflectionProperty|string $property
      * @return null|static
      */
-    public static function find(ReflectionProperty|array $property): ?static
+    public static function find(string $target, ReflectionProperty|string $property): ?static
     {
-        if (is_array($property)) {
-            [$class, $name] = $property;
-            $property = new ReflectionProperty($class, $name);
+        if (is_string($property)) {
+            $property = new ReflectionProperty($target, $property);
         }
 
         $attributes = $property->getAttributes(static::class, ReflectionAttribute::IS_INSTANCEOF);
@@ -98,6 +98,8 @@ abstract class Cast
 
         $cast = $attribute->newInstance();
         $cast->nullable = ($type and $type->allowsNull());
+        $cast->target = $target;
+        $cast->property = $property->getName();
         return $cast;
     }
 }

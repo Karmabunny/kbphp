@@ -53,7 +53,7 @@ class Typecast implements LogSourceInterface
         }
 
         // See if there's a cast attribute first.
-        if ($cast = Cast::find([ $this->class, $field ])) {
+        if ($cast = Cast::find($this->class, $property)) {
             try {
                 $value = $cast->build($value);
                 return true;
