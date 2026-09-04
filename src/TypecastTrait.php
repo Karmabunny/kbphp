@@ -16,18 +16,17 @@ trait TypecastTrait
      *
      * @return Typecast
      */
-    public static function getTypecast(): Typecast
+    public function getTypecast(): Typecast
     {
-        static $casts = [];
-        $casts[static::class] ??= new Typecast(static::class);
-        return $casts[static::class];
+        static $instance;
+        return $instance ??= new Typecast($this);
     }
 
 
     /** @inheritdoc */
     public function update(iterable $config): void
     {
-        $typecast = static::getTypecast();
+        $typecast = $this->getTypecast();
 
         foreach ($config as $key => $item) {
             if (!property_exists($this, $key)) {

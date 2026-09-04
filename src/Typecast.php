@@ -26,10 +26,10 @@ class Typecast implements LogSourceInterface
 
     /**
      *
-     * @param class-string $class
+     * @param object $target
      * @return void
      */
-    public function __construct(public string $class)
+    public function __construct(public object $target)
     {
     }
 
@@ -47,7 +47,7 @@ class Typecast implements LogSourceInterface
     public function cast(string $field, &$value): bool
     {
         try {
-            $property = new ReflectionProperty($this->class, $field);
+            $property = new ReflectionProperty($this->target, $field);
         }
         catch (ReflectionException $error) {
             $this->log($error, Log::LEVEL_WARNING, static::class);
@@ -55,7 +55,7 @@ class Typecast implements LogSourceInterface
         }
 
         // See if there's a cast attribute first.
-        if ($cast = Cast::find($this->class, $property)) {
+        if ($cast = Cast::find($this->target, $property)) {
             try {
                 $value = $cast->build($value);
                 return true;

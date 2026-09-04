@@ -141,11 +141,12 @@ final class TypecastTest extends TestCase
     public function testCustomMethod()
     {
         $thing = new TypeMethod();
-        $thing->update([
-            'name' => 'john doe',
-        ]);
-
+        $thing->update(['name' => 'John Doe',]);
         $this->assertSame('JOHN DOE', $thing->name);
+
+        $thing->upper = false;
+        $thing->update(['name' => 'John Doe']);
+        $this->assertSame('john doe', $thing->name);
     }
 
     public function testUnionTypes()
@@ -249,10 +250,12 @@ class TypeMethod extends Collection
     #[CastMethod('toName')]
     public string $name;
 
+    public bool $upper = true;
 
-    public static function toName(string $value): string
+
+    public function toName(string $value): string
     {
-        return strtoupper($value);
+        return $this->upper ? strtoupper($value) : strtolower($value);
     }
 }
 

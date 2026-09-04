@@ -18,10 +18,8 @@ use ReflectionProperty;
 abstract class Cast
 {
 
-    /** @var class-string */
-    protected string $target;
+    protected object $target;
 
-    /** @var string */
     protected string $property;
 
     protected bool $nullable = false;
@@ -60,7 +58,7 @@ abstract class Cast
         $virtuals = [];
 
         foreach ($reflect->getProperties() as $property) {
-            $cast = self::find(get_class($target), $property);
+            $cast = self::find($target, $property);
 
             if (!$cast) {
                 continue;
@@ -76,11 +74,11 @@ abstract class Cast
     /**
      * Find a cast attribute on a property.
      *
-     * @param class-string $target
+     * @param object $target
      * @param ReflectionProperty|string $property
      * @return null|static
      */
-    public static function find(string $target, ReflectionProperty|string $property): ?static
+    public static function find(object $target, ReflectionProperty|string $property): ?static
     {
         if (is_string($property)) {
             $property = new ReflectionProperty($target, $property);
