@@ -53,6 +53,14 @@ class CastDate extends Cast
         $property = new ReflectionProperty($this->target, $this->property);
         $type = $property->getType();
 
+        if ($value === null) {
+            if (!$type or $type->allowsNull()) {
+                return null;
+            }
+
+            throw new InvalidArgumentException("Cannot set null on {$this->property}");
+        }
+
         $zone = match ($this->timezone) {
             'default' => null,
             'system' => new DateTimeZone(date_default_timezone_get()),
