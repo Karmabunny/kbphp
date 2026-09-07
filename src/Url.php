@@ -15,7 +15,7 @@ namespace karmabunny\kb;
  */
 class Url extends DataObject
 {
-    use UpdateVirtualTrait;
+    use TypecastTrait;
 
     /** @var string|null */
     public ?string $scheme = null;
@@ -35,20 +35,12 @@ class Url extends DataObject
     /** @var string|null */
     public ?string $path = null;
 
-    /** @var array after the question mark ? */
-    public mixed $query = [];
+    /** @var array<string,mixed> after the question mark ? */
+    #[CastMethod('decode')]
+    public array $query = [];
 
     /** @var string|null after the hashmark # */
     public ?string $fragment = null;
-
-
-    /** @inheritdoc */
-    public function virtual(): array
-    {
-        return [
-            'query' => [$this, 'setQuery'],
-        ];
-    }
 
 
     /**
@@ -60,12 +52,7 @@ class Url extends DataObject
      */
     public function setQuery(array|string $query): static
     {
-        if (is_array($query)) {
-            $this->query = $query;
-        }
-        else {
-            $this->query = self::decode($query);
-        }
+        $this->query = self::decode($query);
         return $this;
     }
 
@@ -279,12 +266,16 @@ class Url extends DataObject
 
     /**
      *
-     * @param string $query
-     * @return array [key => value]
+     * @param string|array $query
+     * @return array<string,mixed> [key => value]
      * @throws UrlDecodeException
      */
-    public static function decode(string $query): array
+    public static function decode(string|array $query): array
     {
+        if (is_array($query)) {
+            return $query;
+        }
+
         $result = [];
         if (!mb_parse_str($query, $result)) {
             throw (new UrlDecodeException('Failed to decode query'))
