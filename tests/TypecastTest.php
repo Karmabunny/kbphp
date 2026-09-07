@@ -4,10 +4,12 @@
  * @copyright Copyright (c) 2020 Karmabunny
  */
 
-use karmabunny\kb\Collection;
 use karmabunny\kb\CastArray;
+use karmabunny\kb\CastDate;
 use karmabunny\kb\CastMethod;
 use karmabunny\kb\CastObject;
+use karmabunny\kb\Collection;
+use karmabunny\kb\Time;
 use karmabunny\kb\TypecastTrait;
 use PHPUnit\Framework\TestCase;
 
@@ -16,6 +18,22 @@ use PHPUnit\Framework\TestCase;
  */
 final class TypecastTest extends TestCase
 {
+
+    private string $originalTimezone;
+
+
+    public function setUp(): void
+    {
+        $this->originalTimezone = date_default_timezone_get();
+        date_default_timezone_set('UTC');
+    }
+
+
+    public function tearDown(): void
+    {
+        date_default_timezone_set($this->originalTimezone);
+    }
+
 
     public function testGoodTypes()
     {
@@ -247,6 +265,135 @@ final class TypecastTest extends TestCase
             $this->assertSame($value, $thing->$key, "{$key} should be " . var_export($value, true));
         }
     }
+
+
+    public static function dataCastDate(): array
+    {
+        $previousTimezone = date_default_timezone_get();
+        date_default_timezone_set('America/Los_Angeles');
+
+        $zones = [
+            'dateDefault' => null,
+            'dateSystem' => new DateTimeZone(date_default_timezone_get()),
+            'dateUtc' => new DateTimeZone('UTC'),
+            'dateAdelaide' => new DateTimeZone('Australia/Adelaide'),
+            'dateNewYork' => new DateTimeZone('America/New_York'),
+        ];
+
+        $inputs = [
+            'date object' => new DateTime('2020-10-10 12:00:00', new DateTimeZone('Europe/Paris')),
+            'string relative' => '2020-10-10 12:00:00 +1 day',
+            'string absolute without timezone' => '2020-10-10 12:00:00',
+            'string absolute with timezone' => '2020-10-10 12:00:00 Europe/Paris',
+            'integer timestamp' => 1602345600,
+            'float timestamp with milliseconds' => 1602345600.123456,
+        ];
+
+        $cases = [];
+
+        foreach ($zones as $property => $zone) {
+            foreach ($inputs as $label => $input) {
+                $expected = Time::parse($input, $zone);
+
+                $cases["{$property} / {$label}"] = [
+                    $property,
+                    $input,
+                    $expected->format('c'),
+                    $zone ?? $expected->getTimezone(),
+                ];
+            }
+        }
+
+        date_default_timezone_set($previousTimezone);
+
+        return $cases;
+    }
+
+
+    /**
+     * @dataProvider dataCastDate
+     */
+    public function testCastDate(
+        string $property,
+        mixed $input,
+        string $expected,
+        ?DateTimeZone $timezone,
+    ): void {
+        date_default_timezone_set('America/Los_Angeles');
+
+        $thing = new TypeDate();
+        $thing->update([$property => $input]);
+
+        $this->assertInstanceOf(DateTimeImmutable::class, $thing->$property);
+        $this->assertSame($timezone->getName(), $thing->$property->getTimezone()->getName(), 'Timezone name should match');
+        $this->assertSame($expected, $thing->$property->format('c'), 'ISO-8601 date should match');
+
+        if (is_float($input)) {
+            [, $expected] = explode('.', sprintf('%.6f', $input), 2);
+            $this->assertSame($expected, $thing->$property->format('u'), 'Microseconds should match');
+        }
+    }
+
+
+    public static function dataCastDateNull(): array
+    {
+        return [
+            'untyped' => ['dateUntyped', null],
+            'no null' => ['dateUnion', '/cannot set null/i'],
+            'yes null' => ['dateUnionImmutable', null],
+        ];
+    }
+
+
+    /**
+     * @dataProvider dataCastDateNull
+     */
+    public function testCastDateNull(string $property, ?string $errorMessage): void
+    {
+        $thing = new TypeDateVariants();
+
+        $error = null;
+
+        $thing->getTypecast()->addLogger(function($message) use (&$error) {
+            $error = $message;
+        });
+
+        $thing->update([$property => null]);
+
+        if ($errorMessage and $error) {
+            $this->assertMatchesRegularExpression($errorMessage, $error->getMessage());
+        }
+        else {
+            $this->assertNull($error, $error?->getMessage() ?? 'No error');
+            $this->assertNull($thing->$property);
+        }
+    }
+
+
+    public function testCastDateUntyped(): void
+    {
+        $thing = new TypeDateVariants();
+        $thing->update(['dateUntyped' => '2020-10-10 12:00:00']);
+
+        $this->assertInstanceOf(DateTimeImmutable::class, $thing->dateUntyped);
+        $this->assertSame('2020-10-10T12:00:00+00:00', $thing->dateUntyped->format('c'));
+    }
+
+
+    public function testCastDateUnion(): void
+    {
+        $thing = new TypeDateVariants();
+        $thing->update([
+            'dateUnion' => '2020-10-10 12:00:00',
+            'dateUnionImmutable' => 1602345600,
+        ]);
+
+        $this->assertInstanceOf(DateTime::class, $thing->dateUnion);
+        $this->assertSame('2020-10-10T12:00:00+00:00', $thing->dateUnion->format('c'));
+
+        $this->assertInstanceOf(DateTimeImmutable::class, $thing->dateUnionImmutable);
+        $this->assertSame('2020-10-10T16:00:00+00:00', $thing->dateUnionImmutable->format('c'));
+    }
 }
 
 
@@ -365,4 +512,40 @@ enum TypeEnumNumber: int
     case FOO = 1;
     case BAR = 10;
     case BAZ = 100;
+}
+
+
+class TypeDate extends Collection
+{
+    use TypecastTrait;
+
+    #[CastDate('default')]
+    public DateTimeImmutable $dateDefault;
+
+    #[CastDate('system')]
+    public DateTimeImmutable $dateSystem;
+
+    #[CastDate('utc')]
+    public DateTimeImmutable $dateUtc;
+
+    #[CastDate('Australia/Adelaide')]
+    public DateTimeImmutable $dateAdelaide;
+
+    #[CastDate('America/New_York')]
+    public DateTimeImmutable $dateNewYork;
+}
+
+
+class TypeDateVariants extends Collection
+{
+    use TypecastTrait;
+
+    #[CastDate('utc')]
+    public $dateUntyped;
+
+    #[CastDate('utc')]
+    public DateTime|string $dateUnion;
+
+    #[CastDate('utc')]
+    public string|DateTimeImmutable|null $dateUnionImmutable;
 }
