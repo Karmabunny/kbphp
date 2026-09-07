@@ -223,8 +223,8 @@ final class TypecastTest extends TestCase
                 ['enum4' => TypeEnumString::BAZ->value ],
             ],
             'backed to int' => [
-                ['enum4' => TypeEnumString::BAZ ],
-                ['enum4' => TypeEnumString::BAZ->value ],
+                ['enum4' => TypeEnumNumber::BAZ ],
+                ['enum4' => TypeEnumNumber::BAZ->value ],
             ],
         ];
     }
@@ -343,7 +343,7 @@ class TypeEnum extends Collection
 
     public ?TypeEnumNumber $enum3;
 
-    public string $enum4 = '';
+    public string|int $enum4 = '';
 }
 
 enum TypeEnumValue
