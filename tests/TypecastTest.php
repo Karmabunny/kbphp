@@ -335,6 +335,41 @@ final class TypecastTest extends TestCase
     }
 
 
+    public static function dataCastDateNull(): array
+    {
+        return [
+            'untyped' => ['dateUntyped', null],
+            'no null' => ['dateUnion', '/cannot set null/i'],
+            'yes null' => ['dateUnionImmutable', null],
+        ];
+    }
+
+
+    /**
+     * @dataProvider dataCastDateNull
+     */
+    public function testCastDateNull(string $property, ?string $errorMessage): void
+    {
+        $thing = new TypeDateVariants();
+
+        $error = null;
+
+        $thing->getTypecast()->addLogger(function($message) use (&$error) {
+            $error = $message;
+        });
+
+        $thing->update([$property => null]);
+
+        if ($errorMessage and $error) {
+            $this->assertMatchesRegularExpression($errorMessage, $error->getMessage());
+        }
+        else {
+            $this->assertNull($error, $error?->getMessage() ?? 'No error');
+            $this->assertNull($thing->$property);
+        }
+    }
+
+
     public function testCastDateUntyped(): void
     {
         $thing = new TypeDateVariants();
