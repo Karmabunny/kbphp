@@ -103,6 +103,10 @@ class CastDate extends Cast
                 $value = new $class($value, $zone);
             }
 
+            if ($zone !== null) {
+                $value = $value->setTimezone($zone);
+            }
+
             return $value;
         }
         catch (Throwable $error) {
