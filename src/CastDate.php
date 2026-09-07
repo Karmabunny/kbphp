@@ -91,7 +91,12 @@ class CastDate extends Cast
             }
             // Parse integer/floats as timestamps with microseconds.
             else if (is_numeric($value)) {
-                $value = $class::createFromFormat('U.u', sprintf('%.6f', $value), $zone);
+                $timestamp = sprintf('%.6f', $value);
+                $value = $class::createFromFormat('U.u', $timestamp, $zone);
+
+                if ($value === false) {
+                    throw new InvalidArgumentException("Invalid timestamp: {$timestamp}");
+                }
             }
             // Classic timey-wimey parsing.
             else if (is_string($value)) {
