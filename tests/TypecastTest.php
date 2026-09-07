@@ -85,7 +85,7 @@ final class TypecastTest extends TestCase
     public function testBadTypes()
     {
         $thing = new TypeThing();
-        $thing->getTypecast()->addLogger(fn($message) => fwrite(STDERR, $message->getMessage() . PHP_EOL . $message->getStackTrace() . PHP_EOL));
+        $thing->getTypecast()->addLogger(fn($message) => fwrite(STDERR, "{$message->getMessage()} - on line {$message->getLine()}\n"));
 
         $thing->update([
             'id' => ['not an int'],
@@ -141,8 +141,11 @@ final class TypecastTest extends TestCase
     public function testCustomMethod()
     {
         $thing = new TypeMethod();
-        $thing->update(['name' => 'John Doe',]);
+        $thing->getTypecast()->addLogger(fn($message) => fwrite(STDERR, "{$message->getMessage()} - on line {$message->getLine()}\n"));
+
+        $thing->update(['name' => 'John Doe', 'trim' => '  Hello, World!  ']);
         $this->assertSame('JOHN DOE', $thing->name);
+        $this->assertSame('Hello, World!', $thing->trim);
 
         $thing->upper = false;
         $thing->update(['name' => 'John Doe']);
@@ -249,6 +252,9 @@ class TypeMethod extends Collection
 
     #[CastMethod('toName')]
     public string $name;
+
+    #[CastMethod('\\trim')]
+    public string $trim;
 
     public bool $upper = true;
 
