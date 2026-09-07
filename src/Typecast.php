@@ -1,6 +1,7 @@
 <?php
 namespace karmabunny\kb;
 
+use BackedEnum;
 use karmabunny\interfaces\LogSourceInterface;
 use ReflectionException;
 use ReflectionIntersectionType;
@@ -8,6 +9,7 @@ use ReflectionNamedType;
 use ReflectionProperty;
 use ReflectionUnionType;
 use Throwable;
+use UnitEnum;
 
 /**
  * Typecasting for objects.
@@ -142,8 +144,70 @@ class Typecast implements LogSourceInterface
                 return true;
             }
 
+            if (
+                (is_string($value) or is_int($value))
+                and is_subclass_of($type->getName(), BackedEnum::class)
+            ) {
+                try {
+                    $value = $type->getName()::from($value);
+                    return true;
+                }
+                catch (Throwable $error) {
+                    if ($type->allowsNull()) {
+                        $this->log($error, Log::LEVEL_WARNING, static::class);
+                        $value = null;
+                        return true;
+                    }
+                    else {
+                        $this->log($error, Log::LEVEL_ERROR, static::class);
+                        return false;
+                    }
+                }
+            }
+
+            if (
+                is_string($value)
+                and is_subclass_of($type->getName(), UnitEnum::class)
+            ) {
+                foreach ($type->getName()::cases() as $case) {
+                    if ($case->name === $value) {
+                        $value = $case;
+                        return true;
+                    }
+                }
+
+                if ($type->allowsNull()) {
+                    $value = null;
+                    return true;
+                }
+
+                return false;
+            }
+
             if (is_object($value)) {
                 if ($type->getName() === 'object') {
+                    return true;
+                }
+
+                if ($value instanceof BackedEnum) {
+                    if ($type->getName() === 'string') {
+                        $value = (string) $value->value;
+                        return true;
+                    }
+
+                    if (
+                        $type->getName() === 'int'
+                        and is_int($value->value)
+                    ) {
+                        $value = $value->value;
+                        return true;
+                    }
+                }
+                else if (
+                    $value instanceof UnitEnum
+                    and $type->getName() === 'string'
+                ) {
+                    $value = $value->name;
                     return true;
                 }
 
