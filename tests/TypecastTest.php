@@ -193,6 +193,60 @@ final class TypecastTest extends TestCase
         $this->assertSame(1, $thing->boolIntString2);
         $this->assertSame('hello', $thing->mixed);
     }
+
+
+    public static function dataEnums(): array
+    {
+        return [
+            'pass-through' => [
+                [ 'enum1' => TypeEnumValue::BAZ, 'enum2' => TypeEnumString::BAZ, 'enum3' => TypeEnumNumber::BAZ ],
+                [ 'enum1' => TypeEnumValue::BAZ, 'enum2' => TypeEnumString::BAZ, 'enum3' => TypeEnumNumber::BAZ ],
+            ],
+            'standard' => [
+                [ 'enum1' => 'FOO', 'enum2' => 'bar', 'enum3' => 100 ],
+                [ 'enum1' => TypeEnumValue::FOO, 'enum2' => TypeEnumString::BAR, 'enum3' => TypeEnumNumber::BAZ ],
+            ],
+            'alternate int from string' => [
+                [ 'enum3' => '10' ],
+                [ 'enum3' => TypeEnumNumber::BAR ],
+            ],
+            'invalid' => [
+                [ 'enum1' => 'INVALID', 'enum3' => 1000 ],
+                [ 'enum1' => null, 'enum3' => null ],
+            ],
+            'unit to string' => [
+                ['enum4' => TypeEnumValue::FOO ],
+                ['enum4' => TypeEnumValue::FOO->name ],
+            ],
+            'backed to string' => [
+                ['enum4' => TypeEnumString::BAZ ],
+                ['enum4' => TypeEnumString::BAZ->value ],
+            ],
+            'backed to int' => [
+                ['enum4' => TypeEnumNumber::BAZ ],
+                ['enum4' => TypeEnumNumber::BAZ->value ],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider dataEnums
+     */
+    public function testEnums(array $input, array $expected)
+    {
+        $thing = new TypeEnum();
+        $thing->getTypecast()->addLogger(fn($message) => fwrite(STDERR, "{$message->getMessage()} - on line {$message->getLine()}\n"));
+        $thing->update($input);
+
+        $reflect = new ReflectionObject($thing);
+
+        foreach ($expected as $key => $value) {
+            $initialized = $reflect->getProperty($key)->isInitialized($thing);
+            $this->assertTrue($initialized, "{$key} should be initialized");
+
+            $this->assertSame($value, $thing->$key, "{$key} should be " . var_export($value, true));
+        }
+    }
 }
 
 
@@ -277,4 +331,38 @@ class TypeUnion extends Collection
     public int|bool|string $boolIntString1;
     public bool|int|string $boolIntString2;
     public mixed $mixed;
+}
+
+class TypeEnum extends Collection
+{
+    use TypecastTrait;
+
+    public ?TypeEnumValue $enum1;
+
+    public TypeEnumString $enum2;
+
+    public ?TypeEnumNumber $enum3;
+
+    public string|int $enum4 = '';
+}
+
+enum TypeEnumValue
+{
+    case FOO;
+    case BAR;
+    case BAZ;
+}
+
+enum TypeEnumString: string
+{
+    case FOO = 'foo';
+    case BAR = 'bar';
+    case BAZ = 'baz';
+}
+
+enum TypeEnumNumber: int
+{
+    case FOO = 1;
+    case BAR = 10;
+    case BAZ = 100;
 }

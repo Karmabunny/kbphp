@@ -32,10 +32,6 @@ trait TypecastTrait
         $typecast = $this->getTypecast();
 
         foreach ($config as $key => $item) {
-            if (!property_exists($this, $key)) {
-                continue;
-            }
-
             if ($typecast->cast($key, $item)) {
                 $this->$key = $item;
             }
