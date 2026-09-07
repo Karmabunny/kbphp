@@ -332,6 +332,32 @@ final class TypecastTest extends TestCase
     }
 
 
+    public function testCastDateUntyped(): void
+    {
+        $thing = new TypeDateVariants();
+        $thing->update(['dateUntyped' => '2020-10-10 12:00:00']);
+
+        $this->assertInstanceOf(DateTimeImmutable::class, $thing->dateUntyped);
+        $this->assertSame('2020-10-10T12:00:00+00:00', $thing->dateUntyped->format('c'));
+    }
+
+
+    public function testCastDateUnion(): void
+    {
+        $thing = new TypeDateVariants();
+        $thing->update([
+            'dateUnion' => '2020-10-10 12:00:00',
+            'dateUnionImmutable' => 1602345600,
+        ]);
+
+        $this->assertInstanceOf(DateTime::class, $thing->dateUnion);
+        $this->assertSame('2020-10-10T12:00:00+00:00', $thing->dateUnion->format('c'));
+
+        $this->assertInstanceOf(DateTimeImmutable::class, $thing->dateUnionImmutable);
+        $this->assertSame('2020-10-10T16:00:00+00:00', $thing->dateUnionImmutable->format('c'));
+    }
+
+
     private static function castDateExpected(mixed $input, ?DateTimeZone $zone): array
     {
         if ($input instanceof DateTimeInterface) {
@@ -499,4 +525,19 @@ class TypeDate extends Collection
 
     #[CastDate('America/New_York')]
     public DateTimeImmutable $dateNewYork;
+}
+
+
+class TypeDateVariants extends Collection
+{
+    use TypecastTrait;
+
+    #[CastDate('utc')]
+    public $dateUntyped;
+
+    #[CastDate('utc')]
+    public DateTime|string $dateUnion;
+
+    #[CastDate('utc')]
+    public string|DateTimeImmutable|null $dateUnionImmutable;
 }
