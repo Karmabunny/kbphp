@@ -84,9 +84,9 @@ trait ToJsonTrait
     /**
      * A default JSON serialiser. No 'extras' I'm afraid.
      *
-     * @return array
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
         return $this->toJson();
     }

@@ -60,7 +60,7 @@ abstract class Collection extends DataObject implements
 
 
     /** @inheritdoc */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
         return $this->getSerializedProperties();
     }
