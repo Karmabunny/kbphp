@@ -127,6 +127,15 @@ class Typecast implements LogSourceInterface
                     return true;
                 }
             }
+
+            if (
+                isset($subTypes['int'])
+                and $value instanceof BackedEnum
+                and is_int($value->value)
+            ) {
+                $value = $value->value;
+                return true;
+            }
         }
 
         foreach ($subTypes as $type) {
@@ -210,8 +219,7 @@ class Typecast implements LogSourceInterface
                     $value = $value->name;
                     return true;
                 }
-
-                if (
+                else if (
                     !$type->isBuiltin()
                     and $value instanceof ($type->getName())
                 ) {
