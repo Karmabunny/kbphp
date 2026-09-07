@@ -12,7 +12,9 @@ use DateTimeImmutable;
 use DateTimeInterface;
 use DateTimeZone;
 use InvalidArgumentException;
+use ReflectionNamedType;
 use ReflectionProperty;
+use ReflectionUnionType;
 use Throwable;
 
 /**
@@ -58,10 +60,26 @@ class CastDate extends Cast
             default => new DateTimeZone($this->timezone),
         };
 
-        $class = $type->getName();
+        if ($type === null) {
+            $class = DateTimeImmutable::class;
+        }
+        else if ($type instanceof ReflectionNamedType) {
+            $class = $type->getName();
+        }
+        else if ($type instanceof ReflectionUnionType) {
+            foreach ($type->getTypes() as $type) {
+                if (
+                    $type instanceof ReflectionNamedType
+                    and is_subclass_of($type->getName(), DateTimeInterface::class)
+                ) {
+                    $class = $type->getName();
+                    break;
+                }
+            }
+        }
 
-        if (!is_subclass_of($class, DateTimeInterface::class)) {
-            throw new InvalidArgumentException("Invalid date type: {$class}");
+        if (!isset($class) or !is_subclass_of($class, DateTimeInterface::class)) {
+            throw new InvalidArgumentException("Invalid date type: {$type->__toString()}");
         }
 
         /** @var class-string<DateTime|DateTimeImmutable> $class */
