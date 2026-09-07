@@ -4,10 +4,11 @@
  * @copyright Copyright (c) 2020 Karmabunny
  */
 
-use karmabunny\kb\Collection;
 use karmabunny\kb\CastArray;
+use karmabunny\kb\CastDate;
 use karmabunny\kb\CastMethod;
 use karmabunny\kb\CastObject;
+use karmabunny\kb\Collection;
 use karmabunny\kb\TypecastTrait;
 use PHPUnit\Framework\TestCase;
 
@@ -16,6 +17,22 @@ use PHPUnit\Framework\TestCase;
  */
 final class TypecastTest extends TestCase
 {
+
+    private string $originalTimezone;
+
+
+    public function setUp(): void
+    {
+        $this->originalTimezone = date_default_timezone_get();
+        date_default_timezone_set('UTC');
+    }
+
+
+    public function tearDown(): void
+    {
+        date_default_timezone_set($this->originalTimezone);
+    }
+
 
     public function testGoodTypes()
     {
@@ -247,6 +264,102 @@ final class TypecastTest extends TestCase
             $this->assertSame($value, $thing->$key, "{$key} should be " . var_export($value, true));
         }
     }
+
+
+    public static function dataCastDate(): array
+    {
+        $previousTimezone = date_default_timezone_get();
+        date_default_timezone_set('UTC');
+
+        $zones = [
+            'dateDefault' => null,
+            'dateSystem' => new DateTimeZone(date_default_timezone_get()),
+            'dateUtc' => new DateTimeZone('UTC'),
+            'dateAdelaide' => new DateTimeZone('Australia/Adelaide'),
+            'dateNewYork' => new DateTimeZone('America/New_York'),
+        ];
+
+        $inputs = [
+            'date object' => new DateTime('2020-10-10 12:00:00', new DateTimeZone('Europe/Paris')),
+            'string relative' => '2020-10-10 12:00:00 +1 day',
+            'string absolute without timezone' => '2020-10-10 12:00:00',
+            'string absolute with timezone' => '2020-10-10 12:00:00+05:00',
+            'integer timestamp' => 1602345600,
+            'float timestamp with milliseconds' => 1602345600.123456,
+        ];
+
+        $cases = [];
+
+        foreach ($zones as $property => $zone) {
+            foreach ($inputs as $label => $input) {
+                $expected = self::castDateExpected($input, $zone);
+                $cases["{$property} / {$label}"] = [
+                    $property,
+                    $input,
+                    $expected['iso'],
+                    $expected['timezone'],
+                    $expected['microseconds'] ?? null,
+                ];
+            }
+        }
+
+        date_default_timezone_set($previousTimezone);
+
+        return $cases;
+    }
+
+
+    /**
+     * @dataProvider dataCastDate
+     */
+    public function testCastDate(
+        string $property,
+        mixed $input,
+        string $expectedIso,
+        string $expectedTimezone,
+        ?string $expectedMicroseconds,
+    ): void {
+        $thing = new TypeDate();
+        $thing->update([$property => $input]);
+
+        $this->assertInstanceOf(DateTimeImmutable::class, $thing->$property);
+        $this->assertSame($expectedIso, $thing->$property->format('c'), 'ISO-8601 date should match');
+        $this->assertSame($expectedTimezone, $thing->$property->getTimezone()->getName(), 'Timezone name should match');
+
+        if ($expectedMicroseconds !== null) {
+            $this->assertSame($expectedMicroseconds, $thing->$property->format('u'), 'Microseconds should match');
+        }
+    }
+
+
+    private static function castDateExpected(mixed $input, ?DateTimeZone $zone): array
+    {
+        if ($input instanceof DateTimeInterface) {
+            $expected = DateTimeImmutable::createFromInterface($input);
+
+            return [
+                'iso' => $expected->format('c'),
+                'timezone' => $expected->getTimezone()->getName(),
+            ];
+        }
+
+        if (is_numeric($input)) {
+            $expected = DateTimeImmutable::createFromFormat('U.u', sprintf('%.6f', $input), $zone);
+
+            return [
+                'iso' => $expected->format('c'),
+                'timezone' => $expected->getTimezone()->getName(),
+                'microseconds' => is_float($input) ? $expected->format('u') : null,
+            ];
+        }
+
+        $expected = new DateTimeImmutable($input, $zone);
+
+        return [
+            'iso' => $expected->format('c'),
+            'timezone' => $expected->getTimezone()->getName(),
+        ];
+    }
 }
 
 
@@ -365,4 +478,25 @@ enum TypeEnumNumber: int
     case FOO = 1;
     case BAR = 10;
     case BAZ = 100;
+}
+
+
+class TypeDate extends Collection
+{
+    use TypecastTrait;
+
+    #[CastDate('default')]
+    public DateTimeImmutable $dateDefault;
+
+    #[CastDate('system')]
+    public DateTimeImmutable $dateSystem;
+
+    #[CastDate('utc')]
+    public DateTimeImmutable $dateUtc;
+
+    #[CastDate('Australia/Adelaide')]
+    public DateTimeImmutable $dateAdelaide;
+
+    #[CastDate('America/New_York')]
+    public DateTimeImmutable $dateNewYork;
 }
