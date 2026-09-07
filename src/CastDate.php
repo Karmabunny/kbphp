@@ -110,6 +110,9 @@ class CastDate extends Cast
             else if (is_string($value)) {
                 $value = new $class($value, $zone);
             }
+            else {
+                throw new InvalidArgumentException('Invalid date value: ' . get_debug_type($value));
+            }
 
             if ($zone !== null) {
                 $value = $value->setTimezone($zone);
