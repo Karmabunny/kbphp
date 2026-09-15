@@ -30,7 +30,8 @@ class Cli
     const FG_BLUE   = "\033[34m";
     const FG_PURPLE = "\033[35m";
     const FG_CYAN   = "\033[36m";
-    const FG_GREY   = "\033[37m";
+    const FG_WHITE  = "\033[37m";
+    const FG_GREY   = "\033[38;5;248m";
 
     const BG_BLACK  = "\033[40m";
     const BG_RED    = "\033[41m";
@@ -39,7 +40,8 @@ class Cli
     const BG_BLUE   = "\033[44m";
     const BG_PURPLE = "\033[45m";
     const BG_CYAN   = "\033[46m";
-    const BG_GREY   = "\033[47m";
+    const BG_WHITE  = "\033[47m";
+    const BG_GREY   = "\033[48;5;248m";
 
     const RESET     = "\033[0m";
     const BOLD      = "\033[1m";
