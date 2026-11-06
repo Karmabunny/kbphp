@@ -259,6 +259,33 @@ class Events
 
 
     /**
+     * Does the sender have any listeners for this event?
+     *
+     * @param class-string|object $sender
+     * @param class-string<EventInterface> $event
+     * @return bool
+     */
+    public static function hasListeners(string|object $sender, string $event): bool
+    {
+        if (is_object($sender)) {
+            $sender = get_class($sender);
+        }
+
+        foreach (self::$_events as $class => $events) {
+            // Permit subclass emitters to trigger root handlers.
+            // But not the other way - roots cannot trigger subclass handlers.
+            if (!is_a($class, $sender, true)) continue;
+
+            if (!empty($events[$event])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    /**
      * How many times has events been triggered?
      *
      * @param array $filter [ event, sender, flatten ]

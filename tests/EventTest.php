@@ -33,11 +33,20 @@ class EventTest extends TestCase
 
         // Instance long form.
         $emitter = new RootEmitter();
+
+        $this->assertFalse(Events::hasListeners($emitter, TestEvent::class));
+        $this->assertFalse(Events::hasListeners(get_class($emitter), TestEvent::class));
+        $this->assertFalse($emitter->hasEventListeners(TestEvent::class));
+
         $emitter->on(TestEvent::class, function(TestEvent $event) use (&$count, $emitter) {
             $this->assertEquals($event->sender, $emitter);
             $count++;
             return 'one';
         });
+
+        $this->assertTrue(Events::hasListeners($emitter, TestEvent::class));
+        $this->assertTrue(Events::hasListeners(get_class($emitter), TestEvent::class));
+        $this->assertTrue($emitter->hasEventListeners(TestEvent::class));
 
         $actual = $emitter->testRoot();
 
@@ -51,6 +60,8 @@ class EventTest extends TestCase
             $count++;
             return 'two';
         });
+
+        $this->assertTrue($emitter->hasEventListeners(TestEvent::class));
 
         $count = 0;
         $actual = $emitter->testRoot();

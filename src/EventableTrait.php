@@ -98,4 +98,16 @@ trait EventableTrait
     {
         Events::off($this, $event);
     }
+
+
+    /**
+     * Does this object have any listeners for this event?
+     *
+     * @param class-string<EventInterface> $event
+     * @return bool
+     */
+    public function hasEventListeners(string $event): bool
+    {
+        return Events::hasListeners($this, $event);
+    }
 }
