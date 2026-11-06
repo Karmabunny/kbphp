@@ -161,6 +161,318 @@ class EventTest extends TestCase
 
 
     /**
+     * Test removing listeners.
+     *
+     * Covers every off() invocation: an object or class sender, one event or
+     * every event, a null sender, and the instance helpers. Root emitters are
+     * removed on their own class and still see subclass listeners afterwards.
+     */
+    public function testOff()
+    {
+        $emitter = new RootEmitter();
+
+        $this->assertFalse(Events::hasListeners($emitter, TestEvent::class));
+        $this->assertFalse(Events::hasListeners($emitter, TestOtherEvent::class));
+
+        // Object sender, one event.
+        Events::on($emitter, function(TestEvent $event) use ($emitter) {
+            $this->assertEquals($event->sender, $emitter);
+            return 'one';
+        });
+
+        Events::on($emitter, function(TestOtherEvent $event) use ($emitter) {
+            $this->assertEquals($event->sender, $emitter);
+            return 'two';
+        });
+
+        $this->assertTrue(Events::hasListeners($emitter, TestEvent::class));
+        $this->assertTrue(Events::hasListeners($emitter, TestOtherEvent::class));
+
+        $actual = $emitter->testRoot();
+        $this->assertEquals(['one'], $actual);
+
+        $actual = Events::trigger($emitter, new TestOtherEvent());
+        $this->assertEquals(['two'], $actual);
+
+        Events::off($emitter, TestEvent::class);
+
+        $this->assertFalse(Events::hasListeners($emitter, TestEvent::class));
+        $this->assertTrue(Events::hasListeners($emitter, TestOtherEvent::class));
+
+        $actual = $emitter->testRoot();
+        $this->assertEquals([], $actual);
+
+        $actual = Events::trigger($emitter, new TestOtherEvent());
+        $this->assertEquals(['two'], $actual);
+
+        // Object sender, every event on that sender.
+        Events::on($emitter, function(TestEvent $event) use ($emitter) {
+            $this->assertEquals($event->sender, $emitter);
+            return 'three';
+        });
+
+        $this->assertTrue(Events::hasListeners($emitter, TestEvent::class));
+
+        Events::off($emitter);
+
+        $this->assertFalse(Events::hasListeners($emitter, TestEvent::class));
+        $this->assertFalse(Events::hasListeners($emitter, TestOtherEvent::class));
+
+        $actual = $emitter->testRoot();
+        $this->assertEquals([], $actual);
+
+        $actual = Events::trigger($emitter, new TestOtherEvent());
+        $this->assertEquals([], $actual);
+
+        // Instance helper, one event, then every event.
+        $emitter->on(function(TestEvent $event) use ($emitter) {
+            $this->assertEquals($event->sender, $emitter);
+            return 'four';
+        });
+
+        $emitter->on(function(TestOtherEvent $event) use ($emitter) {
+            $this->assertEquals($event->sender, $emitter);
+            return 'five';
+        });
+
+        $this->assertTrue($emitter->hasEventListeners(TestEvent::class));
+        $this->assertTrue($emitter->hasEventListeners(TestOtherEvent::class));
+
+        $emitter->off(TestEvent::class);
+
+        $this->assertFalse($emitter->hasEventListeners(TestEvent::class));
+        $this->assertTrue($emitter->hasEventListeners(TestOtherEvent::class));
+
+        $actual = $emitter->testRoot();
+        $this->assertEquals([], $actual);
+
+        $actual = Events::trigger($emitter, new TestOtherEvent());
+        $this->assertEquals(['five'], $actual);
+
+        $emitter->on(function(TestEvent $event) use ($emitter) {
+            $this->assertEquals($event->sender, $emitter);
+            return 'six';
+        });
+
+        $emitter->off(null);
+
+        $this->assertFalse($emitter->hasEventListeners(TestEvent::class));
+        $this->assertFalse($emitter->hasEventListeners(TestOtherEvent::class));
+        $this->assertFalse(Events::hasListeners(RootEmitter::class, TestEvent::class));
+        $this->assertFalse(Events::hasListeners(RootEmitter::class, TestOtherEvent::class));
+
+        $actual = $emitter->testRoot();
+        $this->assertEquals([], $actual);
+
+        // Root class sender. off() on the class also drops instance listeners,
+        // because both are stored against the class name.
+        Events::on(RootEmitter::class, function(TestEvent $event) {
+            return 'root-one';
+        });
+
+        Events::on($emitter, function(TestEvent $event) use ($emitter) {
+            $this->assertEquals($event->sender, $emitter);
+            return 'instance';
+        });
+
+        Events::on(RootEmitter::class, function(TestOtherEvent $event) {
+            return 'root-two';
+        });
+
+        $this->assertTrue(Events::hasListeners(RootEmitter::class, TestEvent::class));
+        $this->assertTrue(Events::hasListeners($emitter, TestEvent::class));
+        $this->assertTrue($emitter->hasEventListeners(TestEvent::class));
+        $this->assertTrue(Events::hasListeners(RootEmitter::class, TestOtherEvent::class));
+
+        $actual = $emitter->testRoot();
+        $this->assertEquals(['root-one', 'instance'], $actual);
+
+        $actual = Events::trigger(RootEmitter::class, new TestOtherEvent());
+        $this->assertEquals(['root-two'], $actual);
+
+        Events::off(RootEmitter::class, TestEvent::class);
+
+        $this->assertFalse(Events::hasListeners(RootEmitter::class, TestEvent::class));
+        $this->assertFalse($emitter->hasEventListeners(TestEvent::class));
+        $this->assertTrue(Events::hasListeners(RootEmitter::class, TestOtherEvent::class));
+
+        $actual = $emitter->testRoot();
+        $this->assertEquals([], $actual);
+
+        $actual = Events::trigger(RootEmitter::class, new TestEvent());
+        $this->assertEquals([], $actual);
+
+        $actual = Events::trigger(RootEmitter::class, new TestOtherEvent());
+        $this->assertEquals(['root-two'], $actual);
+
+        // Root class sender, explicit null event removes the rest.
+        Events::on(RootEmitter::class, TestEvent::class, function() {
+            return 'root-three';
+        });
+
+        Events::off(RootEmitter::class, null);
+
+        $this->assertFalse(Events::hasListeners(RootEmitter::class, TestEvent::class));
+        $this->assertFalse(Events::hasListeners(RootEmitter::class, TestOtherEvent::class));
+
+        $actual = Events::trigger(RootEmitter::class, new TestEvent());
+        $this->assertEquals([], $actual);
+
+        $actual = Events::trigger(RootEmitter::class, new TestOtherEvent());
+        $this->assertEquals([], $actual);
+
+        // A root listener and a subclass listener. Removing the root leaves
+        // the subclass, and root emissions still reach that subclass.
+        $root = new RootEmitter();
+        $sub = new SubEmitter();
+
+        Events::on(RootEmitter::class, function(TestEvent $event) {
+            return 'root';
+        });
+
+        Events::on(SubEmitter::class, function(TestEvent $event) {
+            return 'sub';
+        });
+
+        Events::on(SubEmitter::class, function(TestOtherEvent $event) {
+            return 'sub-other';
+        });
+
+        $this->assertEquals(['root', 'sub'], $root->testRoot());
+        $this->assertEquals(['root', 'sub'], $sub->testRoot());
+        $this->assertEquals(['sub'], $sub->testSub());
+
+        $this->assertTrue(Events::hasListeners(RootEmitter::class, TestEvent::class));
+        $this->assertTrue(Events::hasListeners(SubEmitter::class, TestEvent::class));
+        $this->assertTrue($root->hasEventListeners(TestEvent::class));
+        $this->assertTrue($sub->hasEventListeners(TestEvent::class));
+
+        Events::off(RootEmitter::class, TestEvent::class);
+
+        $this->assertEquals(['sub'], $root->testRoot());
+        $this->assertEquals(['sub'], $sub->testRoot());
+        $this->assertEquals(['sub'], $sub->testSub());
+
+        // The subclass listener still counts for the root sender.
+        $this->assertTrue(Events::hasListeners(RootEmitter::class, TestEvent::class));
+        $this->assertTrue($root->hasEventListeners(TestEvent::class));
+        $this->assertTrue(Events::hasListeners(SubEmitter::class, TestEvent::class));
+
+        $actual = Events::trigger(SubEmitter::class, new TestOtherEvent());
+        $this->assertEquals(['sub-other'], $actual);
+
+        // Removing the subclass leaves the root listener. Subclass emissions
+        // do not reach the root.
+        Events::on(RootEmitter::class, function(TestEvent $event) {
+            return 'root-again';
+        });
+
+        Events::off(SubEmitter::class, TestEvent::class);
+
+        $this->assertEquals(['root-again'], $root->testRoot());
+        $this->assertEquals(['root-again'], $sub->testRoot());
+        $this->assertEquals([], $sub->testSub());
+
+        $this->assertTrue(Events::hasListeners(RootEmitter::class, TestEvent::class));
+        $this->assertFalse(Events::hasListeners(SubEmitter::class, TestEvent::class));
+        $this->assertFalse($sub->hasEventListeners(TestEvent::class));
+        $this->assertTrue(Events::hasListeners(SubEmitter::class, TestOtherEvent::class));
+        $this->assertTrue(Events::hasListeners(RootEmitter::class, TestOtherEvent::class));
+
+        Events::off(SubEmitter::class);
+
+        $this->assertFalse(Events::hasListeners(SubEmitter::class, TestOtherEvent::class));
+        $this->assertFalse(Events::hasListeners(RootEmitter::class, TestOtherEvent::class));
+        $this->assertTrue(Events::hasListeners(RootEmitter::class, TestEvent::class));
+
+        $actual = Events::trigger(RootEmitter::class, new TestOtherEvent());
+        $this->assertEquals([], $actual);
+
+        $actual = $root->testRoot();
+        $this->assertEquals(['root-again'], $actual);
+
+        // Null sender removes one event from every sender.
+        Events::on(OtherEmitter::class, function(TestEvent $event) {
+            return 'other';
+        });
+
+        Events::on(RootEmitter::class, function(TestOtherEvent $event) {
+            return 'root-other';
+        });
+
+        $this->assertTrue(Events::hasListeners(RootEmitter::class, TestEvent::class));
+        $this->assertTrue(Events::hasListeners(OtherEmitter::class, TestEvent::class));
+        $this->assertTrue(Events::hasListeners(RootEmitter::class, TestOtherEvent::class));
+
+        $actual = Events::trigger(RootEmitter::class, new TestEvent());
+        $this->assertEquals(['root-again', 'other'], $actual);
+
+        Events::off(null, TestEvent::class);
+
+        $this->assertFalse(Events::hasListeners(RootEmitter::class, TestEvent::class));
+        $this->assertFalse(Events::hasListeners(SubEmitter::class, TestEvent::class));
+        $this->assertFalse(Events::hasListeners(OtherEmitter::class, TestEvent::class));
+        $this->assertTrue(Events::hasListeners(RootEmitter::class, TestOtherEvent::class));
+
+        $actual = Events::trigger(RootEmitter::class, new TestEvent());
+        $this->assertEquals([], $actual);
+
+        $actual = Events::trigger(OtherEmitter::class, new TestEvent());
+        $this->assertEquals([], $actual);
+
+        $actual = Events::trigger(RootEmitter::class, new TestOtherEvent());
+        $this->assertEquals(['root-other'], $actual);
+
+        // Null sender with a null event removes every listener.
+        Events::on(RootEmitter::class, function(TestEvent $event) {
+            return 'root-restored';
+        });
+
+        Events::on(SubEmitter::class, function(TestEvent $event) {
+            return 'sub-restored';
+        });
+
+        Events::off(null, null);
+
+        $this->assertFalse(Events::hasListeners(RootEmitter::class, TestEvent::class));
+        $this->assertFalse(Events::hasListeners(RootEmitter::class, TestOtherEvent::class));
+        $this->assertFalse(Events::hasListeners(SubEmitter::class, TestEvent::class));
+        $this->assertFalse(Events::hasListeners(OtherEmitter::class, TestEvent::class));
+
+        $actual = Events::trigger(RootEmitter::class, new TestEvent());
+        $this->assertEquals([], $actual);
+
+        $actual = Events::trigger(RootEmitter::class, new TestOtherEvent());
+        $this->assertEquals([], $actual);
+
+        // Omitted event with a null sender is the same clear.
+        Events::on(LeafEmitter::class, function(TestEvent $event) {
+            return 'leaf';
+        });
+
+        Events::on(OtherEmitter::class, function(TestOtherEvent $event) {
+            return 'other-again';
+        });
+
+        $this->assertTrue(Events::hasListeners(RootEmitter::class, TestEvent::class));
+        $this->assertTrue(Events::hasListeners(OtherEmitter::class, TestOtherEvent::class));
+
+        Events::off(null);
+
+        $this->assertFalse(Events::hasListeners(RootEmitter::class, TestEvent::class));
+        $this->assertFalse(Events::hasListeners(LeafEmitter::class, TestEvent::class));
+        $this->assertFalse(Events::hasListeners(OtherEmitter::class, TestOtherEvent::class));
+        $this->assertFalse(Events::hasListeners(RootEmitter::class, TestOtherEvent::class));
+
+        $actual = Events::trigger(LeafEmitter::class, new TestEvent());
+        $this->assertEquals([], $actual);
+
+        $actual = Events::trigger(OtherEmitter::class, new TestOtherEvent());
+        $this->assertEquals([], $actual);
+    }
+
+
+    /**
      * Sub class listeners receive subclass events.
      */
     public function testSubclass()
